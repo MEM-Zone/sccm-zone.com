@@ -3,6 +3,14 @@
     Exports data from the SCCM database.
 .DESCRIPTION
     Exports data from the SCCM database and formats it for telegraf.
+.PARAMETER Server
+    Specifies the server name.
+.PARAMETER Database
+    Specifies the database name.
+.PARAMETER ServerCollectionID
+    Specifies the Server CollectionID.
+.PARAMETER WorkstationCollectionID
+    Specifies the Workstation CollectionID.
 .EXAMPLE
     Export-CMDBToTelegraf.ps1 -Server 'SomeSCCMDBServer' -Database 'CM_SomeSiteCode' -ServerCollectionID 'SomeServerCollectionID' -WorkstationCollectionID 'SomeWorkstationCollectionID'
 .INPUTS
@@ -12,7 +20,7 @@
 .NOTES
     Created by Octavian Cordos & Ioan Popovici
 .LINK
-    https://SCCM.Zone/Grafana-Dashboards
+    https://SCCM.Zone/Grafana-Dashboards-1
 .LINK
     https://SCCM.Zone/Export-CMDBToTelegraf-CHANGELOG
 .LINK
