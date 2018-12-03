@@ -45,7 +45,7 @@ Function Get-CMDBDeviceInfo {
             SELECT
                 Client_Version = Systems.Client_Version0
                 , Count = COUNT(*)
-            FROM fn_rbac_R_System(@UserSIDs) AS SYS
+            FROM fn_rbac_R_System(@UserSIDs) AS Systems
                 LEFT JOIN fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembership ON CollectionMembership.ResourceID = Systems.ResourceID
             WHERE Systems.Client0 = 1
                 AND CollectionMembership.CollectionID = @CollectionID
