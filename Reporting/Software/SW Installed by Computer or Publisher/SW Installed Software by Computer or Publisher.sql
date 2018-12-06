@@ -2,7 +2,7 @@
 .SYNOPSIS
     Gets the installed software.
 .DESCRIPTION
-    Gets the installed software by computer or publisher. Supports filtering by comma separated values and wildcards by software name.
+    Gets the installed software by computer or publisher. Supports filtering and exclusions by multiple software names using comma separated values and wildcards.
 .NOTES
     Created by Ioan Popovici.
     Requires ufn_csv_String_Parser custom function.
