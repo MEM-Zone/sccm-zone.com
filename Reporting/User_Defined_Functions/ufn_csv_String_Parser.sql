@@ -4,25 +4,25 @@
 .DESCRIPTION
     Parses a CSV string and returns individual substrings.
 .EXAMPLE
-    Replace the {Your_Site_Code} with your site code
+    Replace the <Your_Site_Code> with your site code
     Run the code in SQL Server Management Studio
 .NOTES
-    Created by
-        Ioan Popovici   2015-08-18
-    Credit to
-        Michelle Ufford http://sqlfool.com.
+    All credit goes to Michelle Ufford for the original code. I only reformated it a bit.
+    Created by Ioan Popovici (2015-08-18)
 .LINK
-    https://SCCM-Zone.com
+    http://sqlfool.com (Credit - Michelle Ufford)
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Issues
 */
 
 /*##=============================================*/
-/*## QUERY BODY
+/*## QUERY BODY                                  */
 /*##=============================================*/
 /* #region QueryBody */
 
-USE [CM_{Your_Site_Code}]
+USE [CM_<Your_Site_Code>]
 GO
 
 SET ANSI_NULLS ON
@@ -33,16 +33,16 @@ GO
 IF EXISTS
 (
     SELECT  [OBJECT_ID]
-    FROM    SYS.OBJECTS
+    FROM    [SYS].[OBJECTS]
     WHERE   NAME = 'ufn_csv_String_Parser'
 )
-    DROP FUNCTION dbo.ufn_csv_String_Parser;
+    DROP FUNCTION [dbo].[ufn_csv_String_Parser];
 GO
 
 CREATE FUNCTION [dbo].[ufn_csv_String_Parser]
 (
     @pInputString VARCHAR(8000)
-,   @pDelimiter CHAR(1)
+,   @pDelimiter   CHAR(1)
 )
 RETURNS @tRET TABLE (StringValue VARCHAR(128))
 AS
