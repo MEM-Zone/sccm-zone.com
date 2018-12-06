@@ -55,12 +55,12 @@ DECLARE @InstalledSoftware TABLE (
 /* Populate SoftwareLike table */
 INSERT INTO @SoftwareLike (SoftwareName)
 SELECT StringValue
-FROM CM_Tools.dbo.ufn_csv_String_Parser(@SoftwareNameLike, ',');
+FROM ufn_csv_String_Parser(@SoftwareNameLike, ',');
 
 /* Populate SoftwareNotLike table */
 INSERT INTO @SoftwareNotLike (SoftwareName)
 SELECT StringValue
-FROM CM_Tools.dbo.ufn_csv_String_Parser(@SoftwareNameNotLike, ',');
+FROM ufn_csv_String_Parser(@SoftwareNameNotLike, ',');
 
 /* Populate InstalledSoftware table */
 INSERT INTO @InstalledSoftware (Device, Manufacturer, DeviceType, SerialNumber, Publisher, SoftwareName, Version, DomainOrWorkgroup, UserName, OperatingSystem)
