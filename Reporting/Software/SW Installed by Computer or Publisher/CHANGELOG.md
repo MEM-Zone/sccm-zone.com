@@ -1,5 +1,14 @@
 # SW Installed Software by Computer or Publisher release history
 
+## 2.0 - 2018-12-05
+
+### Changed
+
+* Merged by computer and by publisher reports
+* Added filtering by comma separated values and wildcards
+* Updated report template
+* Optimized performance
+
 ## 1.2 - 2018-08-06
 
 ### Changed
@@ -25,4 +34,4 @@
 
 ### First version
 
-* Get installed software by collection and software name
+* Gets the installed software by computer or publisher.
