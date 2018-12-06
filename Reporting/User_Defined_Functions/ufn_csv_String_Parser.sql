@@ -4,7 +4,7 @@
 .DESCRIPTION
     Parses a CSV string and returns individual substrings.
 .EXAMPLE
-    Replace the <Your_Site_Code> with your site code
+    Replace the <CM_Your_Site_Code> with your CM or custom database name.
     Run the code in SQL Server Management Studio
 .NOTES
     All credit goes to Michelle Ufford for the original code. I only reformated it a bit.
@@ -22,7 +22,7 @@
 /*##=============================================*/
 /* #region QueryBody */
 
-USE [CM_<Your_Site_Code>]
+USE [<CM_Your_Site_Code/Custom_Function_Database>]
 GO
 
 SET ANSI_NULLS ON
