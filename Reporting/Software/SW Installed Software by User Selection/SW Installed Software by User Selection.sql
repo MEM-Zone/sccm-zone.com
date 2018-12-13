@@ -1,18 +1,19 @@
 /*
 .SYNOPSIS
-    Gets the installed software.
+    Lists the installed software.
 .DESCRIPTION
-    Gets the installed software by computer or publisher. Supports filtering and exclusions by multiple software names using comma separated values and wildcards.
+    Lists the installed software by user selection (Device, Publisher or Name).
+    Supports filtering and exclusions by multiple software names using comma separated values and sql wildcards.
 .NOTES
     Created by Ioan Popovici.
     Requires ufn_csv_String_Parser custom function.
     Part of a report should not be run separately.
 .LINK
-    https://SCCM.Zone/SW-Installed-by-Computer-or-Publisher
+    https://SCCM.Zone/SW-Installed-Software-by-User-Selection
 .LINK
-    https://SCCM.Zone/SW-Installed-by-Computer-or-Publisher-CHANGELOG
+    https://SCCM.Zone/SW-Installed-Software-by-User-Selection-CHANGELOG
 .LINK
-    https://SCCM.Zone/SW-Installed-by-Computer-or-Publisher-GIT
+    https://SCCM.Zone/SW-Installed-Software-by-User-Selection-GIT
 .LINK
     https://SCCM.Zone/Issues
 */
@@ -85,8 +86,8 @@ SELECT DISTINCT
             ELSE Software.Publisher0
         END
     )
-    , SoftwareName      = Software.DisplayName0
-    , Version           = Software.Version0
+    , SoftwareName      = COALESCE(NULLIF(Software.DisplayName0, ''), 'Unknown')
+    , Version           = COALESCE(NULLIF(Software.Version0, ''), 'Unknown')
     , DomainOrWorkgroup = Systems.Resource_Domain_OR_Workgr0
     , UserName          = Systems.User_Name0
     , OperatingSystem   = OS.Caption0

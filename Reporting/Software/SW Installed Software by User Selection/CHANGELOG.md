@@ -1,4 +1,14 @@
-# SW Installed Software by Computer or Publisher release history
+# Installed Software by User Selection release history
+
+## 2.1 - 2018-12-13
+
+### Changed
+
+* Added by software name view
+* Changed report name
+* Fixed total sorting
+* Minor formating fixes
+* Corrected descriptions
 
 ## 2.0 - 2018-12-05
 
