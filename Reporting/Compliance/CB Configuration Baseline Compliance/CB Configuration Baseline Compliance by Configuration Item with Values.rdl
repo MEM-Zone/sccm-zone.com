@@ -1,19 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:cl="http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition">
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:cl="http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition">
   <Description>Displays the compliance of all configuration items for the selected baseline deployed to the selected collection with the actual values returned by the configuration item setting. Note that if you want to use CI's for reporting you need to select a compliacen rule that is never compliant. The values are returned only when the setting is found as non-compliant.</Description>
   <Author>Popovici Ioan @ SCCM-Zone.com</Author>
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
-    <DataSource Name="AutoGen__5C6358F2_4BB6_4a1b_A16E_8D96795D8602_">
-      <DataSourceReference>/ConfigMgr_A01/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}</DataSourceReference>
+    <DataSource Name="CMSQLDatabase">
+      <DataSourceReference>/ConfigMgr_HUB/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}</DataSourceReference>
       <rd:SecurityType>None</rd:SecurityType>
       <rd:DataSourceID>11111111-1111-1111-1111-111111111111</rd:DataSourceID>
+    </DataSource>
+    <DataSource Name="CMReportServer">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=dfs-sccmcas-52.dpko.un.org;Initial Catalog=ReportServer</ConnectString>
+        <IntegratedSecurity>true</IntegratedSecurity>
+      </ConnectionProperties>
+      <rd:SecurityType>Integrated</rd:SecurityType>
+      <rd:DataSourceID>0a6ca0cd-b5fa-4e6d-bc68-cbcdc5ee6847</rd:DataSourceID>
     </DataSource>
   </DataSources>
   <DataSets>
     <DataSet Name="AdminID">
       <Query>
-        <DataSourceName>AutoGen__5C6358F2_4BB6_4a1b_A16E_8D96795D8602_</DataSourceName>
+        <DataSourceName>CMSQLDatabase</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@UserTokenSIDs">
             <Value>=Parameters!UserTokenSIDs.Value</Value>
@@ -32,7 +41,7 @@ SELECT dbo.fn_rbac_GetAdminIDsfromUserSIDs (@UserTokenSIDs) AS UserSIDs</Command
     </DataSet>
     <DataSet Name="ReportDescription">
       <Query>
-        <DataSourceName>AutoGen__5C6358F2_4BB6_4a1b_A16E_8D96795D8602_</DataSourceName>
+        <DataSourceName>CMReportServer</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@ReportName">
             <Value>=Parameters!ReportName.Value</Value>
@@ -53,7 +62,7 @@ WHERE Name = @ReportName</CommandText>
     </DataSet>
     <DataSet Name="ComplianceStatusData">
       <Query>
-        <DataSourceName>AutoGen__5C6358F2_4BB6_4a1b_A16E_8D96795D8602_</DataSourceName>
+        <DataSourceName>CMSQLDatabase</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@BaselineID">
             <Value>=Parameters!BaselineID.Value</Value>
@@ -347,7 +356,7 @@ ORDER BY
     </DataSet>
     <DataSet Name="CollectionInfo">
       <Query>
-        <DataSourceName>AutoGen__5C6358F2_4BB6_4a1b_A16E_8D96795D8602_</DataSourceName>
+        <DataSourceName>CMSQLDatabase</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@UserSIDs">
             <Value>=Parameters!UserSIDs.Value</Value>
@@ -376,7 +385,7 @@ ORDER BY
     </DataSet>
     <DataSet Name="BaselineInfo">
       <Query>
-        <DataSourceName>AutoGen__5C6358F2_4BB6_4a1b_A16E_8D96795D8602_</DataSourceName>
+        <DataSourceName>CMSQLDatabase</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@LocaleID">
             <Value>=Parameters!LocaleID.Value</Value>
@@ -418,7 +427,7 @@ ORDER BY BaselineName;</CommandText>
     </DataSet>
     <DataSet Name="LocaleID">
       <Query>
-        <DataSourceName>AutoGen__5C6358F2_4BB6_4a1b_A16E_8D96795D8602_</DataSourceName>
+        <DataSourceName>CMSQLDatabase</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@Locale">
             <Value>=Parameters!Locale.Value</Value>
@@ -4005,10 +4014,58 @@ SELECT dbo.fn_LShortNameToLCID(@Locale)</CommandText>
       <Hidden>true</Hidden>
     </ReportParameter>
   </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>4</NumberOfColumns>
+      <NumberOfRows>3</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>UserTokenSIDs</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>UserSIDs</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>Locale</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>LocaleID</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>BaselineID</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>CollectionID</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>ReportName</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>ReportDescription</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
   <CodeModules>
     <CodeModule>SrsResources, culture=neutral</CodeModule>
   </CodeModules>
   <rd:ReportUnitType>Cm</rd:ReportUnitType>
-  <rd:ReportServerUrl></rd:ReportServerUrl>
+  <rd:ReportServerUrl>http://dfs-sccmcas-52/ReportServer</rd:ReportServerUrl>
   <rd:ReportID>6fbd236a-d836-4950-8788-14b828deb616</rd:ReportID>
 </Report>
