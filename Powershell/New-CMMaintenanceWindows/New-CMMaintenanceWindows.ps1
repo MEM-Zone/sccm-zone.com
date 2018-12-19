@@ -343,21 +343,21 @@ Function New-MaintenanceWindows {
 .DESCRIPTION
     Set Maintenance Windows to a Collection.
 .PARAMETER CollectionName
-    The collection name for which to set maintenance windows.
+    Specifies the collection name for which to set maintenance windows.
 .PARAMETER Year
-    The maintenance window year.
+    Specifies the maintenance window year.
 .PARAMETER Month
-    The maintenance window month.
+    Specifies the maintenance window month.
 .PARAMETER OffsetWeeks
-    The maintenance window offset number of weeks after patch Tuesday.
+    Specifies the maintenance window offset number of weeks after patch Tuesday.
 .PARAMETER OffsetDays
-    The maintenance window offset number of days after path Tuesday.
+    Specifies the maintenance window offset number of days after path Tuesday.
 .PARAMETER StartTime
-    The maintenance window start time.
+    Specifies the maintenance window start time.
 .PARAMETER StopTime
-    The maintenance window stop time.
+    Specifies the maintenance window stop time.
 .PARAMETER ApplyTo
-    Maintenance window applies to ( Any | SoftwareUpdates | TaskSequences.)
+    Specifies the maintenance window type to ( Any | SoftwareUpdates | TaskSequences).
 .EXAMPLE
     New-MaintenanceWindows -CollectionName 'Computer Collection' -Year 2015 -Month 3 -OffsetWeeks 3 -OffsetDays 2 -StartTime '01:00' -StopTime '02:00' -ApplyTo SoftwareUpdates
 .INPUTS
