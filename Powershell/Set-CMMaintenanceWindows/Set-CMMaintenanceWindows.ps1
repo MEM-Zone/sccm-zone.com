@@ -1,45 +1,36 @@
 <#
-*********************************************************************************************************
-* Created by Ioan Popovici     | Requires PowerShell 3.0                                                *
-* ===================================================================================================== *
-* Modified by     |    Date    | Revision | Comments                                                    *
-* _____________________________________________________________________________________________________ *
-* Ioan Popovici   | 2015-03-30 | v1.0     | First version                                               *
-* Octavian Cordos | 2015-03-30 | v1.0     | First version                                               *
-* Ioan Popovici   | 2015-03-31 | v2.0     | Vastly improved                                             *
-* Octavian Cordos | 2015-03-31 | v2.0     | Vastly improved                                             *
-* Ioan Popovici   | 2016-01-08 | v2.1     | Fixed locale                                                *
-* Octavian Cordos | 2016-01-11 | v2.2     | Improved MW naming                                          *
-* Ioan Popovici   | 2016-01-11 | v2.3     | Added logging and error detection, cleanup                  *
-* Ioan Popovici   | 2016-01-12 | v2.4     | Added MW type                                               *
-* Ioan Popovici   | 2016-01-12 | v2.5     | Improved logging and variable naming                        *
-* Ioan Popovici   | 2016-10-13 | v2.6     | Visibility MW name improvements                             *
-* Ioan Popovici   | 2017-07-31 | v2.7     | Fixed locale by changing to ISO 8601 format                 *
-* Ioan Popovici   | 2017-09-11 | v2.8     | Fixed $ScriptName variable                                  *
-* ===================================================================================================== *
-*                                                                                                       *
-*********************************************************************************************************
-
 .SYNOPSIS
-    This PowerShell Script is used to set Maintenance Windows on SU Collections.
+    Sets Maintenance Windows on SCCM Collections.
 .DESCRIPTION
-    This PowerShell Script is used to set Maintenance Windows based on PatchTuesday on SU Collections.
+    Sets Maintenance Windows on SCCM Collections based on PatchTuesday.
 .EXAMPLE
-    C:\Windows\System32\WindowsPowerShell\v1.0\PowerShell.exe -NoExit -NoProfile -File Set-MaintenanceWindows.ps1
+    Set-MaintenanceWindows.ps1
 .NOTES
     Written in collaboration with my good friend Octavian Cordos.
+.INPUTS
+    System.String.
+.OUTPUTS
+    System.String.
+.NOTES
+    Created by Ioan Popovici and Octavian Cordos.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Set-CMMaintenanceWindow
+.LINK
+    https://SCCM.Zone/Set-CMMaintenanceWindow-CHANGELOG
+.LINK
+    https://SCCM.Zone/Set-CMMaintenanceWindow-GIT
+.LINK
+    https://SCCM.Zone/Issues
+.COMPONENT
+    CM
+.FUNCTIONALITY
+    Set CM Maintenance Window
 #>
 
 ##*=============================================
 ##* INITIALIZATION
 ##*=============================================
 #region Initialization
-
-## Cleaning prompt history (for testing only)
-CLS
 
 ## Get script path and name
 [string]$ScriptPath = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Definition)
@@ -53,8 +44,8 @@ CLS
 [string]$csvFileNameWithExtension = $ScriptName+'.csv'
 
 #  Assemble CSV and log file path
-[string]$csvFilePath = (Join-Path -Path $ScriptPath -ChildPath $csvFileName)+'.csv'
-[string]$LogFilePath = (Join-Path -Path $ScriptPath -ChildPath $ScriptName)+'.log'
+[string]$csvFilePath = (Join-Path -Path $ScriptPath -ChildPath $csvFileName) + '.csv'
+[string]$LogFilePath = (Join-Path -Path $ScriptPath -ChildPath $ScriptName) + '.log'
 
 #endregion
 ##*=============================================
@@ -91,9 +82,12 @@ Function Write-Log {
     Write-Log -EventLogEntryMessage 'Set-ClientMW was successful' -EventLogName 'Configuration Manager' -EventLogEntrySource 'Script' -EventLogEntryID '1' -EventLogEntryType 'Information'
 .NOTES
     This is an internal script function and should typically not be called directly.
+.NOTES
+    This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Git
 #>
     [CmdletBinding()]
     Param (
@@ -182,11 +176,20 @@ Function Get-PatchTuesday {
     Set the month for which to calculate Patch Tuesday.
 .EXAMPLE
     Get-PatchTuesday -Year 2015 -Month 3
+.INPUTS
+    System.String
+.OUTPUTS
+    System.DateTime.
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Git
+.COMPONENT
+    CM
+.FUNCTIONALITY
+    Get patch tuesday
 #>
     [CmdletBinding()]
     Param (
@@ -197,20 +200,25 @@ Function Get-PatchTuesday {
         [Alias('Mo')]
         [string]$Month
     )
+    Begin {
 
-    ## Build Target Month
-    [DateTime]$StartingMonth = $Month+'/1/'+$Year
-
-    ## Search for First Tuesday
-    While ($StartingMonth.DayofWeek -ine 'Tuesday') {
-        $StartingMonth = $StartingMonth.AddDays(1)
+        ## Build Target Month
+        [DateTime]$StartingMonth = $Month + '/1/' + $Year
     }
+    Process {
+        ## Search for First Tuesday
+        While ($StartingMonth.DayofWeek -ine 'Tuesday') {
+            $StartingMonth = $StartingMonth.AddDays(1)
+        }
 
-    ## Set Second Tuesday of the month by adding 7 days
-    $PatchTuesday = $StartingMonth.AddDays(7)
+        ## Set Second Tuesday of the month by adding 7 days
+        $PatchTuesday = $StartingMonth.AddDays(7)
 
-    ## Return Patch Tuesday
-    Return $PatchTuesday
+        ## Return Patch Tuesday
+        Return $PatchTuesday
+    }
+    End {
+    }
  }
 #endregion
 
@@ -225,11 +233,20 @@ Function Get-MaintenanceWindows {
     Set the collection name for which to list the maintenance Windows.
 .EXAMPLE
     Get-MaintenanceWindows -Collection 'Computer Collection'
+.INPUTS
+    System.String.
+.OUTPUTS
+    System.Object.
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Git
+.COMPONENT
+    CM
+.FUNCTIONALITY
+    Get collection maintenance windows
 #>
     [CmdletBinding()]
     Param (
@@ -264,18 +281,27 @@ Function Get-MaintenanceWindows {
 Function Remove-MaintenanceWindows {
 <#
 .SYNOPSIS
-    Remove ALL existing maintenance windows.
+    Remove existing maintenance windows.
 .DESCRIPTION
-    Remove ALL existing maintenance windows from a collection.
+    Remove all existing maintenance windows from a collection.
 .PARAMETER CollectionName
     The collection name for which to remove the maintenance windows.
 .EXAMPLE
     Remove-MaintenanceWindows -Collection 'Computer Collection'
+.INPUTS
+    System.String.
+.OUTPUTS
+    System.String.
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Git
+.COMPONENT
+    CM
+.FUNCTIONALITY
+    Remove maintenance windows
 #>
     [CmdletBinding()]
     Param (
@@ -334,11 +360,20 @@ Function Set-MaintenanceWindows {
     Maintenance window applies to ( Any | SoftwareUpdates | TaskSequences.)
 .EXAMPLE
     Set-MaintenanceWindows -CollectionName 'Computer Collection' -Year 2015 -Month 3 -OffsetWeeks 3 -OffsetDays 2 -StartTime '01:00' -StopTime '02:00' -ApplyTo SoftwareUpdates
+.INPUTS
+    System.String.
+.OUTPUTS
+    System.String.
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Git
+.COMPONENT
+    CM
+.FUNCTIONALITY
+    Set maintenance window
 #>
     Param (
         [Parameter(Mandatory=$true,Position=0)]
@@ -440,11 +475,20 @@ Function Send-Mail {
     E-Mail SMTPPort.
 .EXAMPLE
     Set-Mail -Body 'Test' -CC 'test@visma.com'
+.INPUTS
+    System.String.
+.OUTPUTS
+    System.String.
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Git
+.COMPONENT
+    Mail
+.FUNCTIONALITY
+    Send mail
 #>
     [CmdletBinding()]
     Param (
@@ -497,7 +541,7 @@ Catch {
 }
 
 #  Get the CMSITE SiteCode and change connection context
-$SiteCode = Get-PSDrive -PSProvider CMSITE
+$SiteCode = Get-PSDrive -PSProvider 'CMSITE'
 
 #  Change the connection context
 Set-Location "$($SiteCode.Name):\"
@@ -517,17 +561,17 @@ $csvFileData | ForEach-Object {
     If ($_.RemoveExisting -eq 'YES' ) {
 
         #  Write to log
-        Write-Log -Message ('Removing maintenance windows from:  '+$_.CollectionName) -SkipEventLog
+        Write-Log -Message ('Removing maintenance windows from:  ' + $_.CollectionName) -SkipEventLog
 
         #  Remove maintenance window
         Remove-MaintenanceWindows $_.CollectionName
     }
 
     #  Check if we need to set maintenance windows for the whole year
-    If ($_.SetForWholeYear -eq "YES") {
+    If ($_.SetForWholeYear -eq 'YES') {
 
         #  Write to log
-        Write-Log -Message ('Setting maintenance windows on: '+$_.CollectionName) -SkipEventLog
+        Write-Log -Message ('Setting maintenance windows on: ' + $_.CollectionName) -SkipEventLog
 
         #  Set maintenance windows for 12 months
         For ($Month = [int]$_.Month; $Month -le 12; $Month++) {
@@ -537,7 +581,7 @@ $csvFileData | ForEach-Object {
     Else {
 
         #  Write to log
-        Write-Log -Message ('Setting maintenance window on: '+$_.CollectionName) -SkipEventLog
+        Write-Log -Message $('Setting maintenance window on: ' + $_.CollectionName) -SkipEventLog
 
         #  Run without removing maintenance windows and set just one maintenance window
         Set-MaintenanceWindows -CollectionName $_.CollectionName -Year $_.Year -Month $_.Month -OffsetWeeks $_.OffsetWeeks -OffsetDays $_.OffsetDays -StartTime $_.StartTime -StopTime $_.StopTime -ApplyTo $_.ApplyTo
@@ -546,16 +590,16 @@ $csvFileData | ForEach-Object {
 
 ## Get maintenance windows for unique collections
 #  Initialize result array
-[array]$Result =@()
+[array]$Result = @()
 
 #  Parsing CSV collection names
 $csvFileData.CollectionName | Select-Object -Unique | ForEach-Object {
 
     #  Getting maintenance windows for collection (split to new line)
-    $MaintenanceWindows = Get-MaintenanceWindows -CollectionName $_ | ForEach-Object { $_.Name+"`n" }
+    $MaintenanceWindows = Get-MaintenanceWindows -CollectionName $_ | ForEach-Object { $_.Name + "`n" }
 
     #  Assemble result with descriptors
-    $Result+= "`n Listing all maintenance windows for: "+$_+" "+"`n "+$MaintenanceWindows
+    $Result += "`n Listing all maintenance windows for: " + $_ + " " + "`n " + $MaintenanceWindows
 }
 
 #  Convert the result to string and write it to log
@@ -569,7 +613,7 @@ Write-Log -Message $ResultString
 Set-Location $ScriptPath
 
 ## Remove SCCM PSH Module
-Remove-Module "ConfigurationManager" -Force -ErrorAction 'Continue'
+Remove-Module 'ConfigurationManager' -Force -ErrorAction 'Continue'
 
 #endregion
 ##*=============================================
