@@ -2,7 +2,7 @@
 .SYNOPSIS
     Creates maintenance windows on SCCM collections.
 .DESCRIPTION
-    Creates maintenance windows on SCCM Ccllections based on patch tuesday.
+    Creates maintenance windows on SCCM collections based on patch tuesday.
 .EXAMPLE
     New-MaintenanceWindows.ps1
 .NOTES
