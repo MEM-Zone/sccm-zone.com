@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:cl="http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition">
   <Description>List devices by AD, SCCM site and network information.</Description>
-  <Author>Ioan Popovici @SCCM-Zone.com</Author>
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
     <DataSource Name="CMSQLDatabase">
@@ -96,6 +95,7 @@ ORDER BY
     https://SCCM.Zone/SIT-Devices-Site-and-Subnet-GIT
 .LINK
     https://SCCM.Zone/Issues
+
 */
 
 /*##=============================================*/
@@ -292,7 +292,7 @@ WHERE Name = @ReportName</CommandText>
     <ReportSection>
       <Body>
         <ReportItems>
-          <Tablix Name="ReportDescriptionTablix2">
+          <Tablix Name="ReportDescriptionTablix">
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
@@ -400,7 +400,7 @@ WHERE Name = @ReportName</CommandText>
             </Style>
           </Tablix>
           <Line Name="ReportDescriptionLine2">
-            <Top>0.44815in</Top>
+            <Top>0.46065in</Top>
             <Left>0.04887in</Left>
             <Height>0in</Height>
             <Width>18.51883in</Width>
@@ -2290,7 +2290,7 @@ WHERE Name = @ReportName</CommandText>
             </Style>
           </Tablix>
         </ReportItems>
-        <Height>3.17136cm</Height>
+        <Height>3.11844cm</Height>
         <Style>
           <Border>
             <Style>None</Style>
@@ -2300,7 +2300,7 @@ WHERE Name = @ReportName</CommandText>
       <Width>47.34716cm</Width>
       <Page>
         <PageHeader>
-          <Height>2.49515cm</Height>
+          <Height>2.60098cm</Height>
           <PrintOnFirstPage>true</PrintOnFirstPage>
           <PrintOnLastPage>true</PrintOnLastPage>
           <ReportItems>
