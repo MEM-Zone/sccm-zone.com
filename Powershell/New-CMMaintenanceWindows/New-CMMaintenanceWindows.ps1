@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-    Sets Maintenance Windows on SCCM Collections.
+    Creates maintenance windows on SCCM collections.
 .DESCRIPTION
-    Sets Maintenance Windows on SCCM Collections based on PatchTuesday.
+    Creates maintenance windows on SCCM Ccllections based on patch tuesday.
 .EXAMPLE
-    Set-MaintenanceWindows.ps1
+    New-MaintenanceWindows.ps1
 .NOTES
     Written in collaboration with my good friend Octavian Cordos.
 .INPUTS
@@ -14,17 +14,17 @@
 .NOTES
     Created by Ioan Popovici and Octavian Cordos.
 .LINK
-    https://SCCM.Zone/Set-CMMaintenanceWindow
+    https://SCCM.Zone/New-CMMaintenanceWindows
 .LINK
-    https://SCCM.Zone/Set-CMMaintenanceWindow-CHANGELOG
+    https://SCCM.Zone/New-CMMaintenanceWindows-CHANGELOG
 .LINK
-    https://SCCM.Zone/Set-CMMaintenanceWindow-GIT
+    https://SCCM.Zone/New-CMMaintenanceWindows-GIT
 .LINK
     https://SCCM.Zone/Issues
 .COMPONENT
     CM
 .FUNCTIONALITY
-    Set CM Maintenance Window
+    Create CM maintenance windows
 #>
 
 ##*=============================================
@@ -335,8 +335,8 @@ Function Remove-MaintenanceWindows {
 }
 #endregion
 
-#region Function Set-MaintenanceWindows
-Function Set-MaintenanceWindows {
+#region Function New-MaintenanceWindows
+Function New-MaintenanceWindows {
 <#
 .SYNOPSIS
     Set maintenance windows.
@@ -359,7 +359,7 @@ Function Set-MaintenanceWindows {
 .PARAMETER ApplyTo
     Maintenance window applies to ( Any | SoftwareUpdates | TaskSequences.)
 .EXAMPLE
-    Set-MaintenanceWindows -CollectionName 'Computer Collection' -Year 2015 -Month 3 -OffsetWeeks 3 -OffsetDays 2 -StartTime '01:00' -StopTime '02:00' -ApplyTo SoftwareUpdates
+    New-MaintenanceWindows -CollectionName 'Computer Collection' -Year 2015 -Month 3 -OffsetWeeks 3 -OffsetDays 2 -StartTime '01:00' -StopTime '02:00' -ApplyTo SoftwareUpdates
 .INPUTS
     System.String.
 .OUTPUTS
@@ -373,7 +373,7 @@ Function Set-MaintenanceWindows {
 .COMPONENT
     CM
 .FUNCTIONALITY
-    Set maintenance window
+    Create maintenance window
 #>
     Param (
         [Parameter(Mandatory=$true,Position=0)]
@@ -575,7 +575,7 @@ $csvFileData | ForEach-Object {
 
         #  Set maintenance windows for 12 months
         For ($Month = [int]$_.Month; $Month -le 12; $Month++) {
-            Set-MaintenanceWindows -CollectionName $_.CollectionName -Year $_.Year -Month $Month -OffsetWeeks $_.OffsetWeeks -OffsetDays $_.OffsetDays -StartTime $_.StartTime -StopTime $_.StopTime -ApplyTo $_.ApplyTo
+            New-MaintenanceWindows -CollectionName $_.CollectionName -Year $_.Year -Month $Month -OffsetWeeks $_.OffsetWeeks -OffsetDays $_.OffsetDays -StartTime $_.StartTime -StopTime $_.StopTime -ApplyTo $_.ApplyTo
         }
     }
     Else {
@@ -584,7 +584,7 @@ $csvFileData | ForEach-Object {
         Write-Log -Message $('Setting maintenance window on: ' + $_.CollectionName) -SkipEventLog
 
         #  Run without removing maintenance windows and set just one maintenance window
-        Set-MaintenanceWindows -CollectionName $_.CollectionName -Year $_.Year -Month $_.Month -OffsetWeeks $_.OffsetWeeks -OffsetDays $_.OffsetDays -StartTime $_.StartTime -StopTime $_.StopTime -ApplyTo $_.ApplyTo
+        New-MaintenanceWindows -CollectionName $_.CollectionName -Year $_.Year -Month $_.Month -OffsetWeeks $_.OffsetWeeks -OffsetDays $_.OffsetDays -StartTime $_.StartTime -StopTime $_.StopTime -ApplyTo $_.ApplyTo
     }
 }
 
