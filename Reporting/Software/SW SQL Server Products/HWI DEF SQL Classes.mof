@@ -1,9 +1,9 @@
-//——————————————— // SQL 2017 Properties //———————————————
+//——————————————— // SQL 2017 Definitions //———————————————
 
 [Dynamic, Provider ("MS_VIEW_INSTANCE_PROVIDER"),
 SMS_Report (TRUE),
 SMS_Group_Name ("SQL 2017 Property"),
-SMS_Class_ID ("CUSTOM|SQL_2017_Property|2.0")]
+SMS_Class_ID ("CUSTOM|SQL_2017_PROPERTY|2.0")]
 
 CLASS SQL_2017 : SMS_Class_Template
 {
@@ -17,12 +17,12 @@ CLASS SQL_2017 : SMS_Class_Template
     [SMS_Report(TRUE), KEY]  UInt32     SqlServiceType;
 };
 
-//——————————————— // SQL 2016 Properties //———————————————
+//——————————————— // SQL 2016 Definitions //———————————————
 
 [Dynamic, Provider ("MS_VIEW_INSTANCE_PROVIDER"),
 SMS_Report (TRUE),
 SMS_Group_Name ("SQL 2016 Property"),
-SMS_Class_ID ("CUSTOM|SQL_2016_Property|2.0")]
+SMS_Class_ID ("CUSTOM|SQL_2016_PROPERTY|2.0")]
 
 CLASS SQL_2016 : SMS_Class_Template
 {
@@ -36,12 +36,12 @@ CLASS SQL_2016 : SMS_Class_Template
     [SMS_Report(TRUE), KEY]  UInt32     SqlServiceType;
 };
 
-//——————————————— // SQL 2014 Properties //———————————————
+//——————————————— // SQL 2014 Definitions //———————————————
 
 [Dynamic, Provider ("MS_VIEW_INSTANCE_PROVIDER"),
 SMS_Report (TRUE),
 SMS_Group_Name ("SQL 2014 Property"),
-SMS_Class_ID ("CUSTOM|SQL_2014_Property|2.0")]
+SMS_Class_ID ("CUSTOM|SQL_2014_PROPERTY|2.0")]
 
 CLASS SQL_2014 : SMS_Class_Template
 {
@@ -55,12 +55,12 @@ CLASS SQL_2014 : SMS_Class_Template
     [SMS_Report(TRUE), KEY]  UInt32     SqlServiceType;
 };
 
-//——————————————— // SQL 2012 Properties //———————————————
+//——————————————— // SQL 2012 Definitions //———————————————
 
 [Dynamic, Provider ("MS_VIEW_INSTANCE_PROVIDER"),
 SMS_Report (TRUE),
 SMS_Group_Name ("SQL 2012 Property"),
-SMS_Class_ID ("CUSTOM|SQL_2012_Property|2.0")]
+SMS_Class_ID ("CUSTOM|SQL_2012_PROPERTY|2.0")]
 
 CLASS SQL_2012 : SMS_Class_Template
 {
@@ -74,12 +74,12 @@ CLASS SQL_2012 : SMS_Class_Template
     [SMS_Report(TRUE), KEY]  UInt32     SqlServiceType;
 };
 
-//——————————————— // SQL 2008 Properties //———————————————
+//——————————————— // SQL 2008 Definitions //———————————————
 
 [Dynamic, Provider ("MS_VIEW_INSTANCE_PROVIDER"),
 SMS_Report (TRUE),
 SMS_Group_Name ("SQL 2008 Property"),
-SMS_Class_ID ("CUSTOM|SQL_2008_Property|2.0")]
+SMS_Class_ID ("CUSTOM|SQL_2008_PROPERTY|2.0")]
 
 CLASS SQL_2008 : SMS_Class_Template
 {
@@ -93,12 +93,12 @@ CLASS SQL_2008 : SMS_Class_Template
     [SMS_Report(TRUE), KEY]  UInt32     SqlServiceType;
 };
 
-//——————————————— // SQL 2000/2005 Properties //———————————————
+//——————————————— // SQL 2000/2005 Definitions //———————————————
 
 [Dynamic, Provider ("MS_VIEW_INSTANCE_PROVIDER"),
 SMS_Report (TRUE),
 SMS_Group_Name ("SQL Legacy Property"),
-SMS_Class_ID ("CUSTOM|SQL_Legacy_Property|2.0")]
+SMS_Class_ID ("CUSTOM|SQL_LEGACY_PROPERTY|2.0")]
 
 CLASS SQL_2000_And_2005 : SMS_Class_Template
 {

@@ -5,7 +5,7 @@
 /* Set default WMI namespace */
 #Pragma NameSpace ("\\\\.\\ROOT\\cimv2")
 
-//———————————————| SQL 2017 |———————————————
+//——————————————— // SQL 2017 Class //———————————————
 
 // Create custom WMI class
 /* Class qualifiers */
@@ -34,7 +34,7 @@ Class SQL_2017
     [PropertySources{"SqlServiceType"}, KEY] UInt32  SqlServiceType;
 };
 
-//———————————————| SQL 2016 |———————————————
+//——————————————— // SQL 2016 Class //———————————————
 
 // Create custom WMI class
 /* Class qualifiers */
@@ -63,7 +63,7 @@ CLASS SQL_2016
     [PropertySources{"SqlServiceType"}, KEY] UInt32  SqlServiceType;
 };
 
-//———————————————| SQL 2014 |———————————————
+//——————————————— // SQL 2014 Class //———————————————
 
 // Create custom WMI class
 /* Class qualifiers */
@@ -92,7 +92,7 @@ CLASS SQL_2014
     [PropertySources{"SqlServiceType"}, KEY] UInt32  SqlServiceType;
 };
 
-//———————————————| SQL 2012 |———————————————
+//——————————————— // SQL 2012 Class //———————————————
 
 // Create custom WMI class
 /* Class qualifiers */
@@ -121,7 +121,7 @@ CLASS SQL_2012
     [PropertySources{"SqlServiceType"}, KEY] UInt32  SqlServiceType;
 };
 
-//———————————————| SQL 2008 |———————————————
+//——————————————— // SQL 2008 Class //———————————————
 
 // Create custom WMI class
 /* Class Qualifiers */
@@ -150,7 +150,7 @@ CLASS SQL_2008
     [PropertySources{"SqlServiceType"}, KEY] UInt32  SqlServiceType;
 };
 
-//———————————————| SQL 2000/2005 |———————————————
+//——————————————— // SQL 2000/2005 //———————————————
 
 // Create custom WMI class
 /* Class Qualifiers */
