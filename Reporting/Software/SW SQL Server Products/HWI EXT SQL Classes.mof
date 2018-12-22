@@ -2,13 +2,13 @@
 //——————————————————| SQL extension start |—————————————————
 //==========================================================
 
-/* Set default WMI namespace */
+//-- Set default WMI namespace
 #Pragma NameSpace ("\\\\.\\ROOT\\cimv2")
 
 //——————————————— // SQL 2017 Class //———————————————
 
-// Create custom WMI class
-/* Class qualifiers */
+//-- Create custom WMI class
+//-  Class qualifiers
 [
     Description("The SQL_2017 class contains information about the SQL 2017 service. You can use this information for SQL version reporting."): ToInstance,
     UNION,
@@ -21,7 +21,7 @@
     Dynamic,
     Provider ("MS_VIEW_INSTANCE_PROVIDER")
 ]
-/* Class properties */
+//-  Class properties
 Class SQL_2017
 {
     [PropertySources{"IsReadOnly"}         ] Boolean IsReadOnly;
@@ -36,8 +36,8 @@ Class SQL_2017
 
 //——————————————— // SQL 2016 Class //———————————————
 
-// Create custom WMI class
-/* Class qualifiers */
+//-- Create custom WMI class
+//-  Class qualifiers
 [
     Description("The SQL_2016 class contains information about the SQL 2016 service. You can use this information for SQL version reporting."): ToInstance,
     UNION,
@@ -50,8 +50,8 @@ Class SQL_2017
     Dynamic,
     Provider ("MS_VIEW_INSTANCE_PROVIDER")
 ]
-/* Class properties */
-CLASS SQL_2016
+//-  Class properties
+Class SQL_2016
 {
     [PropertySources{"IsReadOnly"}         ] Boolean IsReadOnly;
     [PropertySources{"PropertyIndex"},  KEY] UInt32  PropertyIndex;
@@ -65,8 +65,8 @@ CLASS SQL_2016
 
 //——————————————— // SQL 2014 Class //———————————————
 
-// Create custom WMI class
-/* Class qualifiers */
+//-- Create custom WMI class
+//-  Class qualifiers
 [
     Description("The SQL_2014 class contains information about the SQL 2014 service. You can use this information for SQL version reporting."): ToInstance,
     UNION,
@@ -79,8 +79,8 @@ CLASS SQL_2016
     Dynamic,
     Provider ("MS_VIEW_INSTANCE_PROVIDER")
 ]
-/* Class properties */
-CLASS SQL_2014
+//-- Class properties
+Class SQL_2014
 {
     [PropertySources{"IsReadOnly"}         ] Boolean IsReadOnly;
     [PropertySources{"PropertyIndex"},  KEY] UInt32  PropertyIndex;
@@ -94,8 +94,8 @@ CLASS SQL_2014
 
 //——————————————— // SQL 2012 Class //———————————————
 
-// Create custom WMI class
-/* Class qualifiers */
+//-- Create custom WMI class
+//-  Class qualifiers
 [
     Description("The SQL_2012 class contains information about the SQL 2012 service. You can use this information for SQL version reporting."): ToInstance,
     UNION,
@@ -108,8 +108,8 @@ CLASS SQL_2014
     Dynamic,
     Provider ("MS_VIEW_INSTANCE_PROVIDER")
 ]
-/* Class properties */
-CLASS SQL_2012
+//-  Class properties
+Class SQL_2012
 {
     [PropertySources{"IsReadOnly"}         ] Boolean IsReadOnly;
     [PropertySources{"PropertyIndex"},  KEY] UInt32  PropertyIndex;
@@ -123,8 +123,8 @@ CLASS SQL_2012
 
 //——————————————— // SQL 2008 Class //———————————————
 
-// Create custom WMI class
-/* Class Qualifiers */
+//-- Create custom WMI class
+//-  Class Qualifiers
 [
     Description("The SQL_2008 class contains information about the SQL 2008 service. You can use this information for SQL version reporting."): ToInstance,
     UNION,
@@ -137,8 +137,8 @@ CLASS SQL_2012
     Dynamic,
     Provider ("MS_VIEW_INSTANCE_PROVIDER")
 ]
-/* Class properties */
-CLASS SQL_2008
+//-  Class properties
+Class SQL_2008
 {
     [PropertySources{"IsReadOnly"}         ] Boolean IsReadOnly;
     [PropertySources{"PropertyIndex"},  KEY] UInt32  PropertyIndex;
@@ -152,8 +152,8 @@ CLASS SQL_2008
 
 //——————————————— // SQL 2000/2005 //———————————————
 
-// Create custom WMI class
-/* Class Qualifiers */
+//-- Create custom WMI class
+//-  Class Qualifiers
 [
     Description("The SQL_2000_And_2005 class contains information about the SQL 2000 and 2005 service. You can use this information for SQL version reporting."): ToInstance,
     UNION,
@@ -166,8 +166,8 @@ CLASS SQL_2008
     Dynamic,
     Provider ("MS_VIEW_INSTANCE_PROVIDER")
 ]
-/* Class properties */
-CLASS SQL_2000_And_2005
+//-  Class properties
+Class SQL_2000_And_2005
 {
     [PropertySources{"IsReadOnly"}         ] Boolean IsReadOnly;
     [PropertySources{"PropertyIndex"},  KEY] UInt32  PropertyIndex;
