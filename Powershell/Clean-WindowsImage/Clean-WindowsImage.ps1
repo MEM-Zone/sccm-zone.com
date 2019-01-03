@@ -22,7 +22,6 @@
 .LINK
     https://SCCM.Zone/Issues
 .COMPONENT
-.COMPONENT
     Cleanup
 .FUNCTIONALITY
     Clean Windows Image
