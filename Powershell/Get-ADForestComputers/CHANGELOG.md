@@ -1,7 +1,7 @@
-# Disable-CMDeviceCollectionPush release history
+# Get-ADForestComputers release history
 
-## 1.0 - 2016-10-26
+## 1.0 - 2016-02-22
 
 ### First version
 
-    * Disables SCCM push install for a specified collection using the ExcludeServers registry key.
+    * Gets AD computer name, operating system and domain from a list of forests.
