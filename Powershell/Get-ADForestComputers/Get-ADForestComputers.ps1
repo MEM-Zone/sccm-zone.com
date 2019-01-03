@@ -1,24 +1,20 @@
 <#
-*********************************************************************************************************
-* Created by Ioan Popovici   | Requires PowerShell 3.0, SCCM Server                                     *
-* ===================================================================================================== *
-* Modified by   |    Date    | Revision | Comments                                                      *
-* _____________________________________________________________________________________________________ *
-* Ioan Popovici | 13/11/2015 | v1.0     | First version                                                 *
-* Ioan Popovici | 22/02/2016 | v1.1     | Improved Logging                                              *
-* Ioan Popovici | 22/02/2016 | v1.2     | Added Progress Indicator                                      *
-* ===================================================================================================== *
-*                                                                                                       *
-*********************************************************************************************************
-
 .SYNOPSIS
-    This PowerShell Script is used to get AD computer information from a list of forests.
+    Gets AD computer information from a list of forests.
 .DESCRIPTION
-    This PowerShell Script is used to get AD computer name, operating system and domain from a list of forests.
+    Gets AD computer name, operating system and domain from a list of forests.
 .EXAMPLE
+    Get-AdForestComputers.ps1
+.INPUTS
+    System.String.
+.OUTPUTS
+    System.Object.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Get-ADForestComputers-CHANGELOG
+.LINK
+    https://SCCM.Zone/Issues
 #>
 
 ##*=============================================
@@ -106,8 +102,9 @@ Function Remove-InvalidCharacters {
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/GIT
 #>
     [CmdletBinding()]
     Param (
@@ -154,6 +151,10 @@ Function Show-InputPrompt {
     Function modified from original source
 .LINK
     http://psappdeploytoolkit.com
+.LINK
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/GIT
 #>
     [CmdletBinding()]
     Param (
@@ -396,9 +397,6 @@ Function Show-InputPrompt {
 ##* SCRIPT BODY
 ##*=============================================
 #region ScriptBody
-
-## Clearing Console
-CLS
 
 ## Initialize forest counter
 $ProgressCounterForest = 0
