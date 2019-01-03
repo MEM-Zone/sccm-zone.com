@@ -10,7 +10,7 @@
 .OUTPUTS
     System.Object.
 .LINK
-    https://SCCM.Zone
+    https://SCCM.Zone/Get-ADForestComputers
 .LINK
     https://SCCM.Zone/Get-ADForestComputers-CHANGELOG
 .LINK
@@ -18,6 +18,9 @@
 .LINK
     https://SCCM.Zone/Issues
 #>
+
+## Set script requirements
+#Requires -Version 3.0
 
 ##*=============================================
 ##* INITIALIZATION
