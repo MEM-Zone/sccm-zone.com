@@ -4,11 +4,11 @@
 .DESCRIPTION
     Disables SCCM push install for a specified collection using the ExcludeServers registry key.
 .PARAMETER CMSiteServer
-    The NetBIOS name of the SCCM Site Server.
+    Specifies the NetBIOS name of the SCCM Site Server.
 .PARAMETER CMCollection
-    The Collection Name to exclude from Push Install.
+    Specifies the Collection Name to exclude from Push Install.
 .PARAMETER DeleteAllCollectionMembers
-    Optional switch used to Delete all Collection Device Members  and their discovery data using CIM (blazing fast :P).
+    Optional switch used to Delete all Collection Device Members and their discovery data using CIM (blazing fast :P).
 .EXAMPLE
     Disable-CMPushDeviceCollection.ps1 -CMSiteServer 'SiteServerName' -CMCollection 'Exclude from Push Collection' -DeleteAllCollectionMembers
 .INPUTS
@@ -16,17 +16,20 @@
 .OUTPUTS
     System.String.
 .NOTES
-    Created by
-        Ioan Popovici   2016-10-26
+    Created by Ioan Popovici
     Requirements
         Configuration Manager
     Important
         This script can be run using SCCM status filter rules, on collection membership change.
         DeleteAllCollectionMembers switch does not remove collection queries.
 .LINK
-    https://SCCM.Zone
+    https://SCCM.Zone/Disable-CMDeviceCollectionPush
 .LINK
-    https://SCCM.Zone/Git
+    https://SCCM.Zone/Disable-CMDeviceCollectionPush-CHANGELOG
+.LINK
+    https://SCCM.Zone/Disable-CMDeviceCollectionPush-GIT
+.LINK
+    https://SCCM.Zone/Issues
 .COMPONENT
     CM
 .FUNCTIONALITY
@@ -122,7 +125,7 @@ Function Write-Log {
 .LINK
     https://SCCM.Zone
 .LINK
-    https://SCCM.Zone/Git
+    https://SCCM.Zone/GIT
 #>
     [CmdletBinding()]
     Param (
@@ -295,7 +298,7 @@ Function Get-SMSProviderLocation {
 .LINK
     https://SCCM.Zone
 .LINK
-    https://SCCM.Zone/Git
+    https://SCCM.Zone/GIT
 #>
     [CmdletBinding()]
     Param (
@@ -341,7 +344,7 @@ Function Get-CimCollectionMembers {
 .LINK
     https://SCCM.Zone
 .LINK
-    https://SCCM.Zone/Git
+    https://SCCM.Zone/GIT
 #>
     [CmdletBinding()]
     Param (
@@ -393,7 +396,7 @@ Function Remove-CimCollectionMembers {
 .LINK
     https://SCCM.Zone
 .LINK
-    https://SCCM.Zone/Git
+    https://SCCM.Zone/GIT
 #>
     [CmdletBinding()]
     Param (
