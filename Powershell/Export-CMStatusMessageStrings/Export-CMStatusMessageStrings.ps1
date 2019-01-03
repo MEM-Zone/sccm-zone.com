@@ -1,16 +1,4 @@
 <#
-*********************************************************************************************************
-* Requires          | PowerShell 3.0, SCCM Console installed                                            *
-* ===================================================================================================== *
-* Modified by       |    Date    | Revision | Comments                                                  *
-* _____________________________________________________________________________________________________ *
-* Ioan Popovici     | 2018-06-07 | v1.0     | First version                                             *
-* Ioan Popovici     | 2018-06-07 | v1.1     | Code refactoring                                          *
-* Ioan Popovici     | 2018-06-08 | v1.2     | Code refactoring for performance and optimizations        *
-* ===================================================================================================== *
-*                                                                                                       *
-*********************************************************************************************************
-
 .SYNOPSIS
     Exports SCCM status message localization strings from dlls.
 .DESCRIPTION
@@ -32,10 +20,7 @@
 .OUTPUTS
     System.String. This script outputs to a csv file
 .NOTES
-    Created by
-        Ioan Popovici
-    Changelog
-        
+    Created by Ioan Popovici
     Credit to SaudM, Vadims Podāns
     This script can be called directly.
 .LINK
@@ -45,14 +30,19 @@
 .LINK
     https://msdn.microsoft.com/en-us/library/windows/desktop/ms679351
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone/Disable-Export-CMStatusMessageStrings-CHANGELOG
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Disable-Export-CMStatusMessageStrings-GIT
+.LINK
+    https://SCCM.Zone/Issues
 .COMPONENT
     CM
 .FUNCTIONALITY
     Export CM status messages
 #>
+
+## Set script requirements
+#Requires -Version 3.0
 
 ##*=============================================
 ##* VARIABLE DECLARATION
