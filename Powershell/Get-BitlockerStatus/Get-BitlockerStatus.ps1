@@ -29,21 +29,23 @@
 .OUTPUTS
     System.String.
 .NOTES
-    Created by
-        Ioan Popovici   2015-11-15
-    Release notes
-        https://github.com/Ioan-Popovici/SCCMZone/blob/master/Powershell/Get-BitlockerStatus/CHANGELOG.md
-    For issue reporting please use github
-        https://github.com/Ioan-Popovici/SCCMZone/issues
+    Created by Ioan Popovici
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone/Get-BitlockerStatus
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Get-BitlockerStatus-CHANGELOG
+.LINK
+    https://SCCM.Zone/Get-BitlockerStatus-GIT
+.LINK
+    https://SCCM.Zone/Issues
 .COMPONENT
     BitLocker
 .FUNCTIONALITY
     Get BitLocker status
 #>
+
+## Set script requirements
+#Requires -Version 3.0
 
 ##*=============================================
 ##* VARIABLE DECLARATION
@@ -81,11 +83,11 @@ Param (
 
 #region Function Get-BitLockerStatus
 Function Get-BitLockerStatus {
-    <#
+<#
 .SYNOPSIS
-    This Function is used the get the BitLocker Protection Status.
+    Gets the BitLocker protection status.
 .DESCRIPTION
-    This Function is used the get the BitLocker Protection Status.
+    Gets the BitLocker protection status for a specific drive, or all drives.
 .PARAMETER DriveType
     Specifies the drive type(s) for which to get the bitlocker status. Default is: '3'.
     Available values
@@ -99,6 +101,8 @@ Function Get-BitLockerStatus {
     These values are just for reference you probably will never use them.
 .PARAMETER DriveLetter
     Specifies the drive letter(s) for which to get the bitlocker status. Default is: 'All'.
+.PARAMETER ShowTableHeaders
+    This switch specifies to show the table headers. Default: $false.
 .EXAMPLE
     Get-BitLockerStatus -DriveLetter 'All'
 .EXAMPLE
@@ -108,13 +112,13 @@ Function Get-BitLockerStatus {
 .INPUTS
     System.String.
 .OUTPUTS
-    System.Object.
+    System.String.
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/GIT
 .COMPONENT
     BitLocker
 .FUNCTIONALITY
