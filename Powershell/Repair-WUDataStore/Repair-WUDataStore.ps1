@@ -1,18 +1,4 @@
 <#
-*********************************************************************************************************
-* Requires          | Requires PowerShell 2.0                                                           *
-* ===================================================================================================== *
-* Modified by       |    Date    | Revision | Comments                                                  *
-* _____________________________________________________________________________________________________ *
-* Ioan Popovici     | 2018-03-28 | v1.0     | First version                                             *
-* Ioan Popovici     | 2018-05-16 | v1.1     | Fixed logical bugs that forced a NULL return              *
-* Ioan Popovici     | 2018-05-17 | v1.2     | Generalized so it can be used for multiple error cases    *
-* Ioan Popovici     | 2018-05-17 | v1.3     | Added standalone repair option to use without detection   *
-* Ioan Popovici     | 2018-05-24 | v1.4     | Added kill windows update service by PID                  *
-* ===================================================================================================== *
-*                                                                                                       *
-*********************************************************************************************************
-
 .SYNOPSIS
     Repairs a corrupted WU DataStore.
 .DESCRIPTION
@@ -49,9 +35,9 @@
 .NOTES
     This script can be called directly.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Issues
 .COMPONENT
     WindowsUpdate
 .FUNCTIONALITY
@@ -128,9 +114,9 @@ Function Test-EventLogCompliance {
 .NOTES
     This function can typically be called directly.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Git
 .COMPONENT
     WindowsUpdate
 .FUNCTIONALITY
@@ -213,9 +199,9 @@ Function Backup-EventLog {
 .NOTES
     This function can typically be called directly.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Git
 .COMPONENT
     EventLog
 .FUNCTIONALITY
@@ -311,9 +297,9 @@ Function Repair-WUDataStore {
 .NOTES
     This function can typically be called directly.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Git
 .COMPONENT
     WindowsUpdate
 .FUNCTIONALITY
