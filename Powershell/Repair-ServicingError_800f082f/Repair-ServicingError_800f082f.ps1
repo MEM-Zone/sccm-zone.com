@@ -15,7 +15,7 @@
     Requirements
         ADK Windows 10, Windows 8 or higher.
 .LINK
-    https://SCCM.Zone/Update-OfflineWindowsImage
+    https://SCCM.Zone/Repair-ServicingError
 .LINK
     https://SCCM.Zone/Repair-ServicingError_800f082f-CHANGELOG
 .LINK
