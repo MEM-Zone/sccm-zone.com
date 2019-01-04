@@ -1,10 +1,9 @@
 <#
 .SYNOPSIS
-    This PowerShell script is used to fix the 0x800f082f~ error encountered during offline servicing.
+    Repairs error 0x800f082f~ encountered during offline servicing.
 .DESCRIPTION
-    This PowerShell script is used to fix the 0x800f082f~ error encountered during offline servicing by
-    setting the HKLM:\Microsoft\Windows\CurrentVersion\Component Based Servicing\SessionsPending\Exclusive
-    value to 0.
+    Repairs error 0x800f082f~ encountered during offline servicing by setting the
+    HKLM:\Microsoft\Windows\CurrentVersion\Component Based Servicing\SessionsPending\Exclusive value to 0.
 .INPUTS
     None.
 .OUTPUTS
@@ -12,28 +11,21 @@
 .EXAMPLE
     Repair-ServicingError_800f082f.ps1
 .NOTES
+    Created by Ioan Popovici
     Requirements
         ADK Windows 10, Windows 8 or higher.
-    Created by
-        Ioan Popovici
-    ChangeLog
-        # 2017-08-31 - v1.0
-            * First version                                                 *
-        # 2017-09-11 - v1.1
-            * Fixed $ScriptName variable
-        # 2018-10-17 - v1.2
-            * Throw error if image not in the same folder
-    To do
-        * Better error handling.
-        * Better logging.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone/Update-OfflineWindowsImage
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Repair-ServicingError_800f082f-CHANGELOG
+.LINK
+    https://SCCM.Zone/Repair-ServicingError_800f082f-GIT
+.LINK
+    https://SCCM.Zone/Issues
 .COMPONENT
-    Windows Serviving
+    Windows Servicing
 .FUNCTIONALITY
-    Workaround for 0x800f082f~
+    Repairs servicing error 0x800f082f~
 #>
 
 ## Set script requirements
