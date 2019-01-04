@@ -1,4 +1,4 @@
-# Repair-ServicingError_800f082f release history
+# Update-OfflineWindowsImage release history
 
 ## 2.0 - 2017-09-11
 
