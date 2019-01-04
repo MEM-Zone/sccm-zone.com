@@ -3,6 +3,8 @@
     --.
 .DESCRIPTION
     --.
+.PARAMETER
+    --.
 .EXAMPLE
     --.ps1
 .INPUTS
@@ -10,16 +12,15 @@
 .OUTPUTS
     None.
 .NOTES
-    Created by
-        Ioan Popovici
-    Changelog
-        # YYYY-MM-dd - v1.0
-            * First version
-    Credit to --
+    Created by Ioan Popovici
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone/PS-Template
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/PS-Template-CHANGELOG
+.LINK
+    https://SCCM.Zone/PS-Template-GIT
+.LINK
+    https://SCCM.Zone/Issues
 .COMPONENT
     --
 .FUNCTIONALITY
@@ -33,6 +34,19 @@
 ##* VARIABLE DECLARATION
 ##*=============================================
 #region VariableDeclaration
+
+## Get script parameters
+Param (
+    [Parameter(Mandatory=$false,HelpMessage="Valid options are: '--','--' and '--'",Position=0)]
+    [ValidateNotNullorEmpty()]
+    [ValidateSet('--','--','--')]
+    [Alias('--')]
+    [string]$-- = '--'
+)
+
+## Get script path and name
+[string]$ScriptPath = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Definition)
+[string]$ScriptName = [System.IO.Path]::GetFileNameWithoutExtension($MyInvocation.MyCommand.Definition)
 
 #endregion
 ##*=============================================
@@ -51,7 +65,7 @@ Function Verb- {
     --.
 .DESCRIPTION
     --.
-.PARAMETER EventLogName
+.PARAMETER
     --.
 .EXAMPLE
     --
@@ -62,9 +76,9 @@ Function Verb- {
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Git
 .COMPONENT
     --
 .FUNCTIONALITY
@@ -73,10 +87,25 @@ Function Verb- {
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory=$true,Position=0)]
+        [ValidateNotNullorEmpty()]
+        [ValidateSet('--','--','--')]
         [Alias('--')]
         [string]$-- = '--'
     )
 
+    Begin {
+    }
+    Process {
+        Try {
+        }
+        Catch {
+        }
+        Finally {
+        }
+    }
+    End {
+    }
+}
 #endregion
 
 #endregion
@@ -88,7 +117,6 @@ Function Verb- {
 ##* SCRIPT BODY
 ##*=============================================
 #region ScriptBody
-
 
 #endregion
 ##*=============================================

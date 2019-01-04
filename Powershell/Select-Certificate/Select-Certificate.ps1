@@ -8,15 +8,13 @@
 .NOTES
     Created by Ioan Popovici
 .LINK
-    Credit  : https://SCCM.Zone/Add-Certificate-CREDIT (FTW)
+    https://SCCM.Zone/Add-Certificate-CREDIT (FTW)
 .LINK
-    BlogPost: https://SCCM.Zone/Add-Certificate
+    https://SCCM.Zone/Add-Certificate
 .LINK
-    Changes : https://SCCM.Zone/Select-Certificate-CHANGELOG
+    https://SCCM.Zone/Select-Certificate-CHANGELOG
 .LINK
-    Github  : https://SCCM.Zone/Select-Certificate-GIT
-.LINK
-    Issues  : https://SCCM.Zone/Issues
+    https://SCCM.Zone/Issues
 .COMPONENT
     Certificate Store
 .FUNCTIONALITY
@@ -100,9 +98,9 @@ Function Select-Certificate {
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    Github  : https://SCCM.Zone/Select-Certificate-GIT
+    Github  : https://SCCM.Zone
 .LINK
-    Issues  : https://SCCM.Zone/Issues
+    Issues  : https://SCCM.Zone/Git
 #>
     [CmdletBinding()]
     Param (

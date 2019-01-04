@@ -1,16 +1,3 @@
-<#
-*********************************************************************************************************
-* Requires          | Requires PowerShell 2.0                                                           *
-* ===================================================================================================== *
-* Modified by       |    Date    | Revision | Comments                                                  *
-* _____________________________________________________________________________________________________ *
-* Ioan Popovici     | 2018-04-09 | v1.0     | First version                                             *
-* ===================================================================================================== *
-*                                                                                                       *
-*********************************************************************************************************
-#>
-
-#region Function Get-LocalGroupMemberLegacy
 Function Get-LocalGroupMemberLegacy {
 <#
 .SYNOPSIS
@@ -33,9 +20,9 @@ Function Get-LocalGroupMemberLegacy {
 .NOTES
     This is a regular function and can typically be called directly.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Issues
 #>
     [CmdletBinding()]
     Param (
@@ -124,4 +111,3 @@ Function Get-LocalGroupMemberLegacy {
     End {
     }
 }
-#endregion
