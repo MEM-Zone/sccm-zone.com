@@ -24,7 +24,7 @@
 .COMPONENT
     CM
 .FUNCTIONALITY
-    Create CM maintenance windows
+    Create new CM maintenance window
 #>
 
 ##*=============================================
@@ -373,7 +373,7 @@ Function New-MaintenanceWindows {
 .COMPONENT
     CM
 .FUNCTIONALITY
-    Create maintenance window
+    Create new maintenance window
 #>
     Param (
         [Parameter(Mandatory=$true,Position=0)]
