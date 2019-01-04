@@ -1,31 +1,30 @@
 <#
-*********************************************************************************************************
-* Created by Ioan Popovici   | Requires PowerShell 4.0                                                  *
-* ===================================================================================================== *
-* Modified by   |    Date    | Revision | Comments                                                      *
-* _____________________________________________________________________________________________________ *
-* Ioan Popovici | 2017-09-06 | v1.0     | First version                                                 *
-* Ioan Popovici | 2017-09-06 | v1.1     | Vastly improved                                               *
-* Ioan Popovici | 2017-09-11 | v1.2     | Fixed $ScriptName variable                                    *
-* Ioan Popovici | 2017-09-12 | v1.3     | Show result on one line, handle error output                  *
-* Ioan Popovici | 2017-09-12 | v1.4     | Fixed output to console                                       *
-* Ioan Popovici | 2017-09-13 | v1.5     | Cleanup and error reporting                                   *
-* ===================================================================================================== *
-*                                                                                                       *
-*********************************************************************************************************
-
 .SYNOPSIS
-    This PowerShell Script is used to test specified TCP ports.
+    Tests network conectivity on TCP ports.
 .DESCRIPTION
-    This PowerShell Script is used to test specified TCP ports on specified domains.
+    Tests network conectivity on TCP ports on specific domains.
 .EXAMPLE
-    C:\Windows\System32\WindowsPowerShell\v1.0\PowerShell.exe -NoExit -NoProfile -File Test-TCPPorts.ps1
+    Test-TCPPorts.ps1
+.INPUTS
+    System.String.
+.OUTPUTS
+    System.String.
 .NOTES
+    Created by Ioan Popovici
     The script will use name resolution lookup to find all DCs in the specified domain an will perform the
     tests on all of them.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/Test-TCPPorts
+.LINK
+    https://SCCM.Zone/Test-TCPPorts-CHANGELOG
+.LINK
+    https://SCCM.Zone/Test-TCPPorts-GIT
+.LINK
+    https://SCCM.Zone/Issues
+.COMPONENT
+    Network
+.FUNCTIONALITY
+    Tests network conectivity on TCP ports
 #>
 
 ##*=============================================
@@ -89,8 +88,9 @@ Function Remove-InvalidCharacters {
 .NOTES
     This is an internal script function and should typically not be called directly.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Git
 #>
     [CmdletBinding()]
     Param (
@@ -137,6 +137,10 @@ Function Show-InputPrompt {
     Function modified from original source
 .LINK
     http://psappdeploytoolkit.com
+.LINK
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Git
 #>
     [CmdletBinding()]
     Param (
