@@ -27,15 +27,20 @@
 .PARAMETER Threshold
     Specifed the numbers of events after which this functions returns $true. Default is: 3.
 .EXAMPLE
-    Repair-WUDataStore -Action 'Detect' -LogName 'Application' -Source 'ESENT' -EventID '623' -EntryType 'Error' -LimitDays 3 -Threshold 3
+    Repair-WUDataStore.ps1 -Action 'Detect' -LogName 'Application' -Source 'ESENT' -EventID '623' -EntryType 'Error' -LimitDays 3 -Threshold 3
 .INPUTS
     System.String.
 .OUTPUTS
     System.String. This script returns Compliant, Non-Compliant, Remediated or Error Message
 .NOTES
+    Created by Ioan Popovici
     This script can be called directly.
 .LINK
-    https://SCCM.Zone
+    https://SCCM.Zone/Repair-WUDataStore
+.LINK
+    https://SCCM.Zone/Repair-WUDataStore-CHANGELOG
+.LINK
+    https://SCCM.Zone/Repair-WUDataStore-GIT
 .LINK
     https://SCCM.Zone/Issues
 .COMPONENT
@@ -43,6 +48,9 @@
 .FUNCTIONALITY
     Repair
 #>
+
+## Set script requirements
+#Requires -Version 3.0
 
 ##*=============================================
 ##* VARIABLE DECLARATION
