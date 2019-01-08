@@ -474,7 +474,7 @@ Function Send-Mail {
 .PARAMETER SMTPPort
     E-Mail SMTPPort.
 .EXAMPLE
-    Set-Mail -Body 'Test' -CC 'test@visma.com'
+    Set-Mail -Body 'Test' -CC 'email@domain.com'
 .INPUTS
     System.String.
 .OUTPUTS
@@ -493,9 +493,9 @@ Function Send-Mail {
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory=$false,Position=0)]
-        [string]$From = 'SCCM Site Server <noreply@visma.com>',
+        [string]$From = 'SCCM Site Server <noreply@domain.com>',
         [Parameter(Mandatory=$false,Position=1)]
-        [string]$To = 'SCCM Team <SCCM-Team@visma.com>',
+        [string]$To = 'SCCM Team <email@domain.com>',
         [Parameter(Mandatory=$false,Position=2)]
         [string]$CC,
         [Parameter(Mandatory=$false,Position=3)]
@@ -503,7 +503,7 @@ Function Send-Mail {
         [Parameter(Mandatory=$true,Position=4)]
         [string]$Body,
         [Parameter(Mandatory=$false,Position=5)]
-        [string]$SMTPServer = 'mail.datakraftverk.no',
+        [string]$SMTPServer = 'smtpserver.domain.no',
         [Parameter(Mandatory=$false,Position=6)]
         [string]$SMTPPort = "25"
     )
