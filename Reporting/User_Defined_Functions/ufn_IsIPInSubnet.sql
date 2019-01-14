@@ -3,6 +3,10 @@
     Checks if the IP is in the specified subnet.
 .DESCRIPTION
     Checks if the IP is in the specified subnet using the subnet mask.
+.PARAMETER SubnetIP
+    Specifies the subnet IP.
+.PARAMETER SubnetMaskIP
+    Specifies the subnet mask IP.
 .EXAMPLE
     Replace the <CM_Your_Site_Code> with your CM or custom database name.
     Run the code in SQL Server Management Studio

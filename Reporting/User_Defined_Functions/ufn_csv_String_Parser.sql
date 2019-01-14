@@ -3,6 +3,10 @@
     Parses a CSV string.
 .DESCRIPTION
     Parses a CSV string and returns individual substrings.
+.PARAMETER pInputString
+    Specifies the input string.
+.PARAMETER pDelimiter
+    Specifies the delimiter.
 .EXAMPLE
     Replace the <CM_Your_Site_Code> with your CM or custom database name.
     Run the code in SQL Server Management Studio

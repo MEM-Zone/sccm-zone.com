@@ -3,6 +3,8 @@
     Gets the CIDR from a IP Subnet Mask.
 .DESCRIPTION
     Gets the CIDR ('/') from a IP Subnet Mask.
+.PARAMETER IPSubnetMask
+    Specifies the IP subnet mask.
 .EXAMPLE
     Replace the <CM_Your_Site_Code> with your CM or custom database name.
     Run the code in SQL Server Management Studio
