@@ -2,7 +2,7 @@
 .SYNOPSIS
     Checks if the IP is in the specified IP range.
 .DESCRIPTION
-    Checks if the IP is in the specified IP range.
+    Checks if the IP is in the specified IP range and returns 1 or 0 (True/False).
 .PARAMETER IP
     Specifies the IP.
 .PARAMETER IPRange
@@ -32,32 +32,32 @@ SET QUOTED_IDENTIFIER OFF
 GO
 
 IF EXISTS (
-    SELECT  [OBJECT_ID]
-    FROM    [SYS].[OBJECTS]
-    WHERE   NAME = 'ufn_IsIPInRange'
+    SELECT [OBJECT_ID]
+    FROM   [SYS].[OBJECTS]
+    WHERE  NAME = 'ufn_IsIPInRange'
 )
     DROP FUNCTION [dbo].[ufn_IsIPInRange];
 GO
 
 CREATE FUNCTION [dbo].[ufn_IsIPInRange] (
-    @IP        VARCHAR(15)
-    , @IPRange VARCHAR(31)
+    @IP        NVARCHAR(15)
+    , @IPRange NVARCHAR(31)
 )
-RETURNS VARCHAR(4)
+RETURNS BIT
 AS
     BEGIN
 
         /* Variable declaration */
-        DECLARE @IPRangeStart           AS VARCHAR (15);
-        DECLARE @IPRangeFinish          AS VARCHAR (15);
+        DECLARE @IPRangeStart           AS NVARCHAR(15);
+        DECLARE @IPRangeEnd             AS NVARCHAR(15);
         DECLARE @IPToInteger            AS BIGINT;
         DECLARE @IPRangeStartToInteger  AS BIGINT;
-        DECLARE @IPRangeFinishToInteger AS BIGINT;
-        DECLARE @Result                 AS VARCHAR(4);
+        DECLARE @IPRangeEndToInteger    AS BIGINT;
+        DECLARE @Result                 AS BIT;
 
-        /* Set range start and finish */
-        SET @IPRangeStart
-        SET @IPRangeFinish
+        /* Set IP range start and range end */
+        SET @IPRangeStart = (SELECT SUBSTRING(@IPRange, 1, PATINDEX('%-%', @IPRange) -1));
+        SET @IPRangeEnd   = (SELECT SUBSTRING(@IPRange, PATINDEX('%-%', @IPRange) +1, LEN(@IPRange)));
 
         /* Convert IP to integer */
         SET @IPToInteger = (
@@ -67,8 +67,30 @@ AS
             CONVERT(BIGINT, PARSENAME(@IP,4)) * 16777216
         );
 
-        /* Set result */
-        SET @Result = '/' + CAST(@LogarithmCacl AS VARCHAR(5));
+        /* Convert IP range start to integer */
+        SET @IPRangeStartToInteger = (
+            CONVERT(BIGINT, PARSENAME(@IPRangeStart,1)) +
+            CONVERT(BIGINT, PARSENAME(@IPRangeStart,2)) * 256 +
+            CONVERT(BIGINT, PARSENAME(@IPRangeStart,3)) * 65536 +
+            CONVERT(BIGINT, PARSENAME(@IPRangeStart,4)) * 16777216
+        );
+
+        /* Convert IP range end to integer */
+        SET @IPRangeEndToInteger = (
+            CONVERT(BIGINT, PARSENAME(@IPRangeEnd,1)) +
+            CONVERT(BIGINT, PARSENAME(@IPRangeEnd,2)) * 256 +
+            CONVERT(BIGINT, PARSENAME(@IPRangeEnd,3)) * 65536 +
+            CONVERT(BIGINT, PARSENAME(@IPRangeEnd,4)) * 16777216
+        );
+
+        /* Calculate result */
+        SET @Result = (
+            CASE
+                WHEN @IPToInteger BETWEEN @IPRangeStartToInteger AND @IPRangeEndToInteger
+                THEN 1
+                ELSE 0
+            END
+        )
 
         /* Return result */
         RETURN  @Result;

@@ -33,9 +33,9 @@ SET QUOTED_IDENTIFIER OFF
 GO
 
 IF EXISTS (
-    SELECT  [OBJECT_ID]
-    FROM    [SYS].[OBJECTS]
-    WHERE   NAME = 'ufn_CIDRFromIPMask'
+    SELECT [OBJECT_ID]
+    FROM   [SYS].[OBJECTS]
+    WHERE  NAME = 'ufn_CIDRFromIPMask'
 )
     DROP FUNCTION [dbo].[ufn_CIDRFromIPMask];
 GO
@@ -74,7 +74,7 @@ AS
         SET @MaskCalc                     = (@IPDefaultSubnetMaskToInteger - @IPSubnetMaskToInteger + 1);
         SET @LogarithmCacl                = (32 - LOG (@MaskCalc, 2));
 
-        /* Set result */
+        /* Calculate result */
         SET @Result = '/' + CAST(@LogarithmCacl AS VARCHAR(5));
 
         /* Return result */

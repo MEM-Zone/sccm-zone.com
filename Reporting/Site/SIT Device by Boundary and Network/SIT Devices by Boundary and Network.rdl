@@ -1,21 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:cl="http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition">
-  <Description>List devices by AD, SCCM site and network information.</Description>
+  <Description>List devices by boundary group, boundary and network information.</Description>
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
     <DataSource Name="CMSQLDatabase">
       <DataSourceReference>/ConfigMgr_HUB/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}</DataSourceReference>
       <rd:SecurityType>None</rd:SecurityType>
       <rd:DataSourceID>11111111-1111-1111-1111-111111111111</rd:DataSourceID>
-    </DataSource>
-    <DataSource Name="CMReportServer">
-      <ConnectionProperties>
-        <DataProvider>SQL</DataProvider>
-        <ConnectString>Data Source=dfs-sccmcas-52.dpko.un.org;Initial Catalog=ReportServer</ConnectString>
-        <IntegratedSecurity>true</IntegratedSecurity>
-      </ConnectionProperties>
-      <rd:SecurityType>Integrated</rd:SecurityType>
-      <rd:DataSourceID>577b22ff-5778-4c0b-b15c-3dea33b466c1</rd:DataSourceID>
     </DataSource>
   </DataSources>
   <DataSets>
@@ -65,7 +56,7 @@ ORDER BY
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="DeviceAndUserData">
+    <DataSet Name="DeviceAndBoundaryData">
       <Query>
         <DataSourceName>CMSQLDatabase</DataSourceName>
         <QueryParameters>
@@ -81,21 +72,24 @@ ORDER BY
         </QueryParameters>
         <CommandText>/*
 .SYNOPSIS
-    List devices by site and subnet.
+    List devices by boundary and network information.
 .DESCRIPTION
-    List devices by AD, SCCM site and network information.
+    List devices by boundary group, boundary and network information.
 .NOTES
     Created by Ioan Popovici
     Part of a report should not be run separately.
+    Requires
+        CM_Tools.dbo.ufn_IsIPInSubnet
+        CM_Tools.dbo.ufn_IsIPInRange
+        CM_Tools.dbo.ufn_CIDRFromIPMask
 .LINK
-    https://SCCM.Zone/SIT-Devices-Site-and-Subnet
+    https://SCCM.Zone/SIT-Devices-by-Boundary-and-Network
 .LINK
-    https://SCCM.Zone/SIT-Devices-Site-and-Subnet-CHANGELOG
+    https://SCCM.Zone/SIT-Devices-by-Boundary-and-Network-CHANGELOG
 .LINK
-    https://SCCM.Zone/SIT-Devices-Site-and-Subnet-GIT
+    https://SCCM.Zone/SIT-Devices-by-Boundary-and-Network-GIT
 .LINK
     https://SCCM.Zone/Issues
-
 */
 
 /*##=============================================*/
@@ -104,104 +98,117 @@ ORDER BY
 
 /* Testing variables !! Need to be commented for Production !! */
 --DECLARE @UserSIDs       AS NVARCHAR(10) = 'Disabled';
---DECLARE @CollectionID   AS NVARCHAR(10) = 'SMS00001';
---DECLARE @Locale         AS INT  = '2';
+--DECLARE @CollectionID   AS NVARCHAR(10) = 'HUB0074A';
+--DECLARE @Locale         AS INTEGER      = '2';
 
 /* Variable declaration */
-DECLARE @LCID AS INT = dbo.fn_LShortNameToLCID (@Locale)
+DECLARE @LCID  AS INTEGER = dbo.fn_LShortNameToLCID (@Locale);
 
-/* Get systems data */
-SELECT DISTINCT
-    Device	            = ISNULL(NULLIF(Systems.NetBios_Name0, '-'), 'N/A')             -- Replace null with 'NA'
-    , UserName          = NULLIF(Systems.User_Name0, '')                                -- Replace empty string with NULL
-    , SCCMSite          = Sites.SiteName
-    , SCCMSiteCode	    = CombinedResources.SiteCode
-    , ADSite	        = CombinedResources.ADSiteName
-    , ADSiteLocation    = ADSiteLocation
-    , DomainOrWorkgroup = ISNULL(Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0) -- Replace domain with workgroup if NULL
-    , OperatingSystem   = (                                                             -- Get OS caption by version
-        CASE
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 5.%'              THEN 'Windows XP'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.0%'             THEN 'Windows Vista'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.1%'             THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 LIKE 'Windows_7 Entreprise 6.1'      THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 =    'Windows Embedded Standard 6.1' THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.2%'             THEN 'Windows 8'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.3%'             THEN 'Windows 8.1'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 5.%'                   THEN 'Windows Server 2003'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.0%'                  THEN 'Windows Server 2008'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.1%'                  THEN 'Windows Server 2008 R2'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.2%'                  THEN 'Windows Server 2012'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
-                CASE
-                    WHEN CAST(REPLACE(Build01, '.', '') AS INT) &gt; 10017763 THEN 'Windows Server 2019'
-                    ELSE 'Windows Server 2016'
-                END
-            )
-            ELSE Systems.Operating_System_Name_And0
-        END
-    )
-    , Version           = (
-        CASE
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%' THEN (
-                CASE REPLACE(Systems.Build01, '.', '')
-                    WHEN '10010240' THEN '1507'
-                    WHEN '10010586' THEN '1511'
-                    WHEN '10014393' THEN '1607'
-                    WHEN '10015063' THEN '1703'
-                    WHEN '10016299' THEN '1709'
-                    WHEN '10017134' THEN '1803'
-                    WHEN '10017763' THEN '1809'
-                    ELSE NULL
-                END
-            )
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'      THEN (
-                CASE REPLACE(Systems.Build01, '.', '')
-                    WHEN '10014393' THEN '1607'
-                    WHEN '10016299' THEN '1709'
-                    WHEN '10017134' THEN '1803'
-                    WHEN '10017763' THEN '1809'
-                    ELSE NULL
-                END
-            )
-            ELSE NULL
-        END
-    )
-    , Build             = Systems.Build01
-    , IPAddresses       = Network.IPAddress0
-    , IPSubnets         = (
-        REPLACE(
-            (
-                SELECT (
-                    LTRIM(RTRIM(Subnets.IP_Subnets0))
-                ) AS [data()]
-                FROM v_RA_System_IPSubnets AS Subnets
-                WHERE Subnets.ResourceID = CollectionMembers.ResourceID
-                    AND (
-                        SELECT CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Subnets.IP_Subnets0, Network.IPSubnet0)
-                    ) = 1        -- Check if IP is in subnet
-                FOR XML PATH('') -- Merge multiple values
-            ),
-            ' ',', '             -- Replace space with ', '
-        )
-    )
-    , IPSubnetMasks     = (Network.IPSubnet0 + CM_Tools.dbo.ufn_CIDRFromIPMask(Network.IPSubnet0)) -- Add CIDR to the IP subnet
-    , Managed           =
-        CASE Systems.Client0
-            WHEN 1 THEN 'Yes'
-            ELSE 'No'
-        END
-FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
-    LEFT JOIN v_R_System AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
-    LEFT JOIN v_CombinedDeviceResources AS CombinedResources ON CombinedResources.MachineID = CollectionMembers.ResourceID
-    LEFT JOIN v_Site AS Sites ON Sites.SiteCode = CombinedResources.SiteCode
-    LEFT JOIN v_Network_DATA_Serialized AS Network ON Network.ResourceID = CollectionMembers.ResourceID
-        AND Network.IPAddress0 NOT LIKE '[A-Z]%' AND IPEnabled0 = 1 -- Exclude IPv6 and non-enabled adapters
-    LEFT JOIN dbo.ActiveDirectorySites AS ADSites ON ADSites.ADSiteName = CombinedResources.ADSiteName
-WHERE CollectionMembers.CollectionID = @CollectionID
+WITH BoundaryData_CTE (Occurrences, Device, Managed, OperatingSystem, DomainOrWorkgroup, ADSite, SCCMSite, SCCMSiteCode, BoundaryGroup, Boundary, IPAddress, IPSubnet, IPSubnetMask)
+AS (
+
+    /* Get boundary data */
+	SELECT
+		Occurrences         = Count(*) OVER (PARTITION BY Systems.ResourceID)   -- Count ResourceID occurrences
+		, Device	        = ISNULL(NULLIF(Systems.NetBios_Name0, '-'), 'N/A')
+		, Managed           = (
+			CASE Systems.Client0
+				WHEN 1 THEN 'Yes'
+				ELSE 'No'
+			END
+		)
+		, OperatingSystem   = (
+
+			/* Get OS caption by version */
+			CASE
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 5.%'              THEN 'Windows XP'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.0%'             THEN 'Windows Vista'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.1%'             THEN 'Windows 7'
+				WHEN Systems.Operating_System_Name_And0 LIKE 'Windows_7 Entreprise 6.1'      THEN 'Windows 7'
+				WHEN Systems.Operating_System_Name_And0 =    'Windows Embedded Standard 6.1' THEN 'Windows 7'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.2%'             THEN 'Windows 8'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.3%'             THEN 'Windows 8.1'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Server 5.%'                   THEN 'Windows Server 2003'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.0%'                  THEN 'Windows Server 2008'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.1%'                  THEN 'Windows Server 2008 R2'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.2%'                  THEN 'Windows Server 2012'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
+				WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
+					CASE
+						WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) &gt; 10017763 THEN 'Windows Server 2019'
+						ELSE 'Windows Server 2016'
+					END
+				)
+				ELSE Systems.Operating_System_Name_And0
+			END
+		)
+		, DomainOrWorkgroup = ISNULL(Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
+		, ADSite	        = CombinedResources.ADSiteName
+		, SCCMSite          = Sites.SiteName
+		, SCCMSiteCode	    = CombinedResources.SiteCode
+		, BoundaryGroup     = ISNULL(BoundaryGroup.Name, 'N/A')
+		, Boundary	        = ISNULL(Boundary.DisplayName, 'N/A')
+		, IPAddress         = Network.IPAddress0
+		, IPSubnet          = (
+			CASE
+				WHEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Subnets.IP_Subnets0, Network.IPSubnet0) = 1
+				THEN Subnets.IP_Subnets0
+				ELSE NULL
+			END
+		)
+		, IPSubnetMask      = (
+			CASE
+				WHEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Subnets.IP_Subnets0, Network.IPSubnet0) = 1
+				THEN Network.IPSubnet0 + CM_Tools.dbo.ufn_CIDRFromIPMask(Network.IPSubnet0) -- Add CIDR to the IP subnet
+				ELSE NULL
+			END
+		)
+	FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
+		LEFT JOIN v_R_System AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
+		LEFT JOIN v_CombinedDeviceResources AS CombinedResources ON CombinedResources.MachineID = CollectionMembers.ResourceID
+		LEFT JOIN v_Site AS Sites ON Sites.SiteCode = CombinedResources.SiteCode
+		LEFT JOIN v_Network_DATA_Serialized AS Network ON Network.ResourceID = CollectionMembers.ResourceID
+			AND IPEnabled0 = 1                               -- Exclude non-enabled adapters
+			AND Network.IPAddress0 NOT LIKE '%:%'            -- Exclude IPv6
+		LEFT JOIN v_RA_System_IPSubnets AS Subnets ON Subnets.ResourceID = CollectionMembers.ResourceID
+		INNER JOIN vSMS_Boundary AS Boundary ON
+			(
+				CASE
+					WHEN Boundary.BoundaryType = 0
+					THEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Boundary.Value, Network.IPSubnet0)
+					WHEN Boundary.BoundaryType = 1 AND Boundary.Value = CombinedResources.ADSiteName
+					THEN 1
+					WHEN Boundary.BoundaryType = 3
+					THEN CM_Tools.dbo.ufn_IsIPInRange(Network.IPAddress0, Boundary.Value)
+				END
+			) = 1 -- Join only if the Boundary value matches ADSiteName or is in the computer subnet or subnet range.
+		INNER JOIN vSMS_BoundaryGroupMembers AS BoundaryRelation ON BoundaryRelation.BoundaryID = Boundary.BoundaryID
+		INNER JOIN vSMS_BoundaryGroup AS BoundaryGroup ON BoundaryGroup.GroupID = BoundaryRelation.GroupID
+	WHERE CollectionMembers.CollectionID = @CollectionID
+)
+
+/* Remove rows that have no subnet only when a ResourceID is present more than once in the result */
+SELECT
+    Device
+    , Managed
+    , OperatingSystem
+    , DomainOrWorkgroup
+    , ADSite
+    , SCCMSite
+    , SCCMSiteCode
+    , BoundaryGroup
+    , Boundary
+    , IPAddress
+    , IPSubnet
+    , IPSubnetMask
+FROM BoundaryData_CTE AS BoundaryData
+WHERE (
+    (BoundaryData.Occurrences &gt; 1 AND BoundaryData.IPSubnet IS NOT NULL) -- Remove all rows that have no subnet
+    OR
+    (BoundaryData.Occurrences = 1)                                       -- Keep at least one occurrence, even if the subnet is NULL
+)
 
 /*##=============================================*/
 /*## END QUERY BODY                              */
@@ -213,8 +220,20 @@ WHERE CollectionMembers.CollectionID = @CollectionID
           <DataField>Device</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="UserName">
-          <DataField>UserName</DataField>
+        <Field Name="Managed">
+          <DataField>Managed</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="OperatingSystem">
+          <DataField>OperatingSystem</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="DomainOrWorkgroup">
+          <DataField>DomainOrWorkgroup</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ADSite">
+          <DataField>ADSite</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="SCCMSite">
@@ -225,64 +244,24 @@ WHERE CollectionMembers.CollectionID = @CollectionID
           <DataField>SCCMSiteCode</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="ADSite">
-          <DataField>ADSite</DataField>
+        <Field Name="BoundaryGroup">
+          <DataField>BoundaryGroup</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="ADSiteLocation">
-          <DataField>ADSiteLocation</DataField>
+        <Field Name="Boundary">
+          <DataField>Boundary</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="DomainOrWorkgroup">
-          <DataField>DomainOrWorkgroup</DataField>
+        <Field Name="IPAddress">
+          <DataField>IPAddress</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="OperatingSystem">
-          <DataField>OperatingSystem</DataField>
+        <Field Name="IPSubnet">
+          <DataField>IPSubnet</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="Version">
-          <DataField>Version</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Build">
-          <DataField>Build</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="IPAddresses">
-          <DataField>IPAddresses</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="IPSubnets">
-          <DataField>IPSubnets</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="IPSubnetMasks">
-          <DataField>IPSubnetMasks</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Managed">
-          <DataField>Managed</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="ReportDescription">
-      <Query>
-        <DataSourceName>CMReportServer</DataSourceName>
-        <QueryParameters>
-          <QueryParameter Name="@ReportName">
-            <Value>=Parameters!ReportName.Value</Value>
-          </QueryParameter>
-        </QueryParameters>
-        <CommandText>/* ReportDescription Dataset */
-SELECT DISTINCT Description 
-FROM ReportServer.dbo.Catalog
-WHERE Name = @ReportName</CommandText>
-      </Query>
-      <Fields>
-        <Field Name="Description">
-          <DataField>Description</DataField>
+        <Field Name="IPSubnetMask">
+          <DataField>IPSubnetMask</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -347,7 +326,7 @@ WHERE Name = @ReportName</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=SrsResources.Localization.GetString(Fields!Description.Value, User!Language)</Value>
+                                  <Value>List devices by boundary group, boundary and network information.</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>9pt</FontSize>
@@ -388,7 +367,7 @@ WHERE Name = @ReportName</CommandText>
                 <TablixMember />
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>ReportDescription</DataSetName>
+            <DataSetName>DeviceAndBoundaryData</DataSetName>
             <Top>0.03194in</Top>
             <Left>0.127cm</Left>
             <Height>0.4in</Height>
@@ -400,10 +379,10 @@ WHERE Name = @ReportName</CommandText>
             </Style>
           </Tablix>
           <Line Name="ReportDescriptionLine2">
-            <Top>0.46065in</Top>
+            <Top>0.44815in</Top>
             <Left>0.04887in</Left>
             <Height>0in</Height>
-            <Width>18.51883in</Width>
+            <Width>19.27333in</Width>
             <ZIndex>1</ZIndex>
             <Style>
               <Border>
@@ -432,7 +411,7 @@ WHERE Name = @ReportName</CommandText>
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>2.36771cm</Width>
+                  <Width>3.15274cm</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -441,10 +420,10 @@ WHERE Name = @ReportName</CommandText>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="TH_Managed">
+                        <Textbox Name="TH_IPSubnetMask">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!Managed.Value</SortExpression>
+                            <SortExpression>=Fields!IPSubnetMask.Value</SortExpression>
                             <SortExpressionScope>Device</SortExpressionScope>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
@@ -452,7 +431,7 @@ WHERE Name = @ReportName</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=SrsResources.Localization.GetString("Managed", User!Language)</Value>
+                                  <Value>=SrsResources.Localization.GetString("Subnet Mask", User!Language)</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -469,14 +448,10 @@ WHERE Name = @ReportName</CommandText>
                               <Style>None</Style>
                             </Border>
                             <TopBorder>
-                              <Color>Black</Color>
                               <Style>Solid</Style>
-                              <Width>1pt</Width>
                             </TopBorder>
                             <BottomBorder>
-                              <Color>Black</Color>
                               <Style>Solid</Style>
-                              <Width>1pt</Width>
                             </BottomBorder>
                             <BackgroundColor>LightGrey</BackgroundColor>
                             <VerticalAlign>Middle</VerticalAlign>
@@ -495,14 +470,14 @@ WHERE Name = @ReportName</CommandText>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="TV_Managed">
+                        <Textbox Name="Textbox293">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!Managed.Value</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>9pt</FontSize>
@@ -514,10 +489,50 @@ WHERE Name = @ReportName</CommandText>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <rd:DefaultName>Textbox293</rd:DefaultName>
                           <Style>
                             <Border>
                               <Style>None</Style>
                             </Border>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.6cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="TV_IPSubnetMask">
+                          <CanGrow>true</CanGrow>
+                          <HideDuplicates>Device</HideDuplicates>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!IPSubnetMask.Value</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <BackgroundColor>WhiteSmoke</BackgroundColor>
                             <VerticalAlign>Middle</VerticalAlign>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -580,7 +595,7 @@ WHERE Name = @ReportName</CommandText>
               <TablixMembers>
                 <TablixMember>
                   <TablixHeader>
-                    <Size>3.73713cm</Size>
+                    <Size>3.34026cm</Size>
                     <CellContents>
                       <Textbox Name="TH_Device">
                         <CanGrow>true</CanGrow>
@@ -628,12 +643,12 @@ WHERE Name = @ReportName</CommandText>
                   <TablixMembers>
                     <TablixMember>
                       <TablixHeader>
-                        <Size>3.31485cm</Size>
+                        <Size>2.34125cm</Size>
                         <CellContents>
-                          <Textbox Name="TH_UserName">
+                          <Textbox Name="TH_Managed">
                             <CanGrow>true</CanGrow>
                             <UserSort>
-                              <SortExpression>=Fields!UserName.Value</SortExpression>
+                              <SortExpression>=Fields!Managed.Value</SortExpression>
                               <SortExpressionScope>Device</SortExpressionScope>
                             </UserSort>
                             <KeepTogether>true</KeepTogether>
@@ -641,7 +656,7 @@ WHERE Name = @ReportName</CommandText>
                               <Paragraph>
                                 <TextRuns>
                                   <TextRun>
-                                    <Value>=SrsResources.Localization.GetString("User", User!Language)</Value>
+                                    <Value>=SrsResources.Localization.GetString("Managed", User!Language)</Value>
                                     <Style>
                                       <FontFamily>Segoe UI</FontFamily>
                                       <FontWeight>Bold</FontWeight>
@@ -658,10 +673,14 @@ WHERE Name = @ReportName</CommandText>
                                 <Style>None</Style>
                               </Border>
                               <TopBorder>
+                                <Color>Black</Color>
                                 <Style>Solid</Style>
+                                <Width>1pt</Width>
                               </TopBorder>
                               <BottomBorder>
+                                <Color>Black</Color>
                                 <Style>Solid</Style>
+                                <Width>1pt</Width>
                               </BottomBorder>
                               <BackgroundColor>LightGrey</BackgroundColor>
                               <VerticalAlign>Middle</VerticalAlign>
@@ -676,12 +695,12 @@ WHERE Name = @ReportName</CommandText>
                       <TablixMembers>
                         <TablixMember>
                           <TablixHeader>
-                            <Size>5.96573cm</Size>
+                            <Size>4.34988cm</Size>
                             <CellContents>
-                              <Textbox Name="TH_SCCMSite">
+                              <Textbox Name="TH_OperatingSystem">
                                 <CanGrow>true</CanGrow>
                                 <UserSort>
-                                  <SortExpression>=Fields!SCCMSite.Value</SortExpression>
+                                  <SortExpression>=Fields!OperatingSystem.Value</SortExpression>
                                   <SortExpressionScope>Device</SortExpressionScope>
                                 </UserSort>
                                 <KeepTogether>true</KeepTogether>
@@ -689,7 +708,7 @@ WHERE Name = @ReportName</CommandText>
                                   <Paragraph>
                                     <TextRuns>
                                       <TextRun>
-                                        <Value>=SrsResources.Localization.GetString("SCCM Site", User!Language)</Value>
+                                        <Value>=SrsResources.Localization.GetString("OperatingSystem", User!Language)</Value>
                                         <Style>
                                           <FontFamily>Segoe UI</FontFamily>
                                           <FontWeight>Bold</FontWeight>
@@ -706,10 +725,14 @@ WHERE Name = @ReportName</CommandText>
                                     <Style>None</Style>
                                   </Border>
                                   <TopBorder>
+                                    <Color>Black</Color>
                                     <Style>Solid</Style>
+                                    <Width>1pt</Width>
                                   </TopBorder>
                                   <BottomBorder>
+                                    <Color>Black</Color>
                                     <Style>Solid</Style>
+                                    <Width>1pt</Width>
                                   </BottomBorder>
                                   <BackgroundColor>LightGrey</BackgroundColor>
                                   <VerticalAlign>Middle</VerticalAlign>
@@ -724,12 +747,12 @@ WHERE Name = @ReportName</CommandText>
                           <TablixMembers>
                             <TablixMember>
                               <TablixHeader>
-                                <Size>2.5cm</Size>
+                                <Size>4.91003cm</Size>
                                 <CellContents>
-                                  <Textbox Name="TH_SCCMSiteCode">
+                                  <Textbox Name="TH_DomainOrWorkgroup">
                                     <CanGrow>true</CanGrow>
                                     <UserSort>
-                                      <SortExpression>=Fields!SCCMSiteCode.Value</SortExpression>
+                                      <SortExpression>=Fields!DomainOrWorkgroup.Value</SortExpression>
                                       <SortExpressionScope>Device</SortExpressionScope>
                                     </UserSort>
                                     <KeepTogether>true</KeepTogether>
@@ -737,7 +760,7 @@ WHERE Name = @ReportName</CommandText>
                                       <Paragraph>
                                         <TextRuns>
                                           <TextRun>
-                                            <Value>=SrsResources.Localization.GetString("SCCM Site Code", User!Language)</Value>
+                                            <Value>=SrsResources.Localization.GetString("Domain or Workgroup", User!Language)</Value>
                                             <Style>
                                               <FontFamily>Segoe UI</FontFamily>
                                               <FontWeight>Bold</FontWeight>
@@ -772,7 +795,7 @@ WHERE Name = @ReportName</CommandText>
                               <TablixMembers>
                                 <TablixMember>
                                   <TablixHeader>
-                                    <Size>4.102cm</Size>
+                                    <Size>4.01045cm</Size>
                                     <CellContents>
                                       <Textbox Name="TH_ADSite">
                                         <CanGrow>true</CanGrow>
@@ -820,12 +843,12 @@ WHERE Name = @ReportName</CommandText>
                                   <TablixMembers>
                                     <TablixMember>
                                       <TablixHeader>
-                                        <Size>2.90638cm</Size>
+                                        <Size>6.00838cm</Size>
                                         <CellContents>
-                                          <Textbox Name="TH_ADSiteLocation">
+                                          <Textbox Name="TH_SCCMSite">
                                             <CanGrow>true</CanGrow>
                                             <UserSort>
-                                              <SortExpression>=Fields!ADSiteLocation.Value</SortExpression>
+                                              <SortExpression>=Fields!SCCMSite.Value</SortExpression>
                                               <SortExpressionScope>Device</SortExpressionScope>
                                             </UserSort>
                                             <KeepTogether>true</KeepTogether>
@@ -833,7 +856,7 @@ WHERE Name = @ReportName</CommandText>
                                               <Paragraph>
                                                 <TextRuns>
                                                   <TextRun>
-                                                    <Value>=SrsResources.Localization.GetString("AD Site Location", User!Language)</Value>
+                                                    <Value>=SrsResources.Localization.GetString("SCCM Site", User!Language)</Value>
                                                     <Style>
                                                       <FontFamily>Segoe UI</FontFamily>
                                                       <FontWeight>Bold</FontWeight>
@@ -868,12 +891,12 @@ WHERE Name = @ReportName</CommandText>
                                       <TablixMembers>
                                         <TablixMember>
                                           <TablixHeader>
-                                            <Size>4.9172cm</Size>
+                                            <Size>2.5cm</Size>
                                             <CellContents>
-                                              <Textbox Name="TH_DomainOrWorkgroup">
+                                              <Textbox Name="TH_SCCMSiteCode">
                                                 <CanGrow>true</CanGrow>
                                                 <UserSort>
-                                                  <SortExpression>=Fields!DomainOrWorkgroup.Value</SortExpression>
+                                                  <SortExpression>=Fields!SCCMSiteCode.Value</SortExpression>
                                                   <SortExpressionScope>Device</SortExpressionScope>
                                                 </UserSort>
                                                 <KeepTogether>true</KeepTogether>
@@ -881,7 +904,7 @@ WHERE Name = @ReportName</CommandText>
                                                   <Paragraph>
                                                     <TextRuns>
                                                       <TextRun>
-                                                        <Value>=SrsResources.Localization.GetString("Domain or Workgroup", User!Language)</Value>
+                                                        <Value>=SrsResources.Localization.GetString("SCCM Site Code", User!Language)</Value>
                                                         <Style>
                                                           <FontFamily>Segoe UI</FontFamily>
                                                           <FontWeight>Bold</FontWeight>
@@ -916,12 +939,12 @@ WHERE Name = @ReportName</CommandText>
                                           <TablixMembers>
                                             <TablixMember>
                                               <TablixHeader>
-                                                <Size>4.24992cm</Size>
+                                                <Size>7.13154cm</Size>
                                                 <CellContents>
-                                                  <Textbox Name="TH_OperatingSystem">
+                                                  <Textbox Name="TH_BundaryGroup">
                                                     <CanGrow>true</CanGrow>
                                                     <UserSort>
-                                                      <SortExpression>=Fields!OperatingSystem.Value</SortExpression>
+                                                      <SortExpression>=Fields!BoundaryGroup.Value</SortExpression>
                                                       <SortExpressionScope>Device</SortExpressionScope>
                                                     </UserSort>
                                                     <KeepTogether>true</KeepTogether>
@@ -929,7 +952,7 @@ WHERE Name = @ReportName</CommandText>
                                                       <Paragraph>
                                                         <TextRuns>
                                                           <TextRun>
-                                                            <Value>=SrsResources.Localization.GetString("OperatingSystem", User!Language)</Value>
+                                                            <Value>=SrsResources.Localization.GetString("Boundary Group", User!Language)</Value>
                                                             <Style>
                                                               <FontFamily>Segoe UI</FontFamily>
                                                               <FontWeight>Bold</FontWeight>
@@ -946,14 +969,10 @@ WHERE Name = @ReportName</CommandText>
                                                         <Style>None</Style>
                                                       </Border>
                                                       <TopBorder>
-                                                        <Color>Black</Color>
                                                         <Style>Solid</Style>
-                                                        <Width>1pt</Width>
                                                       </TopBorder>
                                                       <BottomBorder>
-                                                        <Color>Black</Color>
                                                         <Style>Solid</Style>
-                                                        <Width>1pt</Width>
                                                       </BottomBorder>
                                                       <BackgroundColor>LightGrey</BackgroundColor>
                                                       <VerticalAlign>Middle</VerticalAlign>
@@ -968,12 +987,12 @@ WHERE Name = @ReportName</CommandText>
                                               <TablixMembers>
                                                 <TablixMember>
                                                   <TablixHeader>
-                                                    <Size>1.865cm</Size>
+                                                    <Size>6.20973cm</Size>
                                                     <CellContents>
-                                                      <Textbox Name="TH_Version">
+                                                      <Textbox Name="TH_Boundary">
                                                         <CanGrow>true</CanGrow>
                                                         <UserSort>
-                                                          <SortExpression>=Fields!Version.Value</SortExpression>
+                                                          <SortExpression>=Fields!Boundary.Value</SortExpression>
                                                           <SortExpressionScope>Device</SortExpressionScope>
                                                         </UserSort>
                                                         <KeepTogether>true</KeepTogether>
@@ -981,7 +1000,7 @@ WHERE Name = @ReportName</CommandText>
                                                           <Paragraph>
                                                             <TextRuns>
                                                               <TextRun>
-                                                                <Value>=SrsResources.Localization.GetString("Version", User!Language)</Value>
+                                                                <Value>=SrsResources.Localization.GetString("Boundary", User!Language)</Value>
                                                                 <Style>
                                                                   <FontFamily>Segoe UI</FontFamily>
                                                                   <FontWeight>Bold</FontWeight>
@@ -1020,12 +1039,12 @@ WHERE Name = @ReportName</CommandText>
                                                   <TablixMembers>
                                                     <TablixMember>
                                                       <TablixHeader>
-                                                        <Size>2.26188cm</Size>
+                                                        <Size>2.5cm</Size>
                                                         <CellContents>
-                                                          <Textbox Name="TH_Build">
+                                                          <Textbox Name="TH_IPAddresses">
                                                             <CanGrow>true</CanGrow>
                                                             <UserSort>
-                                                              <SortExpression>=Fields!Build.Value</SortExpression>
+                                                              <SortExpression>=Fields!IPAddress.Value</SortExpression>
                                                               <SortExpressionScope>Device</SortExpressionScope>
                                                             </UserSort>
                                                             <KeepTogether>true</KeepTogether>
@@ -1033,7 +1052,7 @@ WHERE Name = @ReportName</CommandText>
                                                               <Paragraph>
                                                                 <TextRuns>
                                                                   <TextRun>
-                                                                    <Value>=SrsResources.Localization.GetString("Build", User!Language)</Value>
+                                                                    <Value>=SrsResources.Localization.GetString("IP Address", User!Language)</Value>
                                                                     <Style>
                                                                       <FontFamily>Segoe UI</FontFamily>
                                                                       <FontWeight>Bold</FontWeight>
@@ -1072,12 +1091,12 @@ WHERE Name = @ReportName</CommandText>
                                                       <TablixMembers>
                                                         <TablixMember>
                                                           <TablixHeader>
-                                                            <Size>3.08272cm</Size>
+                                                            <Size>2.5cm</Size>
                                                             <CellContents>
-                                                              <Textbox Name="TH_IPAddresses">
+                                                              <Textbox Name="TH_IPSubnet">
                                                                 <CanGrow>true</CanGrow>
                                                                 <UserSort>
-                                                                  <SortExpression>=Fields!IPAddresses.Value</SortExpression>
+                                                                  <SortExpression>=Fields!IPSubnet.Value</SortExpression>
                                                                   <SortExpressionScope>Device</SortExpressionScope>
                                                                 </UserSort>
                                                                 <KeepTogether>true</KeepTogether>
@@ -1085,7 +1104,7 @@ WHERE Name = @ReportName</CommandText>
                                                                   <Paragraph>
                                                                     <TextRuns>
                                                                       <TextRun>
-                                                                        <Value>=SrsResources.Localization.GetString("IP Addresses", User!Language)</Value>
+                                                                        <Value>=SrsResources.Localization.GetString("IP Subnet", User!Language)</Value>
                                                                         <Style>
                                                                           <FontFamily>Segoe UI</FontFamily>
                                                                           <FontWeight>Bold</FontWeight>
@@ -1102,14 +1121,10 @@ WHERE Name = @ReportName</CommandText>
                                                                     <Style>None</Style>
                                                                   </Border>
                                                                   <TopBorder>
-                                                                    <Color>Black</Color>
                                                                     <Style>Solid</Style>
-                                                                    <Width>1pt</Width>
                                                                   </TopBorder>
                                                                   <BottomBorder>
-                                                                    <Color>Black</Color>
                                                                     <Style>Solid</Style>
-                                                                    <Width>1pt</Width>
                                                                   </BottomBorder>
                                                                   <BackgroundColor>LightGrey</BackgroundColor>
                                                                   <VerticalAlign>Middle</VerticalAlign>
@@ -1122,107 +1137,7 @@ WHERE Name = @ReportName</CommandText>
                                                             </CellContents>
                                                           </TablixHeader>
                                                           <TablixMembers>
-                                                            <TablixMember>
-                                                              <TablixHeader>
-                                                                <Size>2.52646cm</Size>
-                                                                <CellContents>
-                                                                  <Textbox Name="TH_ADSite2">
-                                                                    <CanGrow>true</CanGrow>
-                                                                    <UserSort>
-                                                                      <SortExpression>=Fields!ADSite.Value</SortExpression>
-                                                                      <SortExpressionScope>Device</SortExpressionScope>
-                                                                    </UserSort>
-                                                                    <KeepTogether>true</KeepTogether>
-                                                                    <Paragraphs>
-                                                                      <Paragraph>
-                                                                        <TextRuns>
-                                                                          <TextRun>
-                                                                            <Value>=SrsResources.Localization.GetString("IP Subnets", User!Language)</Value>
-                                                                            <Style>
-                                                                              <FontFamily>Segoe UI</FontFamily>
-                                                                              <FontWeight>Bold</FontWeight>
-                                                                            </Style>
-                                                                          </TextRun>
-                                                                        </TextRuns>
-                                                                        <Style>
-                                                                          <TextAlign>Center</TextAlign>
-                                                                        </Style>
-                                                                      </Paragraph>
-                                                                    </Paragraphs>
-                                                                    <Style>
-                                                                      <Border>
-                                                                        <Style>None</Style>
-                                                                      </Border>
-                                                                      <TopBorder>
-                                                                        <Style>Solid</Style>
-                                                                      </TopBorder>
-                                                                      <BottomBorder>
-                                                                        <Style>Solid</Style>
-                                                                      </BottomBorder>
-                                                                      <BackgroundColor>LightGrey</BackgroundColor>
-                                                                      <VerticalAlign>Middle</VerticalAlign>
-                                                                      <PaddingLeft>2pt</PaddingLeft>
-                                                                      <PaddingRight>2pt</PaddingRight>
-                                                                      <PaddingTop>2pt</PaddingTop>
-                                                                      <PaddingBottom>2pt</PaddingBottom>
-                                                                    </Style>
-                                                                  </Textbox>
-                                                                </CellContents>
-                                                              </TablixHeader>
-                                                              <TablixMembers>
-                                                                <TablixMember>
-                                                                  <TablixHeader>
-                                                                    <Size>3.24083cm</Size>
-                                                                    <CellContents>
-                                                                      <Textbox Name="TH_ADSite3">
-                                                                        <CanGrow>true</CanGrow>
-                                                                        <UserSort>
-                                                                          <SortExpression>=Fields!ADSite.Value</SortExpression>
-                                                                          <SortExpressionScope>Device</SortExpressionScope>
-                                                                        </UserSort>
-                                                                        <KeepTogether>true</KeepTogether>
-                                                                        <Paragraphs>
-                                                                          <Paragraph>
-                                                                            <TextRuns>
-                                                                              <TextRun>
-                                                                                <Value>=SrsResources.Localization.GetString("Subnet Masks", User!Language)</Value>
-                                                                                <Style>
-                                                                                  <FontFamily>Segoe UI</FontFamily>
-                                                                                  <FontWeight>Bold</FontWeight>
-                                                                                </Style>
-                                                                              </TextRun>
-                                                                            </TextRuns>
-                                                                            <Style>
-                                                                              <TextAlign>Center</TextAlign>
-                                                                            </Style>
-                                                                          </Paragraph>
-                                                                        </Paragraphs>
-                                                                        <Style>
-                                                                          <Border>
-                                                                            <Style>None</Style>
-                                                                          </Border>
-                                                                          <TopBorder>
-                                                                            <Style>Solid</Style>
-                                                                          </TopBorder>
-                                                                          <BottomBorder>
-                                                                            <Style>Solid</Style>
-                                                                          </BottomBorder>
-                                                                          <BackgroundColor>LightGrey</BackgroundColor>
-                                                                          <VerticalAlign>Middle</VerticalAlign>
-                                                                          <PaddingLeft>2pt</PaddingLeft>
-                                                                          <PaddingRight>2pt</PaddingRight>
-                                                                          <PaddingTop>2pt</PaddingTop>
-                                                                          <PaddingBottom>2pt</PaddingBottom>
-                                                                        </Style>
-                                                                      </Textbox>
-                                                                    </CellContents>
-                                                                  </TablixHeader>
-                                                                  <TablixMembers>
-                                                                    <TablixMember />
-                                                                  </TablixMembers>
-                                                                </TablixMember>
-                                                              </TablixMembers>
-                                                            </TablixMember>
+                                                            <TablixMember />
                                                           </TablixMembers>
                                                         </TablixMember>
                                                       </TablixMembers>
@@ -1255,9 +1170,33 @@ WHERE Name = @ReportName</CommandText>
                     <SortExpression>
                       <Value>=Fields!Device.Value</Value>
                     </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!Managed.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!OperatingSystem.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!DomainOrWorkgroup.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!ADSite.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!SCCMSite.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!SCCMSiteCode.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!BoundaryGroup.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!Boundary.Value</Value>
+                    </SortExpression>
                   </SortExpressions>
                   <TablixHeader>
-                    <Size>3.73713cm</Size>
+                    <Size>3.34026cm</Size>
                     <CellContents>
                       <Textbox Name="TV_Device">
                         <CanGrow>true</CanGrow>
@@ -1291,60 +1230,36 @@ WHERE Name = @ReportName</CommandText>
                   </TablixHeader>
                   <TablixMembers>
                     <TablixMember>
-                      <Group Name="Details" />
+                      <Group Name="Managed">
+                        <GroupExpressions>
+                          <GroupExpression>=Fields!Managed.Value</GroupExpression>
+                        </GroupExpressions>
+                      </Group>
                       <SortExpressions>
-                        <SortExpression>
-                          <Value>=Fields!UserName.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!SCCMSite.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!ADSite.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!ADSiteLocation.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!DomainOrWorkgroup.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!OperatingSystem.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!Version.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!Build.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!IPAddresses.Value</Value>
-                        </SortExpression>
-                        <SortExpression>
-                          <Value>=Fields!IPSubnets.Value</Value>
-                        </SortExpression>
                         <SortExpression>
                           <Value>=Fields!Managed.Value</Value>
                         </SortExpression>
                       </SortExpressions>
                       <TablixHeader>
-                        <Size>3.31485cm</Size>
+                        <Size>2.34125cm</Size>
                         <CellContents>
-                          <Textbox Name="TV_UserName">
+                          <Textbox Name="TV_Managed">
                             <CanGrow>true</CanGrow>
                             <KeepTogether>true</KeepTogether>
                             <Paragraphs>
                               <Paragraph>
                                 <TextRuns>
                                   <TextRun>
-                                    <Value>=Fields!UserName.Value</Value>
+                                    <Value>=Fields!Managed.Value</Value>
                                     <Style>
                                       <FontFamily>Segoe UI</FontFamily>
                                       <FontSize>9pt</FontSize>
                                     </Style>
                                   </TextRun>
                                 </TextRuns>
-                                <Style />
+                                <Style>
+                                  <TextAlign>Center</TextAlign>
+                                </Style>
                               </Paragraph>
                             </Paragraphs>
                             <Style>
@@ -1362,26 +1277,34 @@ WHERE Name = @ReportName</CommandText>
                       </TablixHeader>
                       <TablixMembers>
                         <TablixMember>
+                          <Group Name="OperatingSystem">
+                            <GroupExpressions>
+                              <GroupExpression>=Fields!OperatingSystem.Value</GroupExpression>
+                            </GroupExpressions>
+                          </Group>
+                          <SortExpressions>
+                            <SortExpression>
+                              <Value>=Fields!OperatingSystem.Value</Value>
+                            </SortExpression>
+                          </SortExpressions>
                           <TablixHeader>
-                            <Size>5.96573cm</Size>
+                            <Size>4.34988cm</Size>
                             <CellContents>
-                              <Textbox Name="TV_SCCMSite">
+                              <Textbox Name="TV_OperatingSystem">
                                 <CanGrow>true</CanGrow>
                                 <KeepTogether>true</KeepTogether>
                                 <Paragraphs>
                                   <Paragraph>
                                     <TextRuns>
                                       <TextRun>
-                                        <Value>=Fields!SCCMSite.Value</Value>
+                                        <Value>=Fields!OperatingSystem.Value</Value>
                                         <Style>
                                           <FontFamily>Segoe UI</FontFamily>
                                           <FontSize>9pt</FontSize>
                                         </Style>
                                       </TextRun>
                                     </TextRuns>
-                                    <Style>
-                                      <TextAlign>Left</TextAlign>
-                                    </Style>
+                                    <Style />
                                   </Paragraph>
                                 </Paragraphs>
                                 <Style>
@@ -1399,26 +1322,34 @@ WHERE Name = @ReportName</CommandText>
                           </TablixHeader>
                           <TablixMembers>
                             <TablixMember>
+                              <Group Name="DomainOrWorkgroup">
+                                <GroupExpressions>
+                                  <GroupExpression>=Fields!DomainOrWorkgroup.Value</GroupExpression>
+                                </GroupExpressions>
+                              </Group>
+                              <SortExpressions>
+                                <SortExpression>
+                                  <Value>=Fields!DomainOrWorkgroup.Value</Value>
+                                </SortExpression>
+                              </SortExpressions>
                               <TablixHeader>
-                                <Size>2.5cm</Size>
+                                <Size>4.91003cm</Size>
                                 <CellContents>
-                                  <Textbox Name="TV_SCCMSiteCode">
+                                  <Textbox Name="TV_DomainOrWorkgroup">
                                     <CanGrow>true</CanGrow>
                                     <KeepTogether>true</KeepTogether>
                                     <Paragraphs>
                                       <Paragraph>
                                         <TextRuns>
                                           <TextRun>
-                                            <Value>=Fields!SCCMSiteCode.Value</Value>
+                                            <Value>=Fields!DomainOrWorkgroup.Value</Value>
                                             <Style>
                                               <FontFamily>Segoe UI</FontFamily>
                                               <FontSize>9pt</FontSize>
                                             </Style>
                                           </TextRun>
                                         </TextRuns>
-                                        <Style>
-                                          <TextAlign>Center</TextAlign>
-                                        </Style>
+                                        <Style />
                                       </Paragraph>
                                     </Paragraphs>
                                     <Style>
@@ -1436,8 +1367,18 @@ WHERE Name = @ReportName</CommandText>
                               </TablixHeader>
                               <TablixMembers>
                                 <TablixMember>
+                                  <Group Name="ADSite">
+                                    <GroupExpressions>
+                                      <GroupExpression>=Fields!ADSite.Value</GroupExpression>
+                                    </GroupExpressions>
+                                  </Group>
+                                  <SortExpressions>
+                                    <SortExpression>
+                                      <Value>=Fields!ADSite.Value</Value>
+                                    </SortExpression>
+                                  </SortExpressions>
                                   <TablixHeader>
-                                    <Size>4.102cm</Size>
+                                    <Size>4.01045cm</Size>
                                     <CellContents>
                                       <Textbox Name="TV_ADSite">
                                         <CanGrow>true</CanGrow>
@@ -1471,24 +1412,36 @@ WHERE Name = @ReportName</CommandText>
                                   </TablixHeader>
                                   <TablixMembers>
                                     <TablixMember>
+                                      <Group Name="SCCMSite">
+                                        <GroupExpressions>
+                                          <GroupExpression>=Fields!SCCMSite.Value</GroupExpression>
+                                        </GroupExpressions>
+                                      </Group>
+                                      <SortExpressions>
+                                        <SortExpression>
+                                          <Value>=Fields!SCCMSite.Value</Value>
+                                        </SortExpression>
+                                      </SortExpressions>
                                       <TablixHeader>
-                                        <Size>2.90638cm</Size>
+                                        <Size>6.00838cm</Size>
                                         <CellContents>
-                                          <Textbox Name="TV_ADSiteLocation">
+                                          <Textbox Name="TV_SCCMSite">
                                             <CanGrow>true</CanGrow>
                                             <KeepTogether>true</KeepTogether>
                                             <Paragraphs>
                                               <Paragraph>
                                                 <TextRuns>
                                                   <TextRun>
-                                                    <Value>=Fields!ADSiteLocation.Value</Value>
+                                                    <Value>=Fields!SCCMSite.Value</Value>
                                                     <Style>
                                                       <FontFamily>Segoe UI</FontFamily>
                                                       <FontSize>9pt</FontSize>
                                                     </Style>
                                                   </TextRun>
                                                 </TextRuns>
-                                                <Style />
+                                                <Style>
+                                                  <TextAlign>Left</TextAlign>
+                                                </Style>
                                               </Paragraph>
                                             </Paragraphs>
                                             <Style>
@@ -1506,24 +1459,36 @@ WHERE Name = @ReportName</CommandText>
                                       </TablixHeader>
                                       <TablixMembers>
                                         <TablixMember>
+                                          <Group Name="SCCMSiteCode">
+                                            <GroupExpressions>
+                                              <GroupExpression>=Fields!SCCMSiteCode.Value</GroupExpression>
+                                            </GroupExpressions>
+                                          </Group>
+                                          <SortExpressions>
+                                            <SortExpression>
+                                              <Value>=Fields!SCCMSiteCode.Value</Value>
+                                            </SortExpression>
+                                          </SortExpressions>
                                           <TablixHeader>
-                                            <Size>4.9172cm</Size>
+                                            <Size>2.5cm</Size>
                                             <CellContents>
-                                              <Textbox Name="TV_DomainOrWorkgroup">
+                                              <Textbox Name="TV_SCCMSiteCode">
                                                 <CanGrow>true</CanGrow>
                                                 <KeepTogether>true</KeepTogether>
                                                 <Paragraphs>
                                                   <Paragraph>
                                                     <TextRuns>
                                                       <TextRun>
-                                                        <Value>=Fields!DomainOrWorkgroup.Value</Value>
+                                                        <Value>=Fields!SCCMSiteCode.Value</Value>
                                                         <Style>
                                                           <FontFamily>Segoe UI</FontFamily>
                                                           <FontSize>9pt</FontSize>
                                                         </Style>
                                                       </TextRun>
                                                     </TextRuns>
-                                                    <Style />
+                                                    <Style>
+                                                      <TextAlign>Center</TextAlign>
+                                                    </Style>
                                                   </Paragraph>
                                                 </Paragraphs>
                                                 <Style>
@@ -1542,16 +1507,16 @@ WHERE Name = @ReportName</CommandText>
                                           <TablixMembers>
                                             <TablixMember>
                                               <TablixHeader>
-                                                <Size>4.24992cm</Size>
+                                                <Size>7.13154cm</Size>
                                                 <CellContents>
-                                                  <Textbox Name="TV_OperatingSystem">
+                                                  <Textbox Name="Textbox286">
                                                     <CanGrow>true</CanGrow>
                                                     <KeepTogether>true</KeepTogether>
                                                     <Paragraphs>
                                                       <Paragraph>
                                                         <TextRuns>
                                                           <TextRun>
-                                                            <Value>=Fields!OperatingSystem.Value</Value>
+                                                            <Value />
                                                             <Style>
                                                               <FontFamily>Segoe UI</FontFamily>
                                                               <FontSize>9pt</FontSize>
@@ -1561,6 +1526,7 @@ WHERE Name = @ReportName</CommandText>
                                                         <Style />
                                                       </Paragraph>
                                                     </Paragraphs>
+                                                    <rd:DefaultName>Textbox286</rd:DefaultName>
                                                     <Style>
                                                       <Border>
                                                         <Style>None</Style>
@@ -1577,27 +1543,26 @@ WHERE Name = @ReportName</CommandText>
                                               <TablixMembers>
                                                 <TablixMember>
                                                   <TablixHeader>
-                                                    <Size>1.865cm</Size>
+                                                    <Size>6.20973cm</Size>
                                                     <CellContents>
-                                                      <Textbox Name="TV_Version">
+                                                      <Textbox Name="Textbox287">
                                                         <CanGrow>true</CanGrow>
                                                         <KeepTogether>true</KeepTogether>
                                                         <Paragraphs>
                                                           <Paragraph>
                                                             <TextRuns>
                                                               <TextRun>
-                                                                <Value>=Fields!Version.Value</Value>
+                                                                <Value />
                                                                 <Style>
                                                                   <FontFamily>Segoe UI</FontFamily>
                                                                   <FontSize>9pt</FontSize>
                                                                 </Style>
                                                               </TextRun>
                                                             </TextRuns>
-                                                            <Style>
-                                                              <TextAlign>Center</TextAlign>
-                                                            </Style>
+                                                            <Style />
                                                           </Paragraph>
                                                         </Paragraphs>
+                                                        <rd:DefaultName>Textbox287</rd:DefaultName>
                                                         <Style>
                                                           <Border>
                                                             <Style>None</Style>
@@ -1614,16 +1579,16 @@ WHERE Name = @ReportName</CommandText>
                                                   <TablixMembers>
                                                     <TablixMember>
                                                       <TablixHeader>
-                                                        <Size>2.26188cm</Size>
+                                                        <Size>2.5cm</Size>
                                                         <CellContents>
-                                                          <Textbox Name="TV_Build">
+                                                          <Textbox Name="Textbox288">
                                                             <CanGrow>true</CanGrow>
                                                             <KeepTogether>true</KeepTogether>
                                                             <Paragraphs>
                                                               <Paragraph>
                                                                 <TextRuns>
                                                                   <TextRun>
-                                                                    <Value>=Fields!Build.Value</Value>
+                                                                    <Value />
                                                                     <Style>
                                                                       <FontFamily>Segoe UI</FontFamily>
                                                                       <FontSize>9pt</FontSize>
@@ -1633,6 +1598,7 @@ WHERE Name = @ReportName</CommandText>
                                                                 <Style />
                                                               </Paragraph>
                                                             </Paragraphs>
+                                                            <rd:DefaultName>Textbox288</rd:DefaultName>
                                                             <Style>
                                                               <Border>
                                                                 <Style>None</Style>
@@ -1649,16 +1615,16 @@ WHERE Name = @ReportName</CommandText>
                                                       <TablixMembers>
                                                         <TablixMember>
                                                           <TablixHeader>
-                                                            <Size>3.08272cm</Size>
+                                                            <Size>2.5cm</Size>
                                                             <CellContents>
-                                                              <Textbox Name="TV_IPAddresses">
+                                                              <Textbox Name="Textbox289">
                                                                 <CanGrow>true</CanGrow>
                                                                 <KeepTogether>true</KeepTogether>
                                                                 <Paragraphs>
                                                                   <Paragraph>
                                                                     <TextRuns>
                                                                       <TextRun>
-                                                                        <Value>=Fields!IPAddresses.Value</Value>
+                                                                        <Value />
                                                                         <Style>
                                                                           <FontFamily>Segoe UI</FontFamily>
                                                                           <FontSize>9pt</FontSize>
@@ -1668,6 +1634,7 @@ WHERE Name = @ReportName</CommandText>
                                                                     <Style />
                                                                   </Paragraph>
                                                                 </Paragraphs>
+                                                                <rd:DefaultName>Textbox289</rd:DefaultName>
                                                                 <Style>
                                                                   <Border>
                                                                     <Style>None</Style>
@@ -1682,81 +1649,192 @@ WHERE Name = @ReportName</CommandText>
                                                             </CellContents>
                                                           </TablixHeader>
                                                           <TablixMembers>
-                                                            <TablixMember>
-                                                              <TablixHeader>
-                                                                <Size>2.52646cm</Size>
-                                                                <CellContents>
-                                                                  <Textbox Name="TV_IPSubnets">
-                                                                    <CanGrow>true</CanGrow>
-                                                                    <KeepTogether>true</KeepTogether>
-                                                                    <Paragraphs>
-                                                                      <Paragraph>
-                                                                        <TextRuns>
-                                                                          <TextRun>
-                                                                            <Value>=Fields!IPSubnets.Value</Value>
-                                                                            <Style>
-                                                                              <FontFamily>Segoe UI</FontFamily>
-                                                                              <FontSize>9pt</FontSize>
-                                                                            </Style>
-                                                                          </TextRun>
-                                                                        </TextRuns>
-                                                                        <Style />
-                                                                      </Paragraph>
-                                                                    </Paragraphs>
+                                                            <TablixMember />
+                                                          </TablixMembers>
+                                                        </TablixMember>
+                                                      </TablixMembers>
+                                                    </TablixMember>
+                                                  </TablixMembers>
+                                                </TablixMember>
+                                              </TablixMembers>
+                                              <KeepWithGroup>After</KeepWithGroup>
+                                            </TablixMember>
+                                            <TablixMember>
+                                              <Group Name="Details" />
+                                              <SortExpressions>
+                                                <SortExpression>
+                                                  <Value>=Fields!BoundaryGroup.Value</Value>
+                                                </SortExpression>
+                                                <SortExpression>
+                                                  <Value>=Fields!SCCMSite.Value</Value>
+                                                </SortExpression>
+                                                <SortExpression>
+                                                  <Value>=Fields!ADSite.Value</Value>
+                                                </SortExpression>
+                                                <SortExpression>
+                                                  <Value>=Fields!DomainOrWorkgroup.Value</Value>
+                                                </SortExpression>
+                                                <SortExpression>
+                                                  <Value>=Fields!OperatingSystem.Value</Value>
+                                                </SortExpression>
+                                                <SortExpression>
+                                                  <Value>=Fields!IPAddress.Value</Value>
+                                                </SortExpression>
+                                                <SortExpression>
+                                                  <Value>=Fields!IPSubnet.Value</Value>
+                                                </SortExpression>
+                                                <SortExpression>
+                                                  <Value>=Fields!IPSubnetMask.Value</Value>
+                                                </SortExpression>
+                                              </SortExpressions>
+                                              <TablixHeader>
+                                                <Size>7.13154cm</Size>
+                                                <CellContents>
+                                                  <Textbox Name="TV_BoundaryGroup">
+                                                    <CanGrow>true</CanGrow>
+                                                    <HideDuplicates>Device</HideDuplicates>
+                                                    <KeepTogether>true</KeepTogether>
+                                                    <Paragraphs>
+                                                      <Paragraph>
+                                                        <TextRuns>
+                                                          <TextRun>
+                                                            <Value>=Fields!BoundaryGroup.Value</Value>
+                                                            <Style>
+                                                              <FontFamily>Segoe UI</FontFamily>
+                                                              <FontSize>9pt</FontSize>
+                                                            </Style>
+                                                          </TextRun>
+                                                        </TextRuns>
+                                                        <Style />
+                                                      </Paragraph>
+                                                    </Paragraphs>
+                                                    <Style>
+                                                      <Border>
+                                                        <Style>None</Style>
+                                                      </Border>
+                                                      <BackgroundColor>WhiteSmoke</BackgroundColor>
+                                                      <VerticalAlign>Middle</VerticalAlign>
+                                                      <PaddingLeft>2pt</PaddingLeft>
+                                                      <PaddingRight>2pt</PaddingRight>
+                                                      <PaddingTop>2pt</PaddingTop>
+                                                      <PaddingBottom>2pt</PaddingBottom>
+                                                    </Style>
+                                                  </Textbox>
+                                                </CellContents>
+                                              </TablixHeader>
+                                              <TablixMembers>
+                                                <TablixMember>
+                                                  <TablixHeader>
+                                                    <Size>6.20973cm</Size>
+                                                    <CellContents>
+                                                      <Textbox Name="TV_Boundary">
+                                                        <CanGrow>true</CanGrow>
+                                                        <HideDuplicates>Device</HideDuplicates>
+                                                        <KeepTogether>true</KeepTogether>
+                                                        <Paragraphs>
+                                                          <Paragraph>
+                                                            <TextRuns>
+                                                              <TextRun>
+                                                                <Value>=Fields!Boundary.Value</Value>
+                                                                <Style>
+                                                                  <FontFamily>Segoe UI</FontFamily>
+                                                                  <FontSize>9pt</FontSize>
+                                                                </Style>
+                                                              </TextRun>
+                                                            </TextRuns>
+                                                            <Style />
+                                                          </Paragraph>
+                                                        </Paragraphs>
+                                                        <Style>
+                                                          <Border>
+                                                            <Style>None</Style>
+                                                          </Border>
+                                                          <BackgroundColor>WhiteSmoke</BackgroundColor>
+                                                          <VerticalAlign>Middle</VerticalAlign>
+                                                          <PaddingLeft>2pt</PaddingLeft>
+                                                          <PaddingRight>2pt</PaddingRight>
+                                                          <PaddingTop>2pt</PaddingTop>
+                                                          <PaddingBottom>2pt</PaddingBottom>
+                                                        </Style>
+                                                      </Textbox>
+                                                    </CellContents>
+                                                  </TablixHeader>
+                                                  <TablixMembers>
+                                                    <TablixMember>
+                                                      <TablixHeader>
+                                                        <Size>2.5cm</Size>
+                                                        <CellContents>
+                                                          <Textbox Name="TV_IPAddress">
+                                                            <CanGrow>true</CanGrow>
+                                                            <HideDuplicates>Device</HideDuplicates>
+                                                            <KeepTogether>true</KeepTogether>
+                                                            <Paragraphs>
+                                                              <Paragraph>
+                                                                <TextRuns>
+                                                                  <TextRun>
+                                                                    <Value>=Fields!IPAddress.Value</Value>
                                                                     <Style>
-                                                                      <Border>
-                                                                        <Style>None</Style>
-                                                                      </Border>
-                                                                      <VerticalAlign>Middle</VerticalAlign>
-                                                                      <PaddingLeft>2pt</PaddingLeft>
-                                                                      <PaddingRight>2pt</PaddingRight>
-                                                                      <PaddingTop>2pt</PaddingTop>
-                                                                      <PaddingBottom>2pt</PaddingBottom>
+                                                                      <FontFamily>Segoe UI</FontFamily>
+                                                                      <FontSize>9pt</FontSize>
                                                                     </Style>
-                                                                  </Textbox>
-                                                                </CellContents>
-                                                              </TablixHeader>
-                                                              <TablixMembers>
-                                                                <TablixMember>
-                                                                  <TablixHeader>
-                                                                    <Size>3.24083cm</Size>
-                                                                    <CellContents>
-                                                                      <Textbox Name="TV_IPSubnetMasks">
-                                                                        <CanGrow>true</CanGrow>
-                                                                        <KeepTogether>true</KeepTogether>
-                                                                        <Paragraphs>
-                                                                          <Paragraph>
-                                                                            <TextRuns>
-                                                                              <TextRun>
-                                                                                <Value>=Fields!IPSubnetMasks.Value</Value>
-                                                                                <Style>
-                                                                                  <FontFamily>Segoe UI</FontFamily>
-                                                                                  <FontSize>9pt</FontSize>
-                                                                                </Style>
-                                                                              </TextRun>
-                                                                            </TextRuns>
-                                                                            <Style />
-                                                                          </Paragraph>
-                                                                        </Paragraphs>
+                                                                  </TextRun>
+                                                                </TextRuns>
+                                                                <Style />
+                                                              </Paragraph>
+                                                            </Paragraphs>
+                                                            <Style>
+                                                              <Border>
+                                                                <Style>None</Style>
+                                                              </Border>
+                                                              <BackgroundColor>WhiteSmoke</BackgroundColor>
+                                                              <VerticalAlign>Middle</VerticalAlign>
+                                                              <PaddingLeft>2pt</PaddingLeft>
+                                                              <PaddingRight>2pt</PaddingRight>
+                                                              <PaddingTop>2pt</PaddingTop>
+                                                              <PaddingBottom>2pt</PaddingBottom>
+                                                            </Style>
+                                                          </Textbox>
+                                                        </CellContents>
+                                                      </TablixHeader>
+                                                      <TablixMembers>
+                                                        <TablixMember>
+                                                          <TablixHeader>
+                                                            <Size>2.5cm</Size>
+                                                            <CellContents>
+                                                              <Textbox Name="TV_IPSubnet">
+                                                                <CanGrow>true</CanGrow>
+                                                                <HideDuplicates>Device</HideDuplicates>
+                                                                <KeepTogether>true</KeepTogether>
+                                                                <Paragraphs>
+                                                                  <Paragraph>
+                                                                    <TextRuns>
+                                                                      <TextRun>
+                                                                        <Value>=Fields!IPSubnet.Value</Value>
                                                                         <Style>
-                                                                          <Border>
-                                                                            <Style>None</Style>
-                                                                          </Border>
-                                                                          <VerticalAlign>Middle</VerticalAlign>
-                                                                          <PaddingLeft>2pt</PaddingLeft>
-                                                                          <PaddingRight>2pt</PaddingRight>
-                                                                          <PaddingTop>2pt</PaddingTop>
-                                                                          <PaddingBottom>2pt</PaddingBottom>
+                                                                          <FontFamily>Segoe UI</FontFamily>
+                                                                          <FontSize>9pt</FontSize>
                                                                         </Style>
-                                                                      </Textbox>
-                                                                    </CellContents>
-                                                                  </TablixHeader>
-                                                                  <TablixMembers>
-                                                                    <TablixMember />
-                                                                  </TablixMembers>
-                                                                </TablixMember>
-                                                              </TablixMembers>
-                                                            </TablixMember>
+                                                                      </TextRun>
+                                                                    </TextRuns>
+                                                                    <Style />
+                                                                  </Paragraph>
+                                                                </Paragraphs>
+                                                                <Style>
+                                                                  <Border>
+                                                                    <Style>None</Style>
+                                                                  </Border>
+                                                                  <BackgroundColor>WhiteSmoke</BackgroundColor>
+                                                                  <VerticalAlign>Middle</VerticalAlign>
+                                                                  <PaddingLeft>2pt</PaddingLeft>
+                                                                  <PaddingRight>2pt</PaddingRight>
+                                                                  <PaddingTop>2pt</PaddingTop>
+                                                                  <PaddingBottom>2pt</PaddingBottom>
+                                                                </Style>
+                                                              </Textbox>
+                                                            </CellContents>
+                                                          </TablixHeader>
+                                                          <TablixMembers>
+                                                            <TablixMember />
                                                           </TablixMembers>
                                                         </TablixMember>
                                                       </TablixMembers>
@@ -1781,7 +1859,7 @@ WHERE Name = @ReportName</CommandText>
                 </TablixMember>
                 <TablixMember>
                   <TablixHeader>
-                    <Size>3.73713cm</Size>
+                    <Size>3.34026cm</Size>
                     <CellContents>
                       <Textbox Name="TV_Total">
                         <CanGrow>true</CanGrow>
@@ -1817,9 +1895,9 @@ WHERE Name = @ReportName</CommandText>
                   <TablixMembers>
                     <TablixMember>
                       <TablixHeader>
-                        <Size>3.31485cm</Size>
+                        <Size>2.34125cm</Size>
                         <CellContents>
-                          <Textbox Name="Textbox97">
+                          <Textbox Name="Textbox155">
                             <CanGrow>true</CanGrow>
                             <KeepTogether>true</KeepTogether>
                             <Paragraphs>
@@ -1836,7 +1914,7 @@ WHERE Name = @ReportName</CommandText>
                                 <Style />
                               </Paragraph>
                             </Paragraphs>
-                            <rd:DefaultName>Textbox97</rd:DefaultName>
+                            <rd:DefaultName>Textbox155</rd:DefaultName>
                             <Style>
                               <Border>
                                 <Style>None</Style>
@@ -1854,9 +1932,9 @@ WHERE Name = @ReportName</CommandText>
                       <TablixMembers>
                         <TablixMember>
                           <TablixHeader>
-                            <Size>5.96573cm</Size>
+                            <Size>4.34988cm</Size>
                             <CellContents>
-                              <Textbox Name="Textbox900">
+                              <Textbox Name="Textbox162">
                                 <CanGrow>true</CanGrow>
                                 <KeepTogether>true</KeepTogether>
                                 <Paragraphs>
@@ -1866,13 +1944,14 @@ WHERE Name = @ReportName</CommandText>
                                         <Value />
                                         <Style>
                                           <FontFamily>Segoe UI</FontFamily>
+                                          <FontWeight>Bold</FontWeight>
                                         </Style>
                                       </TextRun>
                                     </TextRuns>
                                     <Style />
                                   </Paragraph>
                                 </Paragraphs>
-                                <rd:DefaultName>Textbox900</rd:DefaultName>
+                                <rd:DefaultName>Textbox162</rd:DefaultName>
                                 <Style>
                                   <Border>
                                     <Style>None</Style>
@@ -1890,9 +1969,9 @@ WHERE Name = @ReportName</CommandText>
                           <TablixMembers>
                             <TablixMember>
                               <TablixHeader>
-                                <Size>2.5cm</Size>
+                                <Size>4.91003cm</Size>
                                 <CellContents>
-                                  <Textbox Name="Textbox3">
+                                  <Textbox Name="Textbox169">
                                     <CanGrow>true</CanGrow>
                                     <KeepTogether>true</KeepTogether>
                                     <Paragraphs>
@@ -1902,13 +1981,14 @@ WHERE Name = @ReportName</CommandText>
                                             <Value />
                                             <Style>
                                               <FontFamily>Segoe UI</FontFamily>
+                                              <FontWeight>Bold</FontWeight>
                                             </Style>
                                           </TextRun>
                                         </TextRuns>
                                         <Style />
                                       </Paragraph>
                                     </Paragraphs>
-                                    <rd:DefaultName>Textbox3</rd:DefaultName>
+                                    <rd:DefaultName>Textbox169</rd:DefaultName>
                                     <Style>
                                       <Border>
                                         <Style>None</Style>
@@ -1926,9 +2006,9 @@ WHERE Name = @ReportName</CommandText>
                               <TablixMembers>
                                 <TablixMember>
                                   <TablixHeader>
-                                    <Size>4.102cm</Size>
+                                    <Size>4.01045cm</Size>
                                     <CellContents>
-                                      <Textbox Name="Textbox34">
+                                      <Textbox Name="Textbox176">
                                         <CanGrow>true</CanGrow>
                                         <KeepTogether>true</KeepTogether>
                                         <Paragraphs>
@@ -1938,13 +2018,14 @@ WHERE Name = @ReportName</CommandText>
                                                 <Value />
                                                 <Style>
                                                   <FontFamily>Segoe UI</FontFamily>
+                                                  <FontWeight>Bold</FontWeight>
                                                 </Style>
                                               </TextRun>
                                             </TextRuns>
                                             <Style />
                                           </Paragraph>
                                         </Paragraphs>
-                                        <rd:DefaultName>Textbox34</rd:DefaultName>
+                                        <rd:DefaultName>Textbox176</rd:DefaultName>
                                         <Style>
                                           <Border>
                                             <Style>None</Style>
@@ -1962,9 +2043,9 @@ WHERE Name = @ReportName</CommandText>
                                   <TablixMembers>
                                     <TablixMember>
                                       <TablixHeader>
-                                        <Size>2.90638cm</Size>
+                                        <Size>6.00838cm</Size>
                                         <CellContents>
-                                          <Textbox Name="Textbox4">
+                                          <Textbox Name="Textbox196">
                                             <CanGrow>true</CanGrow>
                                             <KeepTogether>true</KeepTogether>
                                             <Paragraphs>
@@ -1974,13 +2055,14 @@ WHERE Name = @ReportName</CommandText>
                                                     <Value />
                                                     <Style>
                                                       <FontFamily>Segoe UI</FontFamily>
+                                                      <FontWeight>Bold</FontWeight>
                                                     </Style>
                                                   </TextRun>
                                                 </TextRuns>
                                                 <Style />
                                               </Paragraph>
                                             </Paragraphs>
-                                            <rd:DefaultName>Textbox4</rd:DefaultName>
+                                            <rd:DefaultName>Textbox196</rd:DefaultName>
                                             <Style>
                                               <Border>
                                                 <Style>None</Style>
@@ -1998,9 +2080,9 @@ WHERE Name = @ReportName</CommandText>
                                       <TablixMembers>
                                         <TablixMember>
                                           <TablixHeader>
-                                            <Size>4.9172cm</Size>
+                                            <Size>2.5cm</Size>
                                             <CellContents>
-                                              <Textbox Name="Textbox28">
+                                              <Textbox Name="Textbox199">
                                                 <CanGrow>true</CanGrow>
                                                 <KeepTogether>true</KeepTogether>
                                                 <Paragraphs>
@@ -2010,13 +2092,14 @@ WHERE Name = @ReportName</CommandText>
                                                         <Value />
                                                         <Style>
                                                           <FontFamily>Segoe UI</FontFamily>
+                                                          <FontWeight>Bold</FontWeight>
                                                         </Style>
                                                       </TextRun>
                                                     </TextRuns>
                                                     <Style />
                                                   </Paragraph>
                                                 </Paragraphs>
-                                                <rd:DefaultName>Textbox28</rd:DefaultName>
+                                                <rd:DefaultName>Textbox199</rd:DefaultName>
                                                 <Style>
                                                   <Border>
                                                     <Style>None</Style>
@@ -2034,9 +2117,9 @@ WHERE Name = @ReportName</CommandText>
                                           <TablixMembers>
                                             <TablixMember>
                                               <TablixHeader>
-                                                <Size>4.24992cm</Size>
+                                                <Size>7.13154cm</Size>
                                                 <CellContents>
-                                                  <Textbox Name="Textbox13">
+                                                  <Textbox Name="Textbox97">
                                                     <CanGrow>true</CanGrow>
                                                     <KeepTogether>true</KeepTogether>
                                                     <Paragraphs>
@@ -2046,13 +2129,14 @@ WHERE Name = @ReportName</CommandText>
                                                             <Value />
                                                             <Style>
                                                               <FontFamily>Segoe UI</FontFamily>
+                                                              <FontWeight>Bold</FontWeight>
                                                             </Style>
                                                           </TextRun>
                                                         </TextRuns>
                                                         <Style />
                                                       </Paragraph>
                                                     </Paragraphs>
-                                                    <rd:DefaultName>Textbox13</rd:DefaultName>
+                                                    <rd:DefaultName>Textbox97</rd:DefaultName>
                                                     <Style>
                                                       <Border>
                                                         <Style>None</Style>
@@ -2070,9 +2154,9 @@ WHERE Name = @ReportName</CommandText>
                                               <TablixMembers>
                                                 <TablixMember>
                                                   <TablixHeader>
-                                                    <Size>1.865cm</Size>
+                                                    <Size>6.20973cm</Size>
                                                     <CellContents>
-                                                      <Textbox Name="Textbox23">
+                                                      <Textbox Name="Textbox5">
                                                         <CanGrow>true</CanGrow>
                                                         <KeepTogether>true</KeepTogether>
                                                         <Paragraphs>
@@ -2082,13 +2166,14 @@ WHERE Name = @ReportName</CommandText>
                                                                 <Value />
                                                                 <Style>
                                                                   <FontFamily>Segoe UI</FontFamily>
+                                                                  <FontWeight>Bold</FontWeight>
                                                                 </Style>
                                                               </TextRun>
                                                             </TextRuns>
                                                             <Style />
                                                           </Paragraph>
                                                         </Paragraphs>
-                                                        <rd:DefaultName>Textbox23</rd:DefaultName>
+                                                        <rd:DefaultName>Textbox5</rd:DefaultName>
                                                         <Style>
                                                           <Border>
                                                             <Style>None</Style>
@@ -2106,9 +2191,9 @@ WHERE Name = @ReportName</CommandText>
                                                   <TablixMembers>
                                                     <TablixMember>
                                                       <TablixHeader>
-                                                        <Size>2.26188cm</Size>
+                                                        <Size>2.5cm</Size>
                                                         <CellContents>
-                                                          <Textbox Name="Textbox938">
+                                                          <Textbox Name="Textbox247">
                                                             <CanGrow>true</CanGrow>
                                                             <KeepTogether>true</KeepTogether>
                                                             <Paragraphs>
@@ -2118,13 +2203,14 @@ WHERE Name = @ReportName</CommandText>
                                                                     <Value />
                                                                     <Style>
                                                                       <FontFamily>Segoe UI</FontFamily>
+                                                                      <FontWeight>Bold</FontWeight>
                                                                     </Style>
                                                                   </TextRun>
                                                                 </TextRuns>
                                                                 <Style />
                                                               </Paragraph>
                                                             </Paragraphs>
-                                                            <rd:DefaultName>Textbox938</rd:DefaultName>
+                                                            <rd:DefaultName>Textbox247</rd:DefaultName>
                                                             <Style>
                                                               <Border>
                                                                 <Style>None</Style>
@@ -2142,9 +2228,9 @@ WHERE Name = @ReportName</CommandText>
                                                       <TablixMembers>
                                                         <TablixMember>
                                                           <TablixHeader>
-                                                            <Size>3.08272cm</Size>
+                                                            <Size>2.5cm</Size>
                                                             <CellContents>
-                                                              <Textbox Name="Textbox944">
+                                                              <Textbox Name="Textbox267">
                                                                 <CanGrow>true</CanGrow>
                                                                 <KeepTogether>true</KeepTogether>
                                                                 <Paragraphs>
@@ -2154,13 +2240,14 @@ WHERE Name = @ReportName</CommandText>
                                                                         <Value />
                                                                         <Style>
                                                                           <FontFamily>Segoe UI</FontFamily>
+                                                                          <FontWeight>Bold</FontWeight>
                                                                         </Style>
                                                                       </TextRun>
                                                                     </TextRuns>
                                                                     <Style />
                                                                   </Paragraph>
                                                                 </Paragraphs>
-                                                                <rd:DefaultName>Textbox944</rd:DefaultName>
+                                                                <rd:DefaultName>Textbox267</rd:DefaultName>
                                                                 <Style>
                                                                   <Border>
                                                                     <Style>None</Style>
@@ -2176,83 +2263,7 @@ WHERE Name = @ReportName</CommandText>
                                                             </CellContents>
                                                           </TablixHeader>
                                                           <TablixMembers>
-                                                            <TablixMember>
-                                                              <TablixHeader>
-                                                                <Size>2.52646cm</Size>
-                                                                <CellContents>
-                                                                  <Textbox Name="Textbox950">
-                                                                    <CanGrow>true</CanGrow>
-                                                                    <KeepTogether>true</KeepTogether>
-                                                                    <Paragraphs>
-                                                                      <Paragraph>
-                                                                        <TextRuns>
-                                                                          <TextRun>
-                                                                            <Value />
-                                                                            <Style>
-                                                                              <FontFamily>Segoe UI</FontFamily>
-                                                                            </Style>
-                                                                          </TextRun>
-                                                                        </TextRuns>
-                                                                        <Style />
-                                                                      </Paragraph>
-                                                                    </Paragraphs>
-                                                                    <rd:DefaultName>Textbox950</rd:DefaultName>
-                                                                    <Style>
-                                                                      <Border>
-                                                                        <Style>None</Style>
-                                                                      </Border>
-                                                                      <BackgroundColor>LightGrey</BackgroundColor>
-                                                                      <VerticalAlign>Middle</VerticalAlign>
-                                                                      <PaddingLeft>2pt</PaddingLeft>
-                                                                      <PaddingRight>2pt</PaddingRight>
-                                                                      <PaddingTop>2pt</PaddingTop>
-                                                                      <PaddingBottom>2pt</PaddingBottom>
-                                                                    </Style>
-                                                                  </Textbox>
-                                                                </CellContents>
-                                                              </TablixHeader>
-                                                              <TablixMembers>
-                                                                <TablixMember>
-                                                                  <TablixHeader>
-                                                                    <Size>3.24083cm</Size>
-                                                                    <CellContents>
-                                                                      <Textbox Name="Textbox11">
-                                                                        <CanGrow>true</CanGrow>
-                                                                        <KeepTogether>true</KeepTogether>
-                                                                        <Paragraphs>
-                                                                          <Paragraph>
-                                                                            <TextRuns>
-                                                                              <TextRun>
-                                                                                <Value />
-                                                                                <Style>
-                                                                                  <FontFamily>Segoe UI</FontFamily>
-                                                                                </Style>
-                                                                              </TextRun>
-                                                                            </TextRuns>
-                                                                            <Style />
-                                                                          </Paragraph>
-                                                                        </Paragraphs>
-                                                                        <rd:DefaultName>Textbox11</rd:DefaultName>
-                                                                        <Style>
-                                                                          <Border>
-                                                                            <Style>None</Style>
-                                                                          </Border>
-                                                                          <BackgroundColor>LightGrey</BackgroundColor>
-                                                                          <VerticalAlign>Middle</VerticalAlign>
-                                                                          <PaddingLeft>2pt</PaddingLeft>
-                                                                          <PaddingRight>2pt</PaddingRight>
-                                                                          <PaddingTop>2pt</PaddingTop>
-                                                                          <PaddingBottom>2pt</PaddingBottom>
-                                                                        </Style>
-                                                                      </Textbox>
-                                                                    </CellContents>
-                                                                  </TablixHeader>
-                                                                  <TablixMembers>
-                                                                    <TablixMember />
-                                                                  </TablixMembers>
-                                                                </TablixMember>
-                                                              </TablixMembers>
-                                                            </TablixMember>
+                                                            <TablixMember />
                                                           </TablixMembers>
                                                         </TablixMember>
                                                       </TablixMembers>
@@ -2277,11 +2288,11 @@ WHERE Name = @ReportName</CommandText>
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>DeviceAndUserData</DataSetName>
+            <DataSetName>DeviceAndBoundaryData</DataSetName>
             <Top>1.2997cm</Top>
             <Left>0.12413cm</Left>
-            <Height>1.8cm</Height>
-            <Width>47.03781cm</Width>
+            <Height>2.4cm</Height>
+            <Width>48.95425cm</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -2290,17 +2301,17 @@ WHERE Name = @ReportName</CommandText>
             </Style>
           </Tablix>
         </ReportItems>
-        <Height>3.11844cm</Height>
+        <Height>3.6997cm</Height>
         <Style>
           <Border>
             <Style>None</Style>
           </Border>
         </Style>
       </Body>
-      <Width>47.34716cm</Width>
+      <Width>49.36913cm</Width>
       <Page>
         <PageHeader>
-          <Height>2.60098cm</Height>
+          <Height>2.49515cm</Height>
           <PrintOnFirstPage>true</PrintOnFirstPage>
           <PrintOnLastPage>true</PrintOnLastPage>
           <ReportItems>
@@ -2339,12 +2350,27 @@ WHERE Name = @ReportName</CommandText>
                 <PaddingBottom>2pt</PaddingBottom>
               </Style>
             </Textbox>
+            <Image Name="Report_Logo">
+              <Source>Embedded</Source>
+              <Value>Report_Logo</Value>
+              <Sizing>FitProportional</Sizing>
+              <Top>0.0617cm</Top>
+              <Left>0.12413cm</Left>
+              <Height>1.35889cm</Height>
+              <Width>1.5cm</Width>
+              <ZIndex>1</ZIndex>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+              </Style>
+            </Image>
             <Line Name="ReportDescriptionLine">
               <Top>0.60444in</Top>
               <Left>0.05in</Left>
               <Height>0in</Height>
-              <Width>18.5177in</Width>
-              <ZIndex>1</ZIndex>
+              <Width>19.2722in</Width>
+              <ZIndex>2</ZIndex>
               <Style>
                 <Border>
                   <Style>Double</Style>
@@ -2415,7 +2441,7 @@ WHERE Name = @ReportName</CommandText>
               <Top>0.06944in</Top>
               <Left>0.04887in</Left>
               <Height>0in</Height>
-              <Width>18.51883in</Width>
+              <Width>19.27333in</Width>
               <ZIndex>1</ZIndex>
               <Style>
                 <Border>
@@ -2500,18 +2526,6 @@ WHERE Name = @ReportName</CommandText>
       <AllowBlank>true</AllowBlank>
       <Hidden>true</Hidden>
     </ReportParameter>
-    <ReportParameter Name="ReportDescription">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <DataSetReference>
-          <DataSetName>ReportDescription</DataSetName>
-          <ValueField>Description</ValueField>
-        </DataSetReference>
-      </DefaultValue>
-      <AllowBlank>true</AllowBlank>
-      <Hidden>true</Hidden>
-    </ReportParameter>
     <ReportParameter Name="CollectionID">
       <DataType>String</DataType>
       <Prompt>Collection Name</Prompt>
@@ -2554,11 +2568,6 @@ WHERE Name = @ReportName</CommandText>
           <ParameterName>ReportName</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>ReportDescription</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>CollectionID</ParameterName>
@@ -2571,6 +2580,24 @@ WHERE Name = @ReportName</CommandText>
       </CellDefinitions>
     </GridLayoutDefinition>
   </ReportParametersLayout>
+  <EmbeddedImages>
+    <EmbeddedImage Name="Report_Logo">
+      <MIMEType>image/png</MIMEType>
+      <ImageData>iVBORw0KGgoAAAANSUhEUgAAAGYAAABWCAYAAAA9pePPAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDE0IDc5LjE1Njc5NywgMjAxNC8wOC8yMC0wOTo1MzowMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjg3NEVGMjdBM0E0MDExRTY5OTdEODFBQUNFNjhGMjcyIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjg3NEVGMjdCM0E0MDExRTY5OTdEODFBQUNFNjhGMjcyIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6ODc0RUYyNzgzQTQwMTFFNjk5N0Q4MUFB
+Q0U2OEYyNzIiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6ODc0RUYyNzkzQTQwMTFFNjk5N0Q4MUFBQ0U2OEYyNzIiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4UFKFDAAAhtElEQVR42uydCXSPV/rHb35ZJCkSkiC2WGpfWlq0qBZVy9BNdRlae3WUTjstqtqqbpgyqKpWW9XBGFXLlFKqpYtllKpSuyIEFVtIIolI5n3P+dz5Pbnum/wS/I8553/PuSfJ7/cu9z7L9/k+z73vm6CGo9er/4FWyukxTq/k9EZOr+v0qvxdxumRTr/o9GCnhzr9nNNPOf2Q039z+g6nb3H6Xqef5LtruoVcw2Or7PQbnH6L01s6vQWC1y3D6aedfhClVXD6GRTgKixKnKtbrtPXOv07p//g9M1OP/r/igmstXb6fQi0kfj8gNNd997F74dRzHGnD3b6EKfvdnpHp1dxemmnl3R6WacnOL2+029CwS245r+d/o3T/+H0bYWQWXGM4H9SMa5AqmHB6QEc3wEBt0Sgbtvn9FlOX+X0RKw7w3JuFj/DnX4e6DKb+108Smrr9O5Ob0bv5fRFTn/L6fsLGGcO5zzk9JmM7Yo331VQtIv/7zv9PfA8o4BzXLj6zOnLnN7J6UFOn+v0dk6/0emvOP1bBOZ1rUiPuNTF6Y86vR4xyL3Gaqe/5PSGeNe/gL0/OX2r0191erkCFOOOZ6fTP3f6Oqff6/TrrlXF3Or0d53+q9PbO30k0JLjcXys04czsa5OP+b0j4CZh52+0umpAd77gog7DZw+yumbENzfgam7jXPca3+JUFth/dkozY1Dj2Aktube569Of504ttDp84x4dlktuOyd/S73Gi7evuj0yU5vDiNyY8TGfM5xJzDV6X1hUS5cPcNnx4swBlc4bYCrCKzXtej5QM0SAv5p
+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</ImageData>
+    </EmbeddedImage>
+  </EmbeddedImages>
   <CodeModules>
     <CodeModule>SrsResources, culture=neutral</CodeModule>
   </CodeModules>
