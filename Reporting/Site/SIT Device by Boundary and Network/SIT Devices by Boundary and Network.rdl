@@ -153,6 +153,7 @@ AS (
 		, IPAddress         = Network.IPAddress0
 		, IPSubnet          = (
 			CASE
+                /* Support function */
 				WHEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Subnets.IP_Subnets0, Network.IPSubnet0) = 1
 				THEN Subnets.IP_Subnets0
 				ELSE NULL
@@ -160,8 +161,10 @@ AS (
 		)
 		, IPSubnetMask      = (
 			CASE
+                /* Support function */
 				WHEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Subnets.IP_Subnets0, Network.IPSubnet0) = 1
-				THEN Network.IPSubnet0 + CM_Tools.dbo.ufn_CIDRFromIPMask(Network.IPSubnet0) -- Add CIDR to the IP subnet
+				/* Support function */
+                THEN Network.IPSubnet0 + CM_Tools.dbo.ufn_CIDRFromIPMask(Network.IPSubnet0) -- Add CIDR to the IP subnet
 				ELSE NULL
 			END
 		)
@@ -177,11 +180,13 @@ AS (
 			(
 				CASE
 					WHEN Boundary.BoundaryType = 0
-					THEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Boundary.Value, Network.IPSubnet0)
+					/* Support function */
+                    THEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Boundary.Value, Network.IPSubnet0)
 					WHEN Boundary.BoundaryType = 1 AND Boundary.Value = CombinedResources.ADSiteName
 					THEN 1
 					WHEN Boundary.BoundaryType = 3
-					THEN CM_Tools.dbo.ufn_IsIPInRange(Network.IPAddress0, Boundary.Value)
+					/* Support function */
+                    THEN CM_Tools.dbo.ufn_IsIPInRange(Network.IPAddress0, Boundary.Value)
 				END
 			) = 1 -- Join only if the Boundary value matches ADSiteName or is in the computer subnet or subnet range.
 		INNER JOIN vSMS_BoundaryGroupMembers AS BoundaryRelation ON BoundaryRelation.BoundaryID = Boundary.BoundaryID

@@ -82,6 +82,7 @@ BEGIN
 
     /* Convert IPSubnet to CIDR and remove '/' if needed */
     IF LEN(@SubnetMask) > 4
+        /* Support function */
         SET @SubnetCIDR = REPLACE(CM_Tools.dbo.ufn_CIDRFromIPMask(@SubnetMask), '/','')
     ELSE
         SET @SubnetCIDR = REPLACE(@SubnetMask, '/', '')
