@@ -145,11 +145,11 @@ AS (
             END
         )
         , DomainOrWorkgroup = ISNULL(Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
-        , ADSite	        = CombinedResources.ADSiteName
+        , ADSite            = CombinedResources.ADSiteName
         , SCCMSite          = Sites.SiteName
-        , SCCMSiteCode	    = CombinedResources.SiteCode
+        , SCCMSiteCode      = CombinedResources.SiteCode
         , BoundaryGroup     = ISNULL(BoundaryGroup.Name, 'N/A')
-        , Boundary	        = ISNULL(Boundary.DisplayName, 'N/A')
+        , Boundary          = ISNULL(Boundary.DisplayName, 'N/A')
         , IPAddress         = Network.IPAddress0
         , IPSubnet          = (
             CASE

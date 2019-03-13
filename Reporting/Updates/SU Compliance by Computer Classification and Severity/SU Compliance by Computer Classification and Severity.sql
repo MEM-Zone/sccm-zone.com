@@ -195,7 +195,7 @@ SELECT
             WHEN 1 THEN 'Yes'
         END
 FROM fn_rbac_ClientCollectionMembers(@UserSIDs) AS CollectionMembers
-    INNER JOIN fn_rbac_Update_ComplianceStatus(@UserSIDs) AS ComplianceStatus ON CollectionMembers.ResourceID = ComplianceStatus.ResourceID
+    INNER JOIN v_Update_ComplianceStatus AS ComplianceStatus ON CollectionMembers.ResourceID = ComplianceStatus.ResourceID
         AND ComplianceStatus.Status IN (0, 2, @ShowInstalled)   --0 Unknown, 2 Required, 3 Installed
     INNER JOIN fn_ListUpdateCIs(@LCID) AS UpdateCIs ON ComplianceStatus.CI_ID = UpdateCIs.CI_ID
         AND UpdateCIs.CIType_ID IN (1, 8)                       --1 Software Updates, 8 Software Update Bundle (v_CITypes)
@@ -203,7 +203,7 @@ FROM fn_rbac_ClientCollectionMembers(@UserSIDs) AS CollectionMembers
         AND UpdateCIs.IsSuperseded = 0                          --Update is not Superseeded
         AND UpdateCIs.ArticleID NOT IN                          --Exclude updates based on ArticleID
 			(
-				SELECT * FROM dbo.ufn_csv_String_Parser(@ExcludeUpdates, ',')
+				SELECT * FROM CM_TOOLS.dbo.ufn_csv_String_Parser(@ExcludeUpdates, ',')
 			)
     LEFT JOIN fn_rbac_CICategories_All(@UserSIDs) AS CICategories ON UpdateCIs.CI_ID = CICategories.CI_ID
     RIGHT JOIN fn_rbac_ListUpdateCategoryInstances(@LCID, @UserSIDs) AS Category ON CICategories.CategoryInstanceID = Category.CategoryInstanceID
