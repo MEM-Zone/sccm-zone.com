@@ -8,11 +8,12 @@
 .PARAMETER pDelimiter
     Specifies the delimiter.
 .EXAMPLE
+    SELECT dbo.ufn_csv_String_Parser('Some String, Some String, ...')
+.NOTES
+    Created by Ioan Popovici (2015-08-18)
+    All credit goes to Michelle Ufford for the original code. I only reformated it a bit.
     Replace the <CM_Your_Site_Code> with your CM or custom database name.
     Run the code in SQL Server Management Studio
-.NOTES
-    All credit goes to Michelle Ufford for the original code. I only reformated it a bit.
-    Created by Ioan Popovici (2015-08-18)
 .LINK
     http://sqlfool.com (Credit - Michelle Ufford)
 .LINK

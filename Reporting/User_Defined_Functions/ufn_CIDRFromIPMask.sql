@@ -6,11 +6,12 @@
 .PARAMETER IPSubnetMask
     Specifies the IP subnet mask.
 .EXAMPLE
-    Replace the <CM_Your_Site_Code> with your CM or custom database name.
-    Run the code in SQL Server Management Studio
+    SELECT dbo.ufn_CIDRFromIPMask('255.255.255.0')
 .NOTES
-    Credit to Chris O'Connor
     Created by Ioan Popovici (2018-12-11)
+    Credit to Chris O'Connor
+    Replace the <CM_Your_Site_Code> with your CM or custom database name.
+    Run the code in SQL Server Management Studio.
 .LINK
     https://clouddeveloper.space/2015/07/14/sql-inet_aton-ip-address-cidr/ (Chris o'Connor)
 .LINK

@@ -12,14 +12,16 @@
     Specifies the subnet mask IP in CIDR format.
     If you don't use CIDR the ufn_CIDRFromIPMask custom function is required.
 .EXAMPLE
-    Replace the <CM_Your_Site_Code> with your CM or custom database name.
-    Run the code in SQL Server Management Studio
-    SELECT ufn_IsIPInSubnet('10.10.10.22', '10.10.10.0', '/24')
-    SELECT ufn_IsIPInSubnet('10.10.10.22', '10.10.10.0', '24')
-    SELECT ufn_IsIPInSubnet('10.10.10.22', '10.10.10.0', '255.255.255.0') -- Requires the ufn_CIDRFromIPMask custom function.
+    SELECT dbo.ufn_IsIPInSubnet('10.10.10.22', '10.10.10.0', '/24')
+.EXAMPLE
+    SELECT dbo.ufn_IsIPInSubnet('10.10.10.22', '10.10.10.0', '24')
+.EXAMPLE
+    SELECT dbo.ufn_IsIPInSubnet('10.10.10.22', '10.10.10.0', '255.255.255.0') -- Requires the ufn_CIDRFromIPMask custom function.
 .NOTES
     Created by Ioan Popovici (2018-12-12)
     Credit to Anthony Mattas. This is just a slightly modified version.
+    Replace the <CM_Your_Site_Code> with your CM or custom database name.
+    Run the code in SQL Server Management Studio.
 .LINK
     http://www.anthonymattas.com
 .LINK

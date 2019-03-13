@@ -8,10 +8,11 @@
 .PARAMETER IPRange
     Specifies the IP range.
 .EXAMPLE
-    Replace the <CM_Your_Site_Code> with your CM or custom database name.
-    Run the code in SQL Server Management Studio
+    SELECT dbo.ufn_IsIPInRange('10.10.10.22', '10.10.10.0-10.10.10.254')
 .NOTES
     Created by Ioan Popovici (2019-01-14)
+    Replace the <CM_Your_Site_Code> with your CM or custom database name.
+    Run the code in SQL Server Management Studio.
 .LINK
     https://SCCM.Zone
 .LINK
