@@ -37,9 +37,9 @@ GO
 
 IF EXISTS
 (
-    SELECT  [OBJECT_ID]
-    FROM    [SYS].[OBJECTS]
-    WHERE   NAME = 'ufn_csv_String_Parser'
+    SELECT [OBJECT_ID]
+    FROM   [SYS].[OBJECTS]
+    WHERE  NAME = 'ufn_csv_String_Parser'
 )
     DROP FUNCTION [dbo].[ufn_csv_String_Parser];
 GO
