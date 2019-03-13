@@ -91,7 +91,7 @@ AS (
             CASE
                 /* Support function */
                 WHEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Subnets.IP_Subnets0, Network.IPSubnet0) = 1
-                 /* Support function */
+                /* Support function */
                 THEN Network.IPSubnet0 + CM_Tools.dbo.ufn_CIDRFromIPMask(Network.IPSubnet0) -- Add CIDR to the IP subnet
                 ELSE NULL
             END

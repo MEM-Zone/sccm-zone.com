@@ -137,7 +137,7 @@ AS (
                 WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
                 WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
                     CASE
-                        WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) > 10017763 THEN 'Windows Server 2019'
+                        WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) &gt; 10017763 THEN 'Windows Server 2019'
                         ELSE 'Windows Server 2016'
                     END
                 )
@@ -163,7 +163,7 @@ AS (
             CASE
                 /* Support function */
                 WHEN CM_Tools.dbo.ufn_IsIPInSubnet(Network.IPAddress0, Subnets.IP_Subnets0, Network.IPSubnet0) = 1
-                 /* Support function */
+                /* Support function */
                 THEN Network.IPSubnet0 + CM_Tools.dbo.ufn_CIDRFromIPMask(Network.IPSubnet0) -- Add CIDR to the IP subnet
                 ELSE NULL
             END
@@ -210,7 +210,7 @@ SELECT
     , IPSubnetMask
 FROM BoundaryData_CTE AS BoundaryData
 WHERE (
-    (BoundaryData.Occurrences > 1 AND BoundaryData.IPSubnet IS NOT NULL) -- Remove all rows that have no subnet
+    (BoundaryData.Occurrences &gt; 1 AND BoundaryData.IPSubnet IS NOT NULL) -- Remove all rows that have no subnet
     OR
     (BoundaryData.Occurrences = 1)                                       -- Keep at least one occurrence, even if the subnet is NULL
 )
