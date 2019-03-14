@@ -1,5 +1,17 @@
 # CB Configuration Baseline Compliance release history
 
+## 4.0 2019-03-14
+
+### Changes
+
+    * Speed optimisations
+    * Workaround for issue [Conversion failed when converting value to data type](https://github.com/SCCM-Zone/sccm-zone.github.io/issues/4)
+    * Added 'Compliant' Data
+    * Changed OS Caption to static
+    * Removed system info temporary table
+    * Replaced report template with the new streamlined template
+    * Changed report description to static
+
 ## 3.2.1 - 2018-11-26
 
 ### Changes
