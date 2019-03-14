@@ -1,6 +1,6 @@
 # CB Configuration Baseline Compliance release history
 
-## 4.0 2019-03-14
+## 4.0 - 2019-03-14
 
 ### Changes
 
