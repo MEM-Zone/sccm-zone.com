@@ -4,6 +4,7 @@
 
 ## Changes
 
+    * Fixed error on ContentID with multiple CacheElementIDs
     * [Breaking] Changed the logic of the Get-* functions
     * [Breaking] Changed the logic of the Remove* functions
     * [Breaking] Changed the parameter name of the Remove-CacheElementFunction function
