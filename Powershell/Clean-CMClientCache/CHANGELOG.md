@@ -1,8 +1,18 @@
 # Clean-CMClientCache release history
 
+## 4.0 - 2019-03-15
+
+## Changes
+
+    * [Breaking] Changed the logic of the Get-* functions
+    * [Breaking] Changed the logic of the Remove* functions
+    * [Breaking] Changed the parameter name of the Remove-CacheElementFunction function
+    * Added Orphaned WMI cache cleanup (Previously it was disk only)
+    * Some code cleanup
+
 ## 3.5 - 2018-09-13
 
-## Changed
+## Changes
 
     * Fixed Get-Help functionality.
     * Moved written requirements to #Required statement

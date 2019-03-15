@@ -726,34 +726,41 @@ Function Get-CCMCachedApplications {
                     #  Assemble Invoke-Method arguments
                     $Arguments = [hashtable]@{
                         'AppDeliveryTypeID' = [string]$($DeploymentType.ID)
-                        'Revision'          = [UINT32]$($DeploymentType.Revision)
+                        'Revision'          = [uint32]$($DeploymentType.Revision)
                         'ActionType'        = 'Install'
                     }
                     #  Get app content ID via GetContentInfo wmi method
                     $AppContentID = (Invoke-CimMethod -Namespace 'Root\ccm\cimodels' -ClassName 'CCM_AppDeliveryType' -MethodName 'GetContentInfo' -Arguments $Arguments -Verbose:$false).ContentID
 
                     ## Get the cache info for the application using the ContentID
-                    $AppCacheInfo = $CacheInfo | Where-Object { $_.ContentID -eq $AppContentID }
+                    $AppCacheInfo = $CacheInfo | Where-Object { $($_.ContentID) -eq $AppContentID }
 
-                    ## If the application is in the cache, assemble properties and add it to the result object
-                    If (($AppCacheInfo.ContentSize) -gt 0) {
-                        #  Set content size to 0 if null to avoid division by 0
-                        If (-not $AppCacheInfo.ContentSize) { $ContentSize = 0 }
-                        #  Assemble result object props
-                        $CachedAppProps = [ordered]@{
-                            Name              = $($Application.Name)
-                            DeploymentType    = $($DeploymentType.Name)
-                            InstallState      = $($Application.InstallState)
-                            ContentID         = $($AppCacheInfo.ContentID)
-                            ContentVersion    = $($AppCacheInfo.ContentVersion)
-                            ReferenceCount    = $($AppCacheInfo.ReferenceCount)
-                            LastReferenceTime = $($AppCacheInfo.LastReferenceTime)
-                            Location          = $($AppCacheInfo.Location)
-                            'Size(MB)'        = '{0:N2}' -f $($AppCacheInfo.ContentSize / 1KB)
-                            CacheElementID    = $($AppCacheInfo.CacheElementID)
+                    ## Debug info
+                    Write-Log -Message "CachedInfo: `n $($AppCacheInfo | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
+
+                    ## Accounting for cache items with multiple CacheElementIDs
+                    ForEach ($CacheItem in $AppCacheInfo) {
+
+                        ## If the application is in the cache, assemble properties and add it to the result object
+                        If ($CacheItem) {
+                            #  Set content size to 0 if null to avoid division by 0
+                            If ($($CacheItem.ContentSize) -eq 0) { [int]$AppContentSize = 0 } Else { [int]$AppContentSize = $($CacheItem.ContentSize) }
+                            #  Assemble result object props
+                            $CachedAppProps = [ordered]@{
+                                Name              = $($Application.Name)
+                                DeploymentType    = $($DeploymentType.Name)
+                                InstallState      = $($Application.InstallState)
+                                ContentID         = $($CacheItem.ContentID)
+                                ContentVersion    = $($CacheItem.ContentVersion)
+                                ReferenceCount    = $($CacheItem.ReferenceCount)
+                                LastReferenceTime = $($CacheItem.LastReferenceTime)
+                                Location          = $($CacheItem.Location)
+                                'Size(MB)'        = '{0:N2}' -f $($AppContentSize / 1KB)
+                                CacheElementID    = $($CacheItem.CacheElementID)
+                            }
+                            #  Add items to result object
+                            $CachedApps += New-Object 'PSObject' -Property $CachedAppProps
                         }
-                        #  Add items to result object
-                        $CachedApps += New-Object 'PSObject' -Property $CachedAppProps
                     }
                 }
             }
@@ -819,10 +826,10 @@ Function Get-CCMCachedPackages {
             $Packages = Get-CimInstance -Namespace 'Root\ccm\ClientSDK' -ClassName 'CCM_Program' -Verbose:$false
 
             ## Count the packages
-            $PackageCount = $($Packages | Measure-Object).Count
+            [int]$PackageCount = $($Packages | Measure-Object).Count
 
             ## Initialize counter
-            $ProgressCounter = 0
+            [int]$ProgressCounter = 0
 
             ## Initialize result object
             [psobject]$CachedPkgs = @()
@@ -842,36 +849,36 @@ Function Get-CCMCachedPackages {
                 $ProgressCounter++
                 Write-Progress -Activity 'Processing Packages' -CurrentOperation $($Package.FullName) -PercentComplete $(($ProgressCounter / $PackageCount) * 100)
 
-                ## Debug info
-                Write-Log -Message "PowerShell version: $($PSVersionTable.PSVersion | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
-                Write-Log -Message "CacheInfo: `n $($CacheInfo | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
-                Write-Log -Message "CurentPackage: `n $($Package | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
-                Write-Log -Message "Size: `n $($PkgCacheInfo.ContentSize | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
-
                 ## Get the cache info for the package using the ContentID
                 $PkgCacheInfo = $CacheInfo | Where-Object { $_.ContentID -eq $Package.PackageID }
 
                 ## Debug info
-                Write-Log -Message "CachedInfo: `n $($PkgCacheInfo | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
+                Write-Log -Message "CurentPackage: `n $($PkgCacheInfo | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
 
-                ## If the package is in the cache, assemble properties and add it to the result object
-                If (($PkgCacheInfo.ContentSize) -gt 0) {
-                    #  Assemble result object props
-                    $CachedPkgProps = [ordered]@{
-                        Name              = $($Package.FullName)
-                        Program           = $($Package.Name)
-                        LastRunStatus     = $($Package.LastRunStatus)
-                        RepeatRunBehavior = $($Package.RepeatRunBehavior)
-                        ContentID         = $($PkgCacheInfo.ContentID)
-                        ContentVersion    = $($PkgCacheInfo.ContentVersion)
-                        ReferenceCount    = $($PkgCacheInfo.ReferenceCount)
-                        LastReferenceTime = $($PkgCacheInfo.LastReferenceTime)
-                        Location          = $($PkgCacheInfo.Location)
-                        'Size(MB)'        = '{0:N2}' -f $($PkgCacheInfo.ContentSize / 1KB)
-                        CacheElementID    = $($PkgCacheInfo.CacheElementID)
+                ## Accounting for cache items with multiple CacheElementIDs
+                ForEach ($CacheItem in $PkgCacheInfo) {
+
+                    ## If the package is in the cache, assemble properties and add it to the result object
+                    If ($CacheItem) {
+                        #  Set content size to 0 if null to avoid division by 0
+                        If ($CacheItem.ContentSize -eq 0) { [int]$PkgContentSize = 0 } Else { [int]$PkgContentSize = $($CacheItem.ContentSize) }
+                        #  Assemble result object props
+                        $CachedPkgProps = [ordered]@{
+                            Name              = $($Package.FullName)
+                            Program           = $($Package.Name)
+                            LastRunStatus     = $($Package.LastRunStatus)
+                            RepeatRunBehavior = $($Package.RepeatRunBehavior)
+                            ContentID         = $($CacheItem.ContentID)
+                            ContentVersion    = $($CacheItem.ContentVersion)
+                            ReferenceCount    = $($CacheItem.ReferenceCount)
+                            LastReferenceTime = $($CacheItem.LastReferenceTime)
+                            Location          = $($CacheItem.Location)
+                            'Size(MB)'        = '{0:N2}' -f $($PkgContentSize / 1KB)
+                            CacheElementID    = $($CacheItem.CacheElementID)
+                        }
+                        #  Add items to result object
+                        $CachedPkgs += New-Object 'PSObject' -Property $CachedPkgProps
                     }
-                    #  Add items to result object
-                    $CachedPkgs += New-Object 'PSObject' -Property $CachedPkgProps
                 }
             }
         }
@@ -937,10 +944,10 @@ Function Get-CCMCachedUpdates {
             $Updates = Get-CimInstance -Namespace 'Root\ccm\SoftwareUpdates\UpdatesStore' -ClassName 'CCM_UpdateStatus' -Verbose:$false
 
             ## Count the updates
-            $UpdateCount = $($Updates | Measure-Object).Count
+            [int]$UpdateCount = $($Updates | Measure-Object).Count
 
             ## Initialize counter
-            $ProgressCounter = 0
+            [int]$ProgressCounter = 0
 
             ## Initialize result object
             [psobject]$CachedUpdates = @()
@@ -963,23 +970,32 @@ Function Get-CCMCachedUpdates {
                 ## Get the cache info for the update using the ContentID
                 $UpdateCacheInfo = $CacheInfo | Where-Object { $_.ContentID -eq $Update.UniqueID }
 
-                ## If the update is in the cache, assemble properties and add it to the result object
-                If (($UpdateCacheInfo.ContentSize) -gt 0) {
-                    #  Assemble result object props
-                    $CachedUpdateProps = [ordered]@{
-                        Name              = $($Update.Title)
-                        Article           = $($Update.Article)
-                        Status            = $($Update.Status)
-                        ContentID         = $($UpdateCacheInfo.ContentID)
-                        ContentVersion    = $($UpdateCacheInfo.ContentVersion)
-                        ReferenceCount    = $($UpdateCacheInfo.ReferenceCount)
-                        LastReferenceTime = $($UpdateCacheInfo.LastReferenceTime)
-                        Location          = $($UpdateCacheInfo.Location)
-                        'Size(MB)'        = '{0:N2}' -f $($UpdateCacheInfo.ContentSize / 1KB)
-                        CacheElementID    = $($UpdateCacheInfo.CacheElementID)
+                ## Debug info
+                Write-Log -Message "CachedInfo: `n $($UpdateCacheInfo | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
+
+                ## Accounting for cache items with multiple CacheElementIDs
+                ForEach ($CacheItem in $UpdateCacheInfo) {
+
+                    ## If the update is in the cache, assemble properties and add it to the result object
+                    If ($CacheItem) {
+                        #  Set content size to 0 if null to avoid division by 0
+                        If ($($CacheItem.ContentSize) -eq 0) { [int]$UpdateContentSize = 0 } Else { [int]$UpdateContentSize = $($CacheItem.ContentSize) }
+                        #  Assemble result object props
+                        $CachedUpdateProps = [ordered]@{
+                            Name              = $($Update.Title)
+                            Article           = $($Update.Article)
+                            Status            = $($Update.Status)
+                            ContentID         = $($CacheItem.ContentID)
+                            ContentVersion    = $($CacheItem.ContentVersion)
+                            ReferenceCount    = $($CacheItem.ReferenceCount)
+                            LastReferenceTime = $($CacheItem.LastReferenceTime)
+                            Location          = $($CacheItem.Location)
+                            'Size(MB)'        = '{0:N2}' -f $($UpdateContentSize / 1KB)
+                            CacheElementID    = $($CacheItem.CacheElementID)
+                        }
+                        #  Add items to result object
+                        $CachedUpdates += New-Object 'PSObject' -Property $CachedUpdateProps
                     }
-                    #  Add items to result object
-                    $CachedUpdates += New-Object 'PSObject' -Property $CachedUpdateProps
                 }
             }
         }
@@ -1006,8 +1022,8 @@ Function Remove-CCMCacheElement {
     Removes a ccm cache element.
 .DESCRIPTION
     Removes a configuration manager client cache element and optionally removes persisted content.
-.PARAMETER ContentID
-    Specifies the cache content ID to be deleted.
+.PARAMETER CacheElementID
+    Specifies the Cache Element ID to be deleted.
 .PARAMETER RemovePersisted
     Specifies to remove cache element even if it's persisted. Default is: $false.
 .PARAMETER ReferencedThreshold
@@ -1035,14 +1051,14 @@ Function Remove-CCMCacheElement {
         [Parameter(Mandatory = $true, Position = 0)]
         [ValidateNotNullorEmpty()]
         [Alias('ID')]
-        [string]$ContentID,
+        [string]$CacheElementID,
         [Parameter(Mandatory = $false, Position = 1)]
         [ValidateNotNullorEmpty()]
-        [Alias('RPer')]
+        [Alias('Persisted')]
         [boolean]$RemovePersisted = $false,
         [Parameter(Mandatory = $false, Position = 2)]
         [ValidateNotNullorEmpty()]
-        [Alias('DaysThreshold')]
+        [Alias('Threshold')]
         [int16]$ReferencedThreshold = $script:ReferencedThreshold
     )
 
@@ -1066,63 +1082,60 @@ Function Remove-CCMCacheElement {
     Process {
         Try {
 
-            ## Get the CacheElementIDs to delete
-            $CacheInfo = $CCMComObject.GetCacheInfo().GetCacheElements() | Where-Object { ($_.ContentID -eq $ContentID) }
+            ## Get the CacheElementID to delete
+            $CacheInfo = $CCMComObject.GetCacheInfo().GetCacheElements() | Where-Object { ($_.CacheElementID -eq $CacheElementID) }
 
             ## Write verbose message
-            Write-Log -Message "ContentID [$ContentID]" -VerboseMessage -ScriptSection ${CmdletName}
+            Write-Log -Message "Processing CacheItem [$($CacheInfo.ContentID) | $($CacheInfo.CacheElementID)]" -VerboseMessage -ScriptSection ${CmdletName}
 
-            ## Delete cache items (This loop is probably not needed but since I don't know if there can be multiple cache items with the same ContentID...)
-            ForEach ($CacheItem in $CacheInfo) {
-                #  Delete only if no action is in progress
-                If ($CacheItem.ReferenceCount -lt 1) {
-                    #  Delete only if the $ReferencedThreshold is respected
-                    If ([datetime]($CacheItem.LastReferenceTime) -le $OlderThan) {
-                        #  Call the remove cache item method
-                        $null = $CCMComObject.GetCacheInfo().DeleteCacheElementEx([string]$($CacheItem.CacheElementID), [bool]$RemovePersisted)
-                    }
-                    Else {
-                        $AboveReferencedThreshold = $true
-                    }
-
-                    ## Check if the CacheElement has been deleted
-                    $CacheInfo = $CCMComObject.GetCacheInfo().GetCacheElements() | Where-Object { $_.ContentID -eq $ContentID }
-                    #  If cache item still exists perform additional checks (this is a hack it would be nice to get the deployment flags from somewhere)
-                    If ($CacheInfo) {
-                        #  If cache is above referenced threshold set status to 'AboveReferencedThreshold'
-                        If ($AboveReferencedThreshold) { $RemovalStatus = 'AboveReferencedThreshold' }
-                        #  If the RemovePersisted switch is set throw error
-                        ElseIf ($RemovePersisted) { Throw "Failed to remove cache element [$($CacheItem.ContentID)]" }
-                        #  If cache item still exists and RemovePersisted is not specified set the RemovalStatus to 'Persisted'
-                        Else { $RemovalStatus = 'Persisted' }
-                    }
-                    #  If the cache is no longer present set the status to 'Removed'
-                    Else { $RemovalStatus = 'Removed' }
+            ## Delete only if no action is in progress
+            If ($($CacheInfo.ReferenceCount) -lt 1) {
+                #  Delete only if the $ReferencedThreshold is respected
+                If ([datetime]($CacheInfo.LastReferenceTime) -le $OlderThan) {
+                    #  Call the remove cache item method
+                    $null = $CCMComObject.GetCacheInfo().DeleteCacheElementEx([string]$($CacheInfo.CacheElementID), [bool]$RemovePersisted)
                 }
                 Else {
-                    ## If the cache item is still referenced set the removal status to 'Referenced'
-                    $RemovalStatus = 'Referenced'
+                    $AboveReferencedThreshold = $true
                 }
 
-                ## Build result object
-                $RemovedCacheProps = [ordered]@{
-                    ContentID         = $($CacheItem.ContentID)
-                    ContentVersion    = $($CacheItem.ContentVersion)
-                    ReferenceCount    = $($CacheItem.ReferenceCount)
-                    LastReferenceTime = $($CacheItem.LastReferenceTime)
-                    Location          = $($CacheItem.Location)
-                    ContentSize       = '{0:N2}' -f $($CacheItem.ContentSize / 1KB)
-                    CacheElementID    = $($CacheItem.CacheElementID)
-                    RemovalStatus     = $RemovalStatus
+                ## Check if the CacheElement has been deleted
+                $CacheInfo = $CCMComObject.GetCacheInfo().GetCacheElements() | Where-Object { $_.CacheElementID -eq $CacheElementID }
+                #  If cache item still exists perform additional checks (this is a hack it would be nice to get the deployment flags from somewhere)
+                If ($CacheInfo) {
+                    #  If cache is above referenced threshold set status to 'AboveReferencedThreshold'
+                    If ($AboveReferencedThreshold) { $RemovalStatus = 'AboveReferencedThreshold' }
+                    #  If the RemovePersisted switch is set throw error
+                    ElseIf ($RemovePersisted) { Throw "Failed to remove cache element [$($CacheInfo.ContentID) | $($CacheInfo.CacheElementID)]" }
+                    #  If cache item still exists and RemovePersisted is not specified set the RemovalStatus to 'Persisted'
+                    Else { $RemovalStatus = 'Persisted' }
                 }
-
-                ##  Add items to result object
-                $RemovedCache += New-Object 'PSObject' -Property $RemovedCacheProps
+                #  If the cache is no longer present set the status to 'Removed'
+                Else { $RemovalStatus = 'Removed' }
             }
+            Else {
+                ## If the cache item is still referenced set the removal status to 'Referenced'
+                $RemovalStatus = 'Referenced'
+            }
+
+            ## Build result object
+            $RemovedCacheProps = [ordered]@{
+                ContentID         = $($CacheInfo.ContentID)
+                ContentVersion    = $($CacheInfo.ContentVersion)
+                ReferenceCount    = $($CacheInfo.ReferenceCount)
+                LastReferenceTime = $($CacheInfo.LastReferenceTime)
+                Location          = $($CacheInfo.Location)
+                'Size(MB)'        = '{0:N2}' -f $($CacheInfo.ContentSize / 1KB)
+                CacheElementID    = $($CacheInfo.CacheElementID)
+                RemovalStatus     = $RemovalStatus
+            }
+
+            ##  Add items to result object
+            $RemovedCache += New-Object 'PSObject' -Property $RemovedCacheProps
         }
         Catch {
-            Write-Log -Message "Could not delete cache element [$($CacheItem.CacheElementID)]. `n$(Resolve-Error)" -Severity '3' -ScriptSection ${CmdletName}
-            Throw "Could not delete cache element [$($CacheItem.CacheElementID)]. `n$($_.Exception.Message)"
+            Write-Log -Message "Could not delete cache element [$($CacheInfo.ContentID) | $($CacheInfo.CacheElementID)]. `n$(Resolve-Error)" -Severity '3' -ScriptSection ${CmdletName}
+            Throw "Could not delete cache element [$($CacheInfo.ContentID) | $($CacheInfo.CacheElementID)]. `n$($_.Exception.Message)"
         }
         Finally {
             Write-Output -InputObject $RemovedCache
@@ -1196,26 +1209,22 @@ Function Remove-CCMCachedApplications {
             ## Process remove cached applications
             ForEach ($Application in $CachedApplications) {
                 #  Call Remove-CCMCacheElement
-                $RemoveCacheElement = Remove-CCMCacheElement -ContentID $($Application.ContentID) -RemovePersisted $RemovePersisted
-
-                ## Process deleted cache results (This loop is probably not needed but since I don't know if there can be multiple cache items with the same ContentID...)
-                ForEach ($CacheElement in $RemoveCacheElement) {
-                    #  Assemble result object props
-                    $RemovedApplicationProps = [ordered]@{
-                        FullName          = $($Application.Name)
-                        Name              = $($Application.DeploymentType)
-                        ContentID         = $($CacheElement.ContentID)
-                        ContentVersion    = $($CacheElement.ContentVersion)
-                        ReferenceCount    = $($CacheElement.ReferenceCount)
-                        LastReferenceTime = $($CacheElement.LastReferenceTime)
-                        Location          = $($CacheElement.Location)
-                        'Size(MB)'        = $($CacheElement.ContentSize)
-                        CacheElementID    = $($CacheElement.CacheElementID)
-                        Status            = $($CacheElement.RemovalStatus)
-                    }
-                    #  Add items to result object
-                    $RemovedApplications += New-Object 'PSObject' -Property $RemovedApplicationProps
+                $RemoveCacheElement = Remove-CCMCacheElement -CacheElementID $($Application.CacheElementID) -RemovePersisted $RemovePersisted
+                #  Assemble result object props
+                $RemovedApplicationProps = [ordered]@{
+                    FullName          = $($Application.Name)
+                    Name              = $($Application.DeploymentType)
+                    ContentID         = $($Application.ContentID)
+                    ContentVersion    = $($Application.ContentVersion)
+                    ReferenceCount    = $($Application.ReferenceCount)
+                    LastReferenceTime = $($Application.LastReferenceTime)
+                    Location          = $($Application.Location)
+                    'Size(MB)'        = $($Application.ContentSize)
+                    CacheElementID    = $($Application.CacheElementID)
+                    Status            = $($RemoveCacheElement.RemovalStatus)
                 }
+                #  Add items to result object
+                $RemovedApplications += New-Object 'PSObject' -Property $RemovedApplicationProps
             }
         }
         Catch {
@@ -1296,32 +1305,28 @@ Function Remove-CCMCachedPackages {
                 #  Check if program in the package needs the cached package, it looked weird to call it Program instead of Package
                 If ($Package.LastRunStatus -eq 'Succeeded' -and $Package.RepeatRunBehavior -ne 'RerunAlways' -and $Package.RepeatRunBehavior -ne 'RerunIfSuccess') {
                     #  Call Remove-CCMCacheElement
-                    $RemoveCacheElement = Remove-CCMCacheElement -ContentID $($Package.ContentID) -RemovePersisted $RemovePersisted
+                    $RemoveCacheElement = Remove-CCMCacheElement -CacheElementID $($Package.CacheElementID) -RemovePersisted $RemovePersisted
                 }
                 Else {
                     $Status = 'Needed'
                 }
-
-                ## Process deleted cache results (This loop is probably not needed but since I don't know if there can be multiple cache items with the same ContentID...)
-                ForEach ($CacheElement in $RemoveCacheElement) {
-                    #  Set removal status
-                    If ($Status -ne 'Needed') { $Status = $($CacheElement.RemovalStatus) }
-                    #  Assemble result object props
-                    $RemovePackageProps = [ordered]@{
-                        FullName          = $($Package.Name)
-                        Name              = $($Package.Program)
-                        ContentID         = $($CacheElement.ContentID)
-                        ContentVersion    = $($CacheElement.ContentVersion)
-                        ReferenceCount    = $($CacheElement.ReferenceCount)
-                        LastReferenceTime = $($CacheElement.LastReferenceTime)
-                        Location          = $($CacheElement.Location)
-                        'Size(MB)'        = $($CacheElement.ContentSize)
-                        CacheElementID    = $($CacheElement.CacheElementID)
-                        Status            = $Status
-                    }
-                    #  Add items to result object
-                    $RemovePackages += New-Object 'PSObject' -Property $RemovePackageProps
+                #  Set removal status
+                If ($Status -ne 'Needed') { $Status = $($RemoveCacheElement.RemovalStatus) }
+                #  Assemble result object props
+                $RemovePackageProps = [ordered]@{
+                    FullName          = $($Package.Name)
+                    Name              = $($Package.Program)
+                    ContentID         = $($Package.ContentID)
+                    ContentVersion    = $($Package.ContentVersion)
+                    ReferenceCount    = $($Package.ReferenceCount)
+                    LastReferenceTime = $($Package.LastReferenceTime)
+                    Location          = $($Package.Location)
+                    'Size(MB)'        = $($Package.ContentSize)
+                    CacheElementID    = $($Package.CacheElementID)
+                    Status            = $Status
                 }
+                #  Add items to result object
+                $RemovePackages += New-Object 'PSObject' -Property $RemovePackageProps
             }
         }
         Catch {
@@ -1395,32 +1400,28 @@ Function Remove-CCMCachedUpdates {
                 #  Check if update is installed
                 If ($Update.Status -eq 'Installed') {
                     #  Call Remove-CCMCacheElement
-                    $RemoveCacheElement = Remove-CCMCacheElement -ContentID $($Update.ContentID) -RemovePersisted $RemovePersisted
+                    $RemoveCacheElement = Remove-CCMCacheElement -CacheElementID $($Update.CacheElementID) -RemovePersisted $RemovePersisted
                 }
                 Else {
                     $Status = 'Needed'
                 }
-
-                ## Process deleted cache results (This loop is probably not needed but since I don't know if there can be multiple cache items with the same ContentID...)
-                ForEach ($CacheElement in $RemoveCacheElement) {
-                    #  Set removal status
-                    If ($Status -ne 'Needed') { $Status = $($CacheElement.RemovalStatus) }
-                    #  Assemble result object props
-                    $RemoveUpdateProps = [ordered]@{
-                        FullName          = $($Update.Title)
-                        Name              = $($Update.Article)
-                        ContentID         = $($CacheElement.ContentID)
-                        ContentVersion    = $($CacheElement.ContentVersion)
-                        ReferenceCount    = $($CacheElement.ReferenceCount)
-                        LastReferenceTime = $($CacheElement.LastReferenceTime)
-                        Location          = $($CacheElement.Location)
-                        'Size(MB)'        = $($CacheElement.ContentSize)
-                        CacheElementID    = $($CacheElement.CacheElementID)
-                        Status            = $Status
-                    }
-                    #  Add items to result object
-                    $RemoveUpdates += New-Object 'PSObject' -Property $RemoveUpdateProps
+                #  Set removal status
+                If ($Status -ne 'Needed') { $Status = $($RemoveCacheElement.RemovalStatus) }
+                #  Assemble result object props
+                $RemoveUpdateProps = [ordered]@{
+                    FullName          = $($Update.Title)
+                    Name              = $($Update.Article)
+                    ContentID         = $($Update.ContentID)
+                    ContentVersion    = $($Update.ContentVersion)
+                    ReferenceCount    = $($Update.ReferenceCount)
+                    LastReferenceTime = $($Update.LastReferenceTime)
+                    Location          = $($Update.Location)
+                    'Size(MB)'        = $($Update.ContentSize)
+                    CacheElementID    = $($Update.CacheElementID)
+                    Status            = $Status
                 }
+                #  Add items to result object
+                $RemoveUpdates += New-Object 'PSObject' -Property $RemoveUpdateProps
             }
         }
         Catch {
@@ -1479,11 +1480,14 @@ Function Remove-CCMOrphanedCache {
             [__comobject]$CCMComObject = New-Object -ComObject 'UIResource.UIResourceMgr'
 
             ## Get ccm disk cache info
-            [string]$DiskCachePath = $($CCMComObject.GetCacheInfo()).Location
-            $DiskCacheInfo = Get-ChildItem -LiteralPath $DiskCachePath | Select-Object -Property 'FullName', 'Name'
+                [string]$DiskCachePath = $($CCMComObject.GetCacheInfo()).Location
+                $DiskCacheInfo = Get-ChildItem -LiteralPath $DiskCachePath | Select-Object -Property 'FullName', 'Name'
 
-            ## Get ccm cache info
-            $WmiCachePaths = $($CCMComObject.GetCacheInfo().GetCacheElements()).Location
+            ## Get ccm wmi cache info
+            $WmiCacheInfo = $($CCMComObject.GetCacheInfo().GetCacheElements())
+
+            ## Get ccm wmi cache paths
+            $WmiCachePaths = $WmiCacheInfo | Select-Object -ExpandProperty 'Location'
 
             ## Initialize result object
             [psobject]$RemoveOrphaned = @()
@@ -1496,7 +1500,7 @@ Function Remove-CCMOrphanedCache {
     Process {
         Try {
 
-            ## Process cache items
+            ## Process disk cache items
             ForEach ($CacheElement in $DiskCacheInfo) {
                 ## Set variables
                 #  Set cache Path
@@ -1511,9 +1515,28 @@ Function Remove-CCMOrphanedCache {
 
                     #  Assemble result object props
                     $RemoveOrphanedProps = [ordered]@{
+                        FullName   = 'Orphaned Disk Cache'
                         Location   = $CacheElementPath
                         'Size(MB)' = '{0:N2}' -f $($CacheElementSize / 1MB)
                         Status     = 'Removed'
+                    }
+                    #  Add items to result object
+                    $RemoveOrphaned += New-Object 'PSObject' -Property $RemoveOrphanedProps
+                }
+            }
+
+            ## Process wmi cache items
+            ForEach ($CacheElement in $WmiCacheInfo) {
+                #  If disk cache path is not present in wmi, delete it
+                If ($($CacheElement.Location) -notin $($DiskCacheInfo.FullName)) {
+                    #  Remove cache item
+                    $RemoveCacheElement = Remove-CCMCacheElement -CacheElementID ($CacheElement.CacheElementID) -RemovePersisted $RemovePersisted
+                    #  Assemble result object props
+                    $RemoveOrphanedProps = [ordered]@{
+                        FullName   = 'Orphaned WMI Cache'
+                        ContentID  = $($CacheElement.ContentID)
+                        'Size(MB)' = '0'
+                        Status     = $($RemoveCacheElement.RemovalStatus)
                     }
                     #  Add items to result object
                     $RemoveOrphaned += New-Object 'PSObject' -Property $RemoveOrphanedProps
