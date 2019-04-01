@@ -20,7 +20,9 @@
     Deprecated Get-WMIObject is used for backwards compatibility.
     Should work with PowerShell 2.0.
 .LINK
-    https://SCCM.Zone
+    https://SCCM.Zone/Test-CMClientVersion
+.LINK
+    https://SCCM.Zone/Test-CMClientVersion-GIT
 .LINK
     https://SCCM.Zone/Issues
 .COMPONENT
