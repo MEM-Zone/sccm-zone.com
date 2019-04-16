@@ -1,18 +1,17 @@
 /*
 .SYNOPSIS
-    Gets the software update compliance for a CSV KB list.
+    Lists the software update compliance for a CSV KB list.
 .DESCRIPTION
-    Gets the software update compliance for a CSV KB list by Client State and ArticleID.
+    Lists the software update compliance for a CSV KB list by ArticleID and Client State.
 .NOTES
-    Created by
-        Ioan Popovici
-    This query is part of a report should not be run separately.
+    Created by Ioan Popovici
+    Part of a report should not be run separately.
 .LINK
-    https://SCCM.Zone/SU-KB-Compliance-by-ClientState-and-ArticleID
+    https://SCCM.Zone/SU-KB-Compliance-by-ArticleID
 .LINK
-    https://SCCM.Zone/SU-KB-Compliance-by-ClientState-and-ArticleID
+    https://SCCM.Zone/SU-KB-Compliance-by-ArticleID-CHANGELOG
 .LINK
-    https://SCCM.Zone/SU-KB-Compliance-by-ClientState-and-ArticleID
+    https://SCCM.Zone/SU-KB-Compliance-by-ArticleID-GIT
 .LINK
     https://SCCM.Zone/Issues
 */
@@ -85,49 +84,51 @@ DECLARE @UpdateInfo TABLE
 /* Get system data */
 INSERT INTO @SystemInfo (ResourceID, Device, UserName, OperatingSystem, Build, Version, DomainOrWorkgroup, IPAddresses, LastBootTime, PendingRestart, Managed, ClientState, ClientVersion, LastUpdateScan)
 SELECT
-    ResourceID         = Devices.ResourceID
-    , Device           = Devices.Netbios_Name0
-    , UserName         = CONCAT(Devices.User_Domain0 + '\', Devices.User_Name0)  -- Add user domain to UserName
+    ResourceID         = Systems.ResourceID
+    , Device           = Systems.Netbios_Name0
+    , UserName         = CONCAT(Systems.User_Domain0 + '\', Systems.User_Name0)  -- Add user domain to UserName
     , OperatingSystem  = (
 
-        /* Workaround for systems not in GS_OPERATING_SYSTEM table */
+        /* Get OS caption by version */
         CASE
-            WHEN OperatingSystem.Caption0 <> '' THEN
-                CONCAT(
-                    REPLACE(OperatingSystem.Caption0, 'Microsoft ', ''),         -- Remove 'Microsoft ' from OperatingSystem
-                    REPLACE(OperatingSystem.CSDVersion0, 'Service Pack ', ' SP') -- Replace 'Service Pack ' with ' SP' in OperatingSystem
-                )
-            ELSE (
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 5.%'              THEN 'Windows XP'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.0%'             THEN 'Windows Vista'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.1%'             THEN 'Windows 7'
+            WHEN Systems.Operating_System_Name_And0 LIKE 'Windows_7 Entreprise 6.1'      THEN 'Windows 7'
+            WHEN Systems.Operating_System_Name_And0 =    'Windows Embedded Standard 6.1' THEN 'Windows 7'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.2%'             THEN 'Windows 8'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.3%'             THEN 'Windows 8.1'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 5.%'                   THEN 'Windows Server 2003'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.0%'                  THEN 'Windows Server 2008'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.1%'                  THEN 'Windows Server 2008 R2'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.2%'                  THEN 'Windows Server 2012'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
                 CASE
-                    WHEN CombinedResources.DeviceOS LIKE '%Workstation 6.1%'  THEN 'Windows 7'
-                    WHEN CombinedResources.DeviceOS LIKE '%Workstation 6.2%'  THEN 'Windows 8'
-                    WHEN CombinedResources.DeviceOS LIKE '%Workstation 6.3%'  THEN 'Windows 8.1'
-                    WHEN CombinedResources.DeviceOS LIKE '%Workstation 10.0%' THEN 'Windows 10'
-                    WHEN CombinedResources.DeviceOS LIKE '%Server 6.0'        THEN 'Windows Server 2008'
-                    WHEN CombinedResources.DeviceOS LIKE '%Server 6.1'        THEN 'Windows Server 2008R2'
-                    WHEN CombinedResources.DeviceOS LIKE '%Server 6.2'        THEN 'Windows Server 2012'
-                    WHEN CombinedResources.DeviceOS LIKE '%Server 6.3'        THEN 'Windows Server 2012 R2'
-                    WHEN CombinedResources.DeviceOS LIKE '%Server 10.0'       THEN 'Windows Server 2016'
-                    ELSE 'Unknown'
+                    WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) > 10017763 THEN 'Windows Server 2019'
+                    ELSE 'Windows Server 2016'
                 END
             )
+            ELSE Systems.Operating_System_Name_And0
         END
     )
-    , Build            = Devices.Build01
+    , Build            = Systems.Build01
     , Version          = (
         SELECT OSLocalizedNames.Value
         FROM fn_GetWindowsServicingLocalizedNames() AS OSLocalizedNames
-            JOIN fn_GetWindowsServicingStates() AS OSServicingStates ON OSServicingStates.Build = Devices.Build01
+            JOIN fn_GetWindowsServicingStates() AS OSServicingStates ON OSServicingStates.Build = Systems.Build01
         WHERE OSLocalizedNames.Name = OSServicingStates.Name
-            AND Devices.OSBranch01 = OSServicingStates.Branch -- Select only the branch of the installed OS
+            AND Systems.OSBranch01 = OSServicingStates.Branch -- Select only the branch of the installed OS
     )
-    , DomainOrWorkgroup = ISNULL(Devices.Full_Domain_Name0, Devices.Resource_Domain_Or_Workgr0)
+    , DomainOrWorkgroup = ISNULL(Systems.Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
     , IPAddresses       = (
         REPLACE(
             (
                 SELECT LTRIM(RTRIM(IP.IP_Addresses0)) AS [data()]
                 FROM fn_rbac_RA_System_IPAddresses(@UserSIDs) AS IP
-                WHERE IP.ResourceID = Devices.ResourceID
+                WHERE IP.ResourceID = Systems.ResourceID
                     AND IP.IP_Addresses0 NOT LIKE 'fe%' -- Exclude IPv6
                 FOR XML PATH('')
             ),
@@ -155,18 +156,18 @@ SELECT
         END
     )
     , Managed          = (
-        CASE Devices.Client0
+        CASE Systems.Client0
             WHEN 1 THEN 'Yes'
             ELSE 'No'
         END
     )
     , ClientState      = ClientSummary.ClientStateDescription
-    , ClientVersion    = Devices.Client_Version0
+    , ClientVersion    = Systems.Client_Version0
     , LastUpdateScan   = UpdateScan.LastScanTime
 FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
-    LEFT JOIN fn_rbac_R_System(@UserSIDs) AS Devices ON Devices.ResourceID = CollectionMembers.ResourceID
+    LEFT JOIN v_R_Systems AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
     LEFT JOIN fn_rbac_GS_OPERATING_SYSTEM(@UserSIDs) OperatingSystem ON OperatingSystem.ResourceID = CollectionMembers.ResourceID
-    LEFT JOIN fn_rbac_CombinedDeviceResources(@UserSIDs) AS CombinedResources ON CombinedResources.MachineID = CollectionMembers.ResourceID
+    LEFT JOIN v_CombinedDeviceResources AS CombinedResources ON CombinedResources.MachineID = CollectionMembers.ResourceID
     LEFT JOIN fn_rbac_CH_ClientSummary(@UserSIDs) AS ClientSummary ON ClientSummary.ResourceID = CollectionMembers.ResourceID
     LEFT JOIN fn_rbac_UpdateScanStatus(@UserSIDs) AS UpdateScan ON UpdateScan.ResourceID = CollectionMembers.ResourceID
 WHERE CollectionMembers.CollectionID = @CollectionID
@@ -177,7 +178,7 @@ SELECT
     CollectionMembers.ResourceID
     , Compliance       = (
         CASE ComplianceStatus.Status
-            WHEN 0 THEN 'Unknown'	   -- Not used here
+            WHEN 0 THEN 'Unknown'      -- Not used here
             WHEN 1 THEN 'Not Required' -- Not used here
             WHEN 2 THEN 'Required'
             WHEN 3 THEN 'Installed'
@@ -213,6 +214,7 @@ FROM fn_rbac_ClientCollectionMembers(@UserSIDs) AS CollectionMembers
         AND UpdateCIs.IsExpired = 0       -- Update is not Expired
         AND UpdateCIs.IsSuperseded = 0    -- Update is not Superseeded
         AND UpdateCIs.ArticleID IN (
+            /* Support function */
             SELECT * FROM CM_Tools.dbo.ufn_csv_String_Parser(@Updates, ',')
         )
     LEFT JOIN fn_rbac_CICategories_All(@UserSIDs) AS CICategories ON CICategories.CI_ID = UpdateCIs.CI_ID
