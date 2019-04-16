@@ -115,7 +115,7 @@ FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
     LEFT JOIN fn_rbac_Collection(@UserSIDs) AS CollectionList ON CollectionList.CollectionID = CollectionMembers.CollectionID
     LEFT JOIN fn_rbac_R_System(@UserSIDs) AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
     LEFT JOIN fn_rbac_GS_COMPUTER_SYSTEM(@UserSIDs) AS ComputerSystem ON ComputerSystem.ResourceID = CollectionMembers.ResourceID
-    LEFT JOIN fn_rbac_GS_OPERATING_SYSTEM(@UserSIDs) OperatingSystem ON OperatingSystem.ResourceID = CollectionMembers.ResourceID
+    LEFT JOIN fn_rbac_GS_OPERATING_SYSTEM(@UserSIDs) AS OperatingSystem ON OperatingSystem.ResourceID = CollectionMembers.ResourceID
     LEFT JOIN fn_rbac_CombinedDeviceResources(@UserSIDs) AS CombinedResources ON CombinedResources.MachineID = CollectionMembers.ResourceID
     LEFT JOIN fn_rbac_GS_COMPUTER_SYSTEM_PRODUCT(@UserSIDs) AS ComputerProduct ON ComputerProduct.ResourceID = CollectionMembers.ResourceID
     LEFT JOIN fn_rbac_Add_Remove_Programs(@UserSIDs) AS Software ON Software.ResourceID = CollectionMembers.ResourceID
