@@ -1,0 +1,172 @@
+//=====================================================
+//---------------| SQL extension start |---------------
+//=====================================================
+
+//-- Set default WMI namespace
+#Pragma NameSpace("\\\\.\\ROOT\\cimv2")
+
+//---------------| SQL 2017 class |---------------
+
+//-- Create custom WMI class
+//-  Class qualifiers
+[
+    Description("The SQL_2017_Property class contains information about the SQL 2017 service. You can use this information for SQL version reporting."): ToInstance,
+    UNION,
+    ViewSources {
+        "SELECT PropertyIndex, PropertyName, PropertyNumValue, PropertyStrValue, ServiceName, SqlServiceType FROM SqlServiceAdvancedProperty WHERE SQLServiceType=1"
+    },
+    ViewSpaces {
+        "\\\\.\\ROOT\\Microsoft\\SqlServer\\ComputerManagement14"
+    },
+    Dynamic,
+    Provider("MS_VIEW_INSTANCE_PROVIDER")
+]
+//-  Class properties
+Class SQL_2017_Property
+{
+    [PropertySources{"PropertyIndex"},  key]    uint32 PropertyIndex;
+    [PropertySources{"PropertyName"},   key]    string PropertyName;
+    [PropertySources{"PropertyNumValue"}   ]    uint32 PropertyNumValue;
+    [PropertySources{"PropertyStrValue"}   ]    string PropertyStrValue;
+    [PropertySources{"ServiceName"},    key]    string ServiceName;
+    [PropertySources{"SqlServiceType"}, key]    uint32 SqlServiceType;
+};
+
+//---------------| SQL 2016 class |---------------
+
+//-- Create custom WMI class
+//-  Class qualifiers
+[
+    Description("The SQL_2016_Property class contains information about the SQL 2016 service. You can use this information for SQL version reporting."): ToInstance,
+    UNION,
+    ViewSources {
+        "SELECT PropertyIndex, PropertyName, PropertyNumValue, PropertyStrValue, ServiceName, SqlServiceType FROM SqlServiceAdvancedProperty WHERE SQLServiceType=1"
+    },
+    ViewSpaces {
+        "\\\\.\\ROOT\\Microsoft\\SqlServer\\ComputerManagement13"
+    },
+    Dynamic,
+    Provider("MS_VIEW_INSTANCE_PROVIDER")
+]
+//-  Class properties
+Class SQL_2016_Property
+{
+    [PropertySources{"PropertyIndex"},  key]    uint32 PropertyIndex;
+    [PropertySources{"PropertyName"},   key]    string PropertyName;
+    [PropertySources{"PropertyNumValue"}   ]    uint32 PropertyNumValue;
+    [PropertySources{"PropertyStrValue"}   ]    string PropertyStrValue;
+    [PropertySources{"ServiceName"},    key]    string ServiceName;
+    [PropertySources{"SqlServiceType"}, key]    uint32 SqlServiceType;
+};
+
+//---------------| SQL 2014 class |---------------
+
+//-- Create custom WMI class
+//-  Class qualifiers
+[
+    Description("The SQL_2014_Property class contains information about the SQL 2014 service. You can use this information for SQL version reporting."): ToInstance,
+    UNION,
+    ViewSources {
+        "SELECT PropertyIndex, PropertyName, PropertyNumValue, PropertyStrValue, ServiceName, SqlServiceType FROM SqlServiceAdvancedProperty WHERE SQLServiceType=1"
+    },
+    ViewSpaces {
+        "\\\\.\\ROOT\\Microsoft\\SqlServer\\ComputerManagement12"
+    },
+    Dynamic,
+    Provider("MS_VIEW_INSTANCE_PROVIDER")
+]
+//-  Class properties
+Class SQL_2014_Property
+{
+    [PropertySources{"PropertyIndex"},  key]    uint32 PropertyIndex;
+    [PropertySources{"PropertyName"},   key]    string PropertyName;
+    [PropertySources{"PropertyNumValue"}   ]    uint32 PropertyNumValue;
+    [PropertySources{"PropertyStrValue"}   ]    string PropertyStrValue;
+    [PropertySources{"ServiceName"},    key]    string ServiceName;
+    [PropertySources{"SqlServiceType"}, key]    uint32 SqlServiceType;
+};
+
+//---------------| SQL 2012 class |---------------
+
+//-- Create custom WMI class
+//-  Class qualifiers
+[
+    Description("The SQL_2012_Property class contains information about the SQL 2012 service. You can use this information for SQL version reporting."): ToInstance,
+    UNION,
+    ViewSources {
+        "SELECT PropertyIndex, PropertyName, PropertyNumValue, PropertyStrValue, ServiceName, SqlServiceType FROM SqlServiceAdvancedProperty WHERE SQLServiceType=1"
+    },
+    ViewSpaces {
+        "\\\\.\\ROOT\\Microsoft\\SqlServer\\ComputerManagement11"
+    },
+    Dynamic,
+    Provider("MS_VIEW_INSTANCE_PROVIDER")
+]
+//-  Class properties
+Class SQL_2012_Property
+{
+    [PropertySources{"PropertyIndex"},  key]    uint32 PropertyIndex;
+    [PropertySources{"PropertyName"},   key]    string PropertyName;
+    [PropertySources{"PropertyNumValue"}   ]    uint32 PropertyNumValue;
+    [PropertySources{"PropertyStrValue"}   ]    string PropertyStrValue;
+    [PropertySources{"ServiceName"},    key]    string ServiceName;
+    [PropertySources{"SqlServiceType"}, key]    uint32 SqlServiceType;
+};
+
+//---------------| SQL 2008 class |---------------
+
+//-- Create custom WMI class
+//-  Class qualifiers
+[
+    Description("The SQL_2008_Property class contains information about the SQL 2008 service. You can use this information for SQL version reporting."): ToInstance,
+    UNION,
+    ViewSources {
+        "SELECT PropertyIndex, PropertyName, PropertyNumValue, PropertyStrValue, ServiceName, SqlServiceType FROM SqlServiceAdvancedProperty WHERE SQLServiceType=1"
+    },
+    ViewSpaces {
+        "\\\\.\\ROOT\\Microsoft\\SqlServer\\ComputerManagement10"
+    },
+    Dynamic,
+    Provider("MS_VIEW_INSTANCE_PROVIDER")
+]
+//-  Class properties
+Class SQL_2008_Property
+{
+    [PropertySources{"PropertyIndex"},  key]    uint32 PropertyIndex;
+    [PropertySources{"PropertyName"},   key]    string PropertyName;
+    [PropertySources{"PropertyNumValue"}   ]    uint32 PropertyNumValue;
+    [PropertySources{"PropertyStrValue"}   ]    string PropertyStrValue;
+    [PropertySources{"ServiceName"},    key]    string ServiceName;
+    [PropertySources{"SqlServiceType"}, key]    uint32 SqlServiceType;
+};
+
+//---------------| SQL 2000/2005 class |---------------
+
+//-- Create custom WMI class
+//-  Class qualifiers
+[
+    Description("The SQL_Legacy_Property class contains information about the SQL 2000 and 2005 service. You can use this information for SQL version reporting."): ToInstance,
+    UNION,
+    ViewSources {
+        "SELECT PropertyIndex, PropertyName, PropertyNumValue, PropertyStrValue, ServiceName, SqlServiceType FROM SqlServiceAdvancedProperty WHERE SQLServiceType=1"
+    },
+    ViewSpaces {
+        "\\\\.\\ROOT\\Microsoft\\SqlServer\\ComputerManagement"
+    },
+    Dynamic,
+    Provider("MS_VIEW_INSTANCE_PROVIDER")
+]
+//-  Class properties
+Class SQL_Legacy_Property
+{
+    [PropertySources{"PropertyIndex"},  key]    uint32 PropertyIndex;
+    [PropertySources{"PropertyName"},   key]    string PropertyName;
+    [PropertySources{"PropertyNumValue"}   ]    uint32 PropertyNumValue;
+    [PropertySources{"PropertyStrValue"}   ]    string PropertyStrValue;
+    [PropertySources{"ServiceName"},    key]    string ServiceName;
+    [PropertySources{"SqlServiceType"}, key]    uint32 SqlServiceType;
+};
+
+//=====================================================
+//----------------| SQL extension end |----------------
+//=====================================================

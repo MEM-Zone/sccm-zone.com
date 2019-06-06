@@ -1,0 +1,21 @@
+//======================================================
+//---------------| SQL definition start |---------------
+//======================================================
+
+//-------------| SQL ProductID definition |-------------
+
+[Dynamic, Provider("MS_VIEW_INSTANCE_PROVIDER"),
+SMS_Report(true),
+SMS_Group_Name("SQL ProductID"),
+SMS_Class_ID("EXT|SQL_PRODUCTID|1.0")]
+
+Class SQL_2017_Property: SMS_Class_Template
+{
+    [SMS_Report(true),  key]    string  Version;
+    [SMS_Report(true)      ]    string  ProductID;
+    [SMS_Report(true)      ]    boolean DigitalProductID[];
+};
+
+//======================================================
+//----------------| SQL definition end |----------------
+//======================================================

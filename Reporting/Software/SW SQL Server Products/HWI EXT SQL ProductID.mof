@@ -1,0 +1,148 @@
+//=====================================================
+//---------| SQL ProductID extension start |-----------
+//=====================================================
+
+//-- Set default WMI namespace
+#Pragma NameSpace("\\\\.\\ROOT\\cimv2")
+#Pragma DeleteClass("SQL_ProductID", NOFAIL)
+
+//---------------| SQL ProductID class |---------------
+
+//-- Create custom WMI class
+//-  Class qualifiers
+    [
+        Description("The SQL_ProductID class contains the obfuscated SQL license key. You can use this information for SQL version reporting."): ToInstance
+    ]
+
+//-  Class properties
+Class SQL_ProductID
+{
+    [key]
+    string  Version;
+    string  ProductID;
+    boolean DigitalProductID[];
+};
+
+//---------------| SQL 2017 instance |---------------
+//-  Class instance
+[DYNPROPS]
+Instance of SQL_ProductID
+{
+    Version = "2017";
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\140\\Tools\\ClientSetup|ProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    ProductID;
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\140\\Tools\\ClientSetup|DigitalProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    DigitalProductID;
+};
+
+//---------------| SQL 2016 instance |---------------
+//-  Class instance
+[DYNPROPS]
+Instance of SQL_ProductID
+{
+    Version = "2016";
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\130\\Tools\\ClientSetup|ProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    ProductID;
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\130\\Tools\\ClientSetup|DigitalProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    DigitalProductID;
+};
+
+//---------------| SQL 2014 instance |---------------
+//-  Class instance
+[DYNPROPS]
+Instance of SQL_ProductID
+{
+    Version = "2014";
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\120\\Tools\\Setup|ProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    ProductID;
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\120\\Tools\\Setup|DigitalProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    DigitalProductID;
+};
+
+//---------------| SQL 2012 instance |---------------
+//-  Class instance
+[DYNPROPS]
+Instance of SQL_ProductID
+{
+    Version = "2012";
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\110\\Tools\\Setup|ProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    ProductID;
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\110\\Tools\\Setup|DigitalProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    DigitalProductID;
+};
+
+//---------------| SQL 2008 instance |---------------
+//-  Class instance
+[DYNPROPS]
+Instance of SQL_ProductID
+{
+    Version = "2008";
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\MSSQL10\\Setup|ProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    ProductID;
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\MSSQL10\\Setup|DigitalProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    DigitalProductID;
+};
+
+//---------------| SQL Legacy instance |---------------
+//-  Class instance
+[DYNPROPS]
+Instance of SQL_ProductID
+{
+    Version = "Legacy";
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\90\\ProductID|ProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    ProductID;
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\90\\ProductID|DigitalProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    DigitalProductID;
+};
+
+//=====================================================
+//----------| SQL ProductID extension start |----------
+//=====================================================
