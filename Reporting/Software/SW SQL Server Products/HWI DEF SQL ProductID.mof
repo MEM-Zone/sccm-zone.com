@@ -1,5 +1,5 @@
 //======================================================
-//---------------| SQL definition start |---------------
+//----------| SQL ProductID definition start |----------
 //======================================================
 
 //-------------| SQL ProductID definition |-------------
@@ -9,7 +9,7 @@ SMS_Report(true),
 SMS_Group_Name("SQL ProductID"),
 SMS_Class_ID("EXT|SQL_PRODUCTID|1.0")]
 
-Class SQL_2017_Property: SMS_Class_Template
+Class SQL_ProductID: SMS_Class_Template
 {
     [SMS_Report(true),  key]    string  Version;
     [SMS_Report(true)      ]    string  ProductID;
@@ -17,5 +17,5 @@ Class SQL_2017_Property: SMS_Class_Template
 };
 
 //======================================================
-//----------------| SQL definition end |----------------
+//-----------| SQL ProductID definition end |-----------
 //======================================================

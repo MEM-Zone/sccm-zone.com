@@ -1,5 +1,5 @@
 //======================================================
-//---------------| SQL definition start |---------------
+//----------| SQL property definition start |-----------
 //======================================================
 
 //---------------| SQL 2017 definitions |---------------
@@ -11,12 +11,12 @@ SMS_Class_ID("EXT|SQL_2017_PROPERTY|1.0")]
 
 Class SQL_2017_Property: SMS_Class_Template
 {
-    [SMS_Report(false), key]    uint32 PropertyIndex;
-    [SMS_Report(true),  key]    string PropertyName;
-    [SMS_Report(true)      ]    uint32 PropertyNumValue;
-    [SMS_Report(true)      ]    string PropertyStrValue;
-    [SMS_Report(true),  key]    string ServiceName;
-    [SMS_Report(false), key]    uint32 SqlServiceType;
+    [SMS_Report(true), key]    uint32 PropertyIndex;
+    [SMS_Report(true), key]    string PropertyName;
+    [SMS_Report(true)     ]    uint32 PropertyNumValue;
+    [SMS_Report(true)     ]    string PropertyStrValue;
+    [SMS_Report(true), key]    string ServiceName;
+    [SMS_Report(true), key]    uint32 SqlServiceType;
 };
 
 //---------------| SQL 2016 definitions |---------------
@@ -28,12 +28,12 @@ SMS_Class_ID("EXT|SQL_2016_PROPERTY|1.0")]
 
 Class SQL_2016_Property: SMS_Class_Template
 {
-    [SMS_Report(false), key]    uint32 PropertyIndex;
-    [SMS_Report(true),  key]    string PropertyName;
-    [SMS_Report(true)      ]    uint32 PropertyNumValue;
-    [SMS_Report(true)      ]    string PropertyStrValue;
-    [SMS_Report(true),  key]    string ServiceName;
-    [SMS_Report(false), key]    uint32 SqlServiceType;
+    [SMS_Report(true), key]    uint32 PropertyIndex;
+    [SMS_Report(true), key]    string PropertyName;
+    [SMS_Report(true)     ]    uint32 PropertyNumValue;
+    [SMS_Report(true)     ]    string PropertyStrValue;
+    [SMS_Report(true), key]    string ServiceName;
+    [SMS_Report(true), key]    uint32 SqlServiceType;
 };
 
 //---------------| SQL 2014 definitions |---------------
@@ -45,12 +45,12 @@ SMS_Class_ID("EXT|SQL_2014_PROPERTY|1.0")]
 
 Class SQL_2014_Property: SMS_Class_Template
 {
-    [SMS_Report(false), key]    uint32 PropertyIndex;
-    [SMS_Report(true),  key]    string PropertyName;
-    [SMS_Report(true)      ]    uint32 PropertyNumValue;
-    [SMS_Report(true)      ]    string PropertyStrValue;
-    [SMS_Report(true),  key]    string ServiceName;
-    [SMS_Report(false), key]    uint32 SqlServiceType;
+    [SMS_Report(true), key]    uint32 PropertyIndex;
+    [SMS_Report(true), key]    string PropertyName;
+    [SMS_Report(true)     ]    uint32 PropertyNumValue;
+    [SMS_Report(true)     ]    string PropertyStrValue;
+    [SMS_Report(true), key]    string ServiceName;
+    [SMS_Report(true), key]    uint32 SqlServiceType;
 };
 
 //---------------| SQL 2012 definitions |---------------
@@ -62,12 +62,12 @@ SMS_Class_ID("EXT|SQL_2012_PROPERTY|1.0")]
 
 Class SQL_2012_Property: SMS_Class_Template
 {
-    [SMS_Report(false), key]    uint32 PropertyIndex;
-    [SMS_Report(true),  key]    string PropertyName;
-    [SMS_Report(true)      ]    uint32 PropertyNumValue;
-    [SMS_Report(true)      ]    string PropertyStrValue;
-    [SMS_Report(true),  key]    string ServiceName;
-    [SMS_Report(false), key]    uint32 SqlServiceType;
+    [SMS_Report(true), key]    uint32 PropertyIndex;
+    [SMS_Report(true), key]    string PropertyName;
+    [SMS_Report(true)     ]    uint32 PropertyNumValue;
+    [SMS_Report(true)     ]    string PropertyStrValue;
+    [SMS_Report(true), key]    string ServiceName;
+    [SMS_Report(true), key]    uint32 SqlServiceType;
 };
 
 //---------------| SQL 2008 definitions |---------------
@@ -79,12 +79,12 @@ SMS_Class_ID("EXT|SQL_2008_PROPERTY|1.0")]
 
 Class SQL_2008_Property: SMS_Class_Template
 {
-    [SMS_Report(false), key]    uint32 PropertyIndex;
-    [SMS_Report(true),  key]    string PropertyName;
-    [SMS_Report(true)      ]    uint32 PropertyNumValue;
-    [SMS_Report(true)      ]    string PropertyStrValue;
-    [SMS_Report(true),  key]    string ServiceName;
-    [SMS_Report(false), key]    uint32 SqlServiceType;
+    [SMS_Report(true), key]    uint32 PropertyIndex;
+    [SMS_Report(true), key]    string PropertyName;
+    [SMS_Report(true)     ]    uint32 PropertyNumValue;
+    [SMS_Report(true)     ]    string PropertyStrValue;
+    [SMS_Report(true), key]    string ServiceName;
+    [SMS_Report(true), key]    uint32 SqlServiceType;
 };
 
 //---------------| SQL 2000/2005 definitions |---------------
@@ -96,14 +96,14 @@ SMS_Class_ID("EXT|SQL_LEGACY_PROPERTY|1.0")]
 
 Class SQL_Legacy_Property: SMS_Class_Template
 {
-    [SMS_Report(false), key]    uint32 PropertyIndex;
-    [SMS_Report(true),  key]    string PropertyName;
-    [SMS_Report(true)      ]    uint32 PropertyNumValue;
-    [SMS_Report(true)      ]    string PropertyStrValue;
-    [SMS_Report(true),  key]    string ServiceName;
-    [SMS_Report(false), key]    uint32 SqlServiceType;
+    [SMS_Report(true), key]    uint32 PropertyIndex;
+    [SMS_Report(true), key]    string PropertyName;
+    [SMS_Report(true)     ]    uint32 PropertyNumValue;
+    [SMS_Report(true)     ]    string PropertyStrValue;
+    [SMS_Report(true), key]    string ServiceName;
+    [SMS_Report(true), key]    uint32 SqlServiceType;
 };
 
 //======================================================
-//----------------| SQL definition end |----------------
+//-----------| SQL property definition end |------------
 //======================================================
