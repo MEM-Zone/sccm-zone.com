@@ -57,6 +57,7 @@ CREATE PROCEDURE [dbo].[usp_PivotWithDynamicColumns] (
 )
 AS
     BEGIN
+
         /* Variable declaration */
         DECLARE @DynamicColumnQuery AS NVARCHAR(MAX);
         DECLARE @DynamicPivotQuery  AS NVARCHAR(MAX);
@@ -77,7 +78,7 @@ AS
             )
         ')
 
-        /* Get pivot columns dynamically */
+        /* Get pivot columns dynamically and output to @ColumnList variable */
         EXECUTE sp_executesql @DynamicColumnQuery, N'@TableName NVARCHAR(MAX), @DynamicColumn NVARCHAR(MAX), @ColumnList NVARCHAR(MAX) OUTPUT', @TableName, @DynamicColumn, @ColumnList OUTPUT
 
         /* Assemble pivot query */
@@ -91,7 +92,7 @@ AS
                     , AggregationAlias   = '+@AggregationColumn+'
             FROM '+@TableName+'
             )
-            SEARCH PIVOT (MAX(AggregationAlias) FOR DynamicColumnAlias IN ('+@ColumnList+'))p
+            SEARCH PIVOT (MAX(AggregationAlias) FOR DynamicColumnAlias IN ('+@ColumnList+'))p --'p' is intentional, do not remove!
         ')
 
         /* Perform pivot */
