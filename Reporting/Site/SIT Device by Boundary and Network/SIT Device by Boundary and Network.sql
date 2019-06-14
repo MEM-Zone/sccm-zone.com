@@ -30,7 +30,7 @@
 --DECLARE @Locale         AS INTEGER      = '2';
 
 /* Variable declaration */
-DECLARE @LCID  AS INTEGER = dbo.fn_LShortNameToLCID (@Locale);
+DECLARE @LCID AS INTEGER = dbo.fn_LShortNameToLCID (@Locale);
 
 WITH BoundaryData_CTE (Occurrences, Device, Managed, OperatingSystem, DomainOrWorkgroup, ADSite, SCCMSite, SCCMSiteCode, BoundaryGroup, Boundary, IPAddress, IPSubnet, IPSubnetMask)
 AS (
