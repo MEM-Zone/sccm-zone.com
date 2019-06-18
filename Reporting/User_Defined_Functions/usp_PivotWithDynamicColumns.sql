@@ -18,8 +18,8 @@
         @DynamicColumn     = N'PropertyName0',
         @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 .NOTES
-    Created by Ioan Popovici (2019-06-14)
-    Credit to CSifiso W. Ndlovu
+    Created by Ioan Popovici.
+    Credit to CSifiso W. Ndlovu.
     Replace the <CM_Your_Site_Code> with your CM or custom database name.
     Run the code in SQL Server Management Studio.
 .LINK
@@ -31,26 +31,22 @@
 */
 
 /*##=============================================*/
-/*## QUERY BODY                                  */
+/*## FUNCTION QUERY BODY                         */
 /*##=============================================*/
-/* #region QueryBody */
+/* #region FunctionQueryBody */
 
-USE [<CM_Your_Site_Code/Custom_Function_Database>]
+USE [<CM_Your_Site_Code>]
 GO
 
 SET NOCOUNT ON
 GO
 
-IF EXISTS (
-    SELECT [OBJECT_ID]
-    FROM   [SYS].[OBJECTS]
-    WHERE  NAME = 'usp_PivotWithDynamicColumns'
-)
-    DROP PROCEDURE [dbo].[usp_PivotWithDynamicColumns];
+IF OBJECT_ID('dbo.usp_PivotWithDynamicColumns', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.usp_PivotWithDynamicColumns;
 GO
 
-CREATE PROCEDURE [dbo].[usp_PivotWithDynamicColumns] (
-      @TableName         AS NVARCHAR(MAX)
+CREATE PROCEDURE dbo.usp_PivotWithDynamicColumns (
+    @TableName           AS NVARCHAR(MAX)
     , @NonPivotedColumn  AS NVARCHAR(MAX)
     , @DynamicColumn     AS NVARCHAR(MAX)
     , @AggregationColumn AS NVARCHAR(MAX)
@@ -79,7 +75,11 @@ AS
         ')
 
         /* Get pivot columns dynamically and output to @ColumnList variable */
-        EXECUTE sp_executesql @DynamicColumnQuery, N'@TableName NVARCHAR(MAX), @DynamicColumn NVARCHAR(MAX), @ColumnList NVARCHAR(MAX) OUTPUT', @TableName, @DynamicColumn, @ColumnList OUTPUT
+        EXECUTE dbo.sp_executesql @DynamicColumnQuery
+            , N'@TableName NVARCHAR(MAX), @DynamicColumn NVARCHAR(MAX), @ColumnList NVARCHAR(MAX) OUTPUT'
+            , @TableName
+            , @DynamicColumn
+            , @ColumnList OUTPUT
 
         /* Assemble pivot query */
         SET @DynamicPivotQuery = ('
@@ -87,19 +87,22 @@ AS
                 '+@NonPivotedColumn+', '+@ColumnList+'
             FROM (
                 SELECT
-                      '+@NonPivotedColumn+'
-                    , DynamicColumnAlias = '+@DynamicColumn+'
-                    , AggregationAlias   = '+@AggregationColumn+'
+                    '+@NonPivotedColumn+'
+                    , DynamicColumnAlias    = '+@DynamicColumn+'
+                    , AggregationAlias      = '+@AggregationColumn+'
             FROM '+@TableName+'
             )
-            SEARCH PIVOT (MAX(AggregationAlias) FOR DynamicColumnAlias IN ('+@ColumnList+'))p --'p' is intentional, do not remove!
-        ')
+            SEARCH PIVOT (MAX(AggregationAlias) FOR DynamicColumnAlias IN ('+@ColumnList+'))p
+        ') --'p' is intentional, do not remove!
 
         /* Perform pivot */
-        EXECUTE sp_executesql @DynamicPivotQuery
+        EXECUTE dbo.sp_executesql @DynamicPivotQuery
     END;
+
+/* Send the current batch of Transact-SQL statements to instance for processing */
+GO
 
 /* #endregion */
 /*##=============================================*/
-/*## END QUERY BODY                              */
+/*## END FUNCTION QUERY BODY                     */
 /*##=============================================*/
