@@ -1,419 +1,304 @@
 /*
-*********************************************************************************************************
-* Requires        | SCCM Hardware extentsion                                                            *
-* ===================================================================================================== *
-* Created by      |    Date    | Comments                                                               *
-* _____________________________________________________________________________________________________ *
-* Octavian Cordos | 2016-01-15 | First version                                                          *
-* Ioan Popovici   |            |                                                                        *
-* ===================================================================================================== *
-*                                                                                                       *
-*********************************************************************************************************
-
 .SYNOPSIS
-    This SQL Query is used to get SQL Service Pack and Cumulative Update version information.
+    Gets SQL Product info.
 .DESCRIPTION
-    This SQL Query is used to get SQL Service Pack and Cumulative Update version information.
+    Gets SQL Product info, id and license key.
 .NOTES
+    Created by Ioan Popovici.
+    Requires the usp_PivotWithDynamicColumns stored procedure (Embedded/Database).
+    Requires SQL Property and ProductID extensions.
     Part of a report should not be run separately.
 .LINK
-    https://SCCM-Zone.com
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/SW-SQL-Server-Porducts
+.LINK
+    https://SCCM.Zone/SW-SQL-Server-Porducts-CHANGELOG
+.LINK
+    https://SCCM.Zone/SW-SQL-Server-Porducts-GIT
+.LINK
+    https://SCCM.Zone/Issues
 */
+
+/*##=============================================*/
+/*## FUNCTION LISTINGS                           */
+/*##=============================================*/
+/* #region FunctionListings */
+
+/* #region usp_PivotWithDynamicColumns */
+/*
+.SYNOPSIS
+    Pivots with dynamic columns.
+.DESCRIPTION
+    Pivots with dynamic columns using dynamic SQL to get the pivot columns.
+.PARAMETER TableName
+    Specifies the source pivot table name.
+.PARAMETER NonPivotedColumn
+    Specifies the non pivoded column name.
+.PARAMETER DynamicColumn
+    Specifies the column form which to dinamically get the pivot column list.
+.PARAMETER AggregationColumn
+    Specifies the aggregation column.
+.EXAMPLE
+    EXECUTE usp_PivotWithDynamicColumns
+        @TableName         = N'SomeTableName'
+        @NonPivotedColumn  = N'ResourceID',
+        @DynamicColumn     = N'PropertyName0',
+        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+.NOTES
+    Created by Ioan Popovici.
+    Credit to CSifiso W. Ndlovu.
+    Replace the <CM_Your_Site_Code> with your CM or custom database name.
+    Run the code in SQL Server Management Studio.
+.LINK
+    https://www.sqlshack.com/multiple-options-to-transposing-rows-into-columns/ (Sifiso W. Ndlovu)
+.LINK
+    https://SCCM.Zone
+.LINK
+    https://SCCM.Zone/Issues
+*/
+
+/*##=============================================*/
+/*## FUNCTION QUERY BODY                         */
+/*##=============================================*/
+/* #region FunctionQueryBody */
+
+SET NOCOUNT ON
+GO
+
+IF OBJECT_ID('dbo.usp_PivotWithDynamicColumns', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.usp_PivotWithDynamicColumns;
+GO
+
+CREATE PROCEDURE dbo.usp_PivotWithDynamicColumns (
+    @TableName           AS NVARCHAR(MAX)
+    , @NonPivotedColumn  AS NVARCHAR(MAX)
+    , @DynamicColumn     AS NVARCHAR(MAX)
+    , @AggregationColumn AS NVARCHAR(MAX)
+)
+AS
+    BEGIN
+
+        /* Variable declaration */
+        DECLARE @DynamicColumnQuery AS NVARCHAR(MAX);
+        DECLARE @DynamicPivotQuery  AS NVARCHAR(MAX);
+        DECLARE @ColumnList         AS NVARCHAR(MAX);
+
+        /* Assemble pivot columns query */
+        SET @DynamicColumnQuery = ('
+            SET @ColumnList = (
+                STUFF(
+                    (
+                        SELECT DISTINCT
+                            '','' + QUOTENAME(DB.'+@DynamicColumn+')
+                        FROM '+@TableName+' AS DB
+                        FOR XML PATH(''''), TYPE
+                    ).value(''.'', ''NVARCHAR(MAX)'')
+                    , 1, 1, ''''
+                )
+            )
+        ')
+
+        /* Get pivot columns dynamically and output to @ColumnList variable */
+        EXECUTE dbo.sp_executesql @DynamicColumnQuery
+            , N'@TableName NVARCHAR(MAX), @DynamicColumn NVARCHAR(MAX), @ColumnList NVARCHAR(MAX) OUTPUT'
+            , @TableName
+            , @DynamicColumn
+            , @ColumnList OUTPUT
+
+        /* Assemble pivot query */
+        SET @DynamicPivotQuery = ('
+            SELECT
+                '+@NonPivotedColumn+', '+@ColumnList+'
+            FROM (
+                SELECT
+                    '+@NonPivotedColumn+'
+                    , DynamicColumnAlias    = '+@DynamicColumn+'
+                    , AggregationAlias      = '+@AggregationColumn+'
+            FROM '+@TableName+'
+            )
+            SEARCH PIVOT (MAX(AggregationAlias) FOR DynamicColumnAlias IN ('+@ColumnList+'))p
+        ') --'p' is intentional, do not remove!
+
+        /* Perform pivot */
+        EXECUTE dbo.sp_executesql @DynamicPivotQuery
+    END;
+
+/* Send the current batch of Transact-SQL statements to instance for processing */
+GO
+
+/* #endregion */
+/*##=============================================*/
+/*## END FUNCTION QUERY BODY                     */
+/*##=============================================*/
+/* #endregion */
+
+/* #endregion */
+/*##=============================================*/
+/*## END FUNCTION LISTINGS                       */
+/*##=============================================*/
 
 /*##=============================================*/
 /*## QUERY BODY                                  */
 /*##=============================================*/
+/* #region QueryBody */
 
---DECLARE @CollectionID VARCHAR(16);
---SELECT @CollectionID = 'WT10000A';
+/* Perform cleanup */
+IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
+    DROP TABLE #SQLProducts;
+GO
 
-WITH temp (
-        [ResourceID],
-        [ComputerName],
-        --[Company],
-        [SQL TYPE],
-        [SQL Service Pack],
-        [SQL Version],
-        [SQL CU Version],
-        [Version]
-    ) AS (
-        SELECT DISTINCT
-            [ResourceID],
-            [ComputerName],
-            --[Company],
-            [SQL TYPE],
-            [SQL Service Pack],
-            [SQL Version],
-            [SQL CU Version],
-            [Version]
-        FROM (
+/* Testing variables !! Need to be commented for Production !! */
+DECLARE @UserSIDs       AS NVARCHAR(10) = 'Disabled';
+DECLARE @CollectionID   AS NVARCHAR(10) = 'SMS00001';
 
---region SQL 2017
-            SELECT
-                [vrs].[resourceID] AS [ResourceID],
-                [VRS].[Netbios_name0] [ComputerName],
-                --ISNULL([vrs].[company0], '<Unknown>') AS  'Company',
-                --vrs.company0 as 'Company',
-                MAX (
-                    CASE [sql2017].[PropertyName0]
-                        WHEN 'SKUName' THEN [sql2017].[PropertySTRValue0]
-                    END
-                ) AS [SQL TYPE],
-                MAX (
-                    CASE [sql2017].[PropertyName0]
-                        WHEN 'SPLEVEL' THEN [sql2017].[PropertyNUMValue0]
-                    END
-                ) AS [SQL Service Pack],
-                MAX (
-                    CASE [sql2017].[PropertyName0]
-                        WHEN 'VERSION' THEN [sql2017].[PropertySTRValue0]
-                    END
-                ) AS [SQL Version],
-                MAX (
-                    CASE [sql2017].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN [sql2017].[PropertySTRValue0]
-                    END
-                ) AS [SQL CU Version],
-                MAX (
-                    CASE [sql2017].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN
-                            CASE LEFT ([sql2017].[PropertySTRValue0], 4)
-                                WHEN '2017' THEN '2017'
-                                WHEN '2016' THEN '2016'
-                                WHEN '2014' THEN '2014'
-                                WHEN '2011' THEN '2012'
-                                WHEN '2009' THEN '2008 R2'
-                                WHEN '2007' THEN '2008'
-                                WHEN '2005' THEN '2005'
-                                WHEN '2000' THEN '2000'
-                                ELSE '2016'
-                            END
-                    END
-                ) AS [Version]
-            FROM [dbo].[v_R_System] [VRS]
-                LEFT JOIN [v_GS_SQL_2017_Property0] [sql2017] ON [sql2017].[ResourceID] = [VRS].[ResourceID]
-                LEFT OUTER JOIN [v_ClientCollectionMembers] [c] ON [c].[ResourceID] = [vrs].[ResourceID]
-            WHERE [sql2017].[PropertyName0] IN ('SKUNAME', 'SPLevel', 'version', 'fileversion')
-                AND [c].[CollectionID] = @CollectionID
-                AND ISNULL([sql2017].[ServiceName0], 0) NOT LIKE '%EXPRESS%'
-            GROUP BY
-                [VRS].[Netbios_name0],
-                [sql2017].[ServiceName0],
-                --[vrs].[company0],
-                [vrs].[resourceID]
-            UNION ALL
---endregion
+/* Create SQLProducts table */
+CREATE TABLE #SQLProducts (
+    ResourceID          NVARCHAR(25)
+    , [Clustered]       BIT
+    , Datapath          NVARCHAR(250)
+    , DumpDir           NVARCHAR(250)
+    , ErrorReporting    BIT
+    , FileVersion       NVARCHAR(50)
+    , InstallPath       NVARCHAR(250)
+    , InstanceID        NVARCHAR(100)
+    , IsWOW64           BIT
+    , [Language]        NVARCHAR(10)
+    , RegRoot           NVARCHAR(250)
+    , SKU               NVARCHAR(100)
+    , SKUName           NVARCHAR(100)
+    , SPLevel           NVARCHAR(2)
+    , SQLStates         NVARCHAR(10)
+    , SQMReproting      BIT
+    , StartupParameters NVARCHAR(MAX)
+    , [Version]         NVARCHAR(25)
+    , VSName            NVARCHAR(50)
+)
 
---region SQL 2016
-            SELECT
-                [vrs].[resourceID] [ResourceID],
-                [VRS].[Netbios_name0] [ComputerName],
-                --ISNULL([vrs].[company0], '<Unknown>') AS 'Company',
-                --vrs.company0 as 'Company',
-                MAX (
-                    CASE [sql2016].[PropertyName0]
-                        WHEN 'SKUName' THEN [sql2016].[PropertySTRValue0]
-                    END
-                ) AS [SQL TYPE],
-                MAX (CASE [sql2016].[PropertyName0]
-                        WHEN 'SPLEVEL' THEN [sql2016].[PropertyNUMValue0]
-                    END
-                ) AS [SQL Service Pack],
-                MAX (
-                    CASE [sql2016].[PropertyName0]
-                        WHEN 'VERSION' THEN [sql2016].[PropertySTRValue0]
-                    END
-                ) AS [SQL Version],
-                MAX (
-                    CASE [sql2016].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN [sql2016].[PropertySTRValue0]
-                    END
-                ) AS [SQL CU Version],
-                MAX (
-                    CASE [sql2016].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN
-                            CASE LEFT ([sql2016].[PropertySTRValue0], 4)
-                                WHEN '2017' THEN '2017'
-                                WHEN '2016' THEN '2016'
-                                WHEN '2014' THEN '2014'
-                                WHEN '2011' THEN '2012'
-                                WHEN '2009' THEN '2008 R2'
-                                WHEN '2007' THEN '2008'
-                                WHEN '2005' THEN '2005'
-                                WHEN '2000' THEN '2000'
-                                ELSE '2016'
-                            END
-                    END
-                ) AS [Version]
-            FROM [dbo].[v_R_System] [VRS]
-                LEFT JOIN [v_GS_SQL_2016_Property0] [sql2016] ON [sql2016].[ResourceID] = [VRS].[ResourceID]
-                LEFT OUTER JOIN [v_ClientCollectionMembers] [c] ON [c].[ResourceID] = [vrs].[ResourceID]
-            WHERE [sql2016].[PropertyName0] IN ('SKUNAME', 'SPLevel', 'version', 'fileversion')
-                AND [c].[CollectionID] = @CollectionID
-                AND ISNULL([sql2016].[ServiceName0], 0) NOT LIKE '%EXPRESS%'
-            GROUP BY [VRS].[Netbios_name0],
-                [sql2016].[ServiceName0],
-                --[vrs].[company0],
-                [vrs].[resourceID]
---endregion
+/* Initialize SQLRelease table */
+DECLARE @SQLRelease Table (FileVersion NVARCHAR(4), Release NVARCHAR(10))
 
---region SQL 2014
-            UNION ALL
-            SELECT
-                [vrs].[resourceID] [ResourceID],
-                [VRS].[Netbios_name0] [ComputerName],
-                --ISNULL([vrs].[company0], '<Unknown>') AS 'Company',
-                --vrs.company0 as 'Company',
-                MAX (
-                    CASE [sql2014].[PropertyName0]
-                        WHEN 'SKUName' THEN [sql2014].[PropertySTRValue0]
-                    END
-                ) AS [SQL TYPE],
-                MAX (
-                    CASE [sql2014].[PropertyName0]
-                        WHEN 'SPLEVEL' THEN [sql2014].[PropertyNUMValue0]
-                    END
-                ) AS [SQL Service Pack],
-                MAX (CASE [sql2014].[PropertyName0]
-                        WHEN 'VERSION' THEN [sql2014].[PropertySTRValue0]
-                    END
-                ) AS [SQL Version],
-                MAX (
-                    CASE [sql2014].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN [sql2014].[PropertySTRValue0]
-                    END
-                ) AS [SQL CU Version],
-                MAX (
-                    CASE [sql2014].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN
-                            CASE LEFT([sql2014].[PropertySTRValue0], 4)
-                                WHEN '2017' THEN '2017'
-                                WHEN '2016' THEN '2016'
-                                WHEN '2014' THEN '2014'
-                                WHEN '2011' THEN '2012'
-                                WHEN '2009' THEN '2008 R2'
-                                WHEN '2007' THEN '2008'
-                                WHEN '2005' THEN '2005'
-                                WHEN '2000' THEN '2000'
-                                ELSE '2014'
-                            END
-                    END
-                ) AS [Version]
-            FROM [v_R_System] [VRS]
-                LEFT JOIN [v_GS_SQL_2014_Property0] [sql2014] ON [sql2014].[ResourceID] = [VRS].[ResourceID]
-                LEFT OUTER JOIN [v_ClientCollectionMembers] [c] ON [c].[ResourceID] = [vrs].[ResourceID]
-            WHERE [sql2014].[PropertyName0] IN ('SKUNAME', 'SPLevel', 'version', 'fileversion')
-                AND [c].[CollectionID] = @CollectionID
-                AND ISNULL([sql2014].[ServiceName0], 0) NOT LIKE '%EXPRESS%'
-            GROUP BY
-                [VRS].[Netbios_name0],
-                [sql2014].[ServiceName0],
-                --[vrs].[company0],
-                [vrs].[resourceID]
---endregion
+/* Populate SQLRelease table */
+INSERT INTO @SQLRelease (FileVersion, Release)
+VALUES
+      ('2017', '2017')
+    , ('2016', '2016')
+    , ('2014', '2014')
+    , ('2011', '2012')
+    , ('2009', '2008 R2')
+    , ('2007', '2008')
+    , ('2005', '2005')
+    , ('2000', '2000')
+    , ('',     'Unknown')
 
---region SQL 2012
-            UNION ALL
-            SELECT
-                [vrs].[resourceID] [ResourceID],
-                [VRS].[Netbios_name0] [ComputerName],
-                --ISNULL([vrs].[company0], '<Unknown>') AS 'Company',
-                MAX (
-                    CASE [sql2012].[PropertyName0]
-                        WHEN 'SKUName' THEN [sql2012].[PropertySTRValue0]
-                    END
-                ) AS [SQL TYPE],
-                MAX (
-                    CASE [sql2012].[PropertyName0]
-                        WHEN 'SPLEVEL' THEN [sql2012].[PropertyNUMValue0]
-                    END
-                ) AS [SQL Service Pack],
-                MAX (
-                    CASE [sql2012].[PropertyName0]
-                        WHEN 'VERSION' THEN [sql2012].[PropertySTRValue0]
-                    END
-                ) AS [SQL Version],
-                MAX (CASE [sql2012].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN [sql2012].[PropertySTRValue0]
-                    END
-                ) AS [SQL CU Version],
-                MAX (
-                    CASE [sql2012].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN
-                            CASE LEFT([sql2012].[PropertySTRValue0], 4)
-                                WHEN '2017' THEN '2017'
-                                WHEN '2016' THEN '2016'
-                                WHEN '2014' THEN '2014'
-                                WHEN '2011' THEN '2012'
-                                WHEN '2009' THEN '2008 R2'
-                                WHEN '2007' THEN '2008'
-                                WHEN '2005' THEN '2005'
-                                WHEN '2000' THEN '2000'
-                                ELSE '2012'
-                            END
-                    END
-                ) AS [Version]
-            FROM [V_R_System] [VRS]
-                LEFT JOIN [v_GS_SQL_2012_Property0] [sql2012] ON [sql2012].[ResourceID] = [VRS].[ResourceID]
-                LEFT OUTER JOIN [v_ClientCollectionMembers] [c] ON [c].[ResourceID] = [vrs].[ResourceID]
-            WHERE [sql2012].[PropertyName0] IN('SKUNAME', 'SPLevel', 'version', 'fileversion')
-                AND [c].[CollectionID] = @CollectionID
-                AND ISNULL([ServiceName0], 0) NOT LIKE '%EXPRESS%'
-            GROUP BY
-                [VRS].[Netbios_name0],
-                [sql2012].[ServiceName0],
-                --[vrs].[company0],
-                [vrs].[resourceID]
---endregion
+/* Get SQL 2017 data */
+INSERT INTO #SQLProducts
+EXECUTE dbo.usp_PivotWithDynamicColumns
+        @TableName         = N'dbo.v_GS_EXT_SQL_2017_Property0',
+        @NonPivotedColumn  = N'ResourceID',
+        @DynamicColumn     = N'PropertyName0',
+        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
---region SQL 2008
-            UNION ALL
-            SELECT
-                [vrs].[resourceID] [ResourceID],
-                [VRS].[Netbios_name0] [ComputerName],
-                --ISNULL([vrs].[company0], '<Unknown>') AS 'Company',
-                MAX (
-                    CASE [sql2008].[PropertyName0]
-                        WHEN 'SKUName' THEN [sql2008].[PropertySTRValue0]
-                    END
-                ) AS [SQL TYPE],
-                MAX (
-                    CASE [sql2008].[PropertyName0]
-                        WHEN 'SPLEVEL' THEN [sql2008].[PropertyNUMValue0]
-                    END
-                ) AS [SQL Service Pack],
-                MAX (
-                    CASE [sql2008].[PropertyName0]
-                        WHEN 'VERSION' THEN [sql2008].[PropertySTRValue0]
-                    END
-                ) AS [SQL Version],
-                MAX (
-                    CASE [sql2008].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN [sql2008].[PropertySTRValue0]
-                    END
-                ) AS [SQL CU Version],
-                MAX (
-                    CASE [sql2008].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN
-                            CASE LEFT([sql2008].[PropertySTRValue0], 4)
-                                WHEN '2017' THEN '2017'
-                                WHEN '2016' THEN '2016'
-                                WHEN '2014' THEN '2014'
-                                WHEN '2011' THEN '2012'
-                                WHEN '2009' THEN '2008 R2'
-                                WHEN '2007' THEN '2008'
-                                WHEN '2005' THEN '2005'
-                                WHEN '2000' THEN '2000'
-                                ELSE '2008'
-                            END
-                    END
-                ) AS [Version]
-            FROM [V_R_System] [VRS]
-                LEFT JOIN [v_GS_SQL_2008_Property0] [sql2008] ON [sql2008].[ResourceID] = [VRS].[ResourceID]
-                LEFT OUTER JOIN [v_ClientCollectionMembers] [c] ON [c].[ResourceID] = [vrs].[ResourceID]
-            WHERE [sql2008].[PropertyName0] IN ('SKUNAME', 'SPLevel', 'version', 'fileversion')
-                AND [c].[CollectionID] = @CollectionID
-                AND ISNULL([sql2008].[ServiceName0], 0) NOT LIKE '%EXPRESS%'
-                AND ISNULL([sql2008].[ServiceName0], 0) NOT LIKE 'SQLBrowser'
-            GROUP BY
-                [VRS].[Netbios_name0],
-                [sql2008].[ServiceName0],
-                --[vrs].[company0],
-                [vrs].[resourceID]
---endregion
+/* Get SQL 2016 data */
+INSERT INTO #SQLProducts
+EXECUTE dbo.usp_PivotWithDynamicColumns
+        @TableName         = N'dbo.v_GS_EXT_SQL_2016_Property0',
+        @NonPivotedColumn  = N'ResourceID',
+        @DynamicColumn     = N'PropertyName0',
+        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
---region SQL Legacy
-            UNION ALL
-            SELECT [vrs].[resourceID] [ResourceID],
-                [VRS].[Netbios_name0] [ComputerName],
-                --ISNULL([vrs].[company0], '<Unknown>') AS 'Company',
-                MAX (
-                    CASE [sqlLgcy].[PropertyName0]
-                        WHEN 'SKUName' THEN [sqlLgcy].[PropertySTRValue0]
-                    END
-                ) AS [SQL TYPE],
-                MAX (
-                    CASE [sqlLgcy].[PropertyName0]
-                        WHEN 'SPLEVEL' THEN [sqlLgcy].[PropertyNUMValue0]
-                    END
-                ) AS [SQL Service Pack],
-                MAX (
-                    CASE [sqlLgcy].[PropertyName0]
-                        WHEN 'VERSION' THEN [sqlLgcy].[PropertySTRValue0]
-                    END
-                ) AS [SQL Version],
-                MAX (
-                    CASE [sqlLgcy].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN [sqlLgcy].[PropertySTRValue0]
-                    END
-                ) AS [SQL CU Version],
-                MAX (
-                    CASE [sqllgcy].[PropertyName0]
-                        WHEN 'FILEVERSION' THEN
-                        CASE LEFT ([sqllgcy].[PropertySTRValue0], 4)
-                            WHEN '2017' THEN '2017'
-                            WHEN '2016' THEN '2016'
-                            WHEN '2014' THEN '2014'
-                            WHEN '2011' THEN '2012'
-                            WHEN '2009' THEN '2008 R2'
-                            WHEN '2007' THEN '2008'
-                            WHEN '2005' THEN '2005'
-                            WHEN '2000' THEN '2000'
-                            ELSE '2005'
-                        END
-                    END
-                ) AS [Version]
-            FROM [V_R_System] [VRS]
-                LEFT JOIN [v_GS_SQL_Legacy_Property0] [sqlLgcy] ON [sqlLgcy].[ResourceID] = [VRS].[ResourceID]
-                LEFT OUTER JOIN [v_ClientCollectionMembers] [c] ON [c].[ResourceID] = [vrs].[ResourceID]
-            WHERE [sqlLgcy].[PropertyName0] IN('SKUNAME', 'SPLevel', 'version', 'fileversion')
-                AND [c].[CollectionID] = @CollectionID
-                AND ISNULL([sqlLgcy].[ServiceName0], 0) NOT LIKE '%EXPRESS%'
-                AND ISNULL([sqlLgcy].[ServiceName0], 0) NOT LIKE 'SQLBrowser'
-            GROUP BY
-                [VRS].[Netbios_Name0],
-                [sqlLgcy].[ServiceName0],
-                --[vrs].[company0],
-                [vrs].[resourceID]
-        ) AS [SQLInv]
---endregion
+/* Get SQL 2014 data data */
+INSERT INTO #SQLProducts
+EXECUTE dbo.usp_PivotWithDynamicColumns
+        @TableName         = N'dbo.v_GS_EXT_SQL_2014_Property0',
+        @NonPivotedColumn  = N'ResourceID',
+        @DynamicColumn     = N'PropertyName0',
+        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
-        WHERE [SQL TYPE] NOT LIKE 'Express%'
-            AND [SQL TYPE] NOT LIKE 'Windows Internal Database%'
-            AND SUBSTRING ( [SQL Version], 1, 2) != SUBSTRING ([SQL CU Version], 1, 2) )
-        SELECT DISTINCT
-            --[Company],
-            [ComputerName],
-            [SQL Type],
-            [SQL Service Pack] AS [Service Pack],
-            [SQL Version] AS Version,
-            [SQL CU Version] AS [CU Version],
-            [version] AS Release,
-            (
-                CASE
-                    WHEN [SQL Type] LIKE '%workgroup%' THEN 'Workgroup Edition'
-                    WHEN [SQL Type] LIKE '%develop%' THEN 'Developer Edition'
-                    WHEN [SQL Type] LIKE '%standard%' THEN 'Standard Edition'
-                    WHEN [SQL Type] LIKE '%enterprise%' THEN 'Enterprise Edition'
-                    ELSE version
-                END
-            ) AS 'Edition',
-            (
-                CASE
-                    WHEN [SQL Type] LIKE '%64%' THEN 'x64'
-                    ELSE 'x32'
-                END
-            ) AS 'Bitness'
-        FROM temp
-        ORDER BY
-            --temp.[Company],
-            Release,
-            Edition,
-            Bitness,
-            Version,
-            ComputerName;
+/* Get SQL 2012 data */
+INSERT INTO #SQLProducts
+EXECUTE dbo.usp_PivotWithDynamicColumns
+        @TableName         = N'dbo.v_GS_EXT_SQL_2012_Property0',
+        @NonPivotedColumn  = N'ResourceID',
+        @DynamicColumn     = N'PropertyName0',
+        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
+/* Get SQL 2008 data */
+INSERT INTO #SQLProducts
+EXECUTE dbo.usp_PivotWithDynamicColumns
+        @TableName         = N'dbo.v_GS_EXT_SQL_2008_Property0',
+        @NonPivotedColumn  = N'ResourceID',
+        @DynamicColumn     = N'PropertyName0',
+        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+
+/* Get SQL Legacy data */
+INSERT INTO #SQLProducts
+EXECUTE dbo.usp_PivotWithDynamicColumns
+        @TableName         = N'dbo.v_GS_EXT_SQL_Legacy_Property0',
+        @NonPivotedColumn  = N'ResourceID',
+        @DynamicColumn     = N'PropertyName0',
+        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+
+/* Aggregate result data */
+SELECT
+    Device              = ISNULL(NULLIF(Systems.NetBios_Name0, '-'), 'N/A')
+    , Release           = (
+        'SQL ' + (SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4))
+    )
+    , [Edition]         = SQLProducts.SKUName
+    , ServicePack       = SQLProducts.SPLevel
+    , [Version]         = SQLProducts.[Version]
+    , CUVersion         = SQLProducts.FileVersion
+    , [Language]        = SQLProducts.[Language]
+    , Bitness           = (
+        CASE SQLProducts.IsWOW64
+            WHEN 0 THEN 'x64'
+            ELSE 'x86'
+        END
+    )
+    , ProductID         = SQLProductID.ProductID0
+    , ProductKey        = SQLProductID.DigitalProductID0
+    , InstanceID        = SQLProducts.InstanceID
+    , [Clustered]       = (
+        CASE SQLProducts.[Clustered]
+            WHEN 0 THEN 'No'
+            ELSE 'Yes'
+        END
+    )
+    , NetworkName       = SQLProducts.VSName
+    , StartupParameters = SQLProducts.StartupParameters
+    , RegistryRoot      = SQLProducts.RegRoot
+    , DataPath          = SQLProducts.Datapath
+    , LogPath           = SQLProducts.DumpDir
+    , ErrorReporting    = (
+        CASE SQLProducts.ErrorReporting
+            WHEN 0 THEN 'No'
+            ELSE 'Yes'
+        END
+    )
+    , SQMReproting      = (
+        CASE SQLProducts.SQMReproting
+            WHEN 0 THEN 'No'
+            ELSE 'Yes'
+        END
+    )
+    , SQLStates         = SQLProducts.SQLStates
+FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
+    JOIN #SQLProducts AS SQLProducts ON SQLProducts.ResourceID = CollectionMembers.ResourceID
+    LEFT JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
+        AND SQLProductID.Version0 = ( ------------------------------>>>>>>>>>>>>> Change mof file to edition!!!!
+            SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4)
+        )
+        AND SQLProductID.ProductID0 IS NOT NULL
+    LEFT JOIN v_R_System AS Systems ON Systems.ResourceID = SQLProducts.ResourceID
+WHERE CollectionMembers.CollectionID = @CollectionID
+
+/* Drop previously created objects */
+IF OBJECT_ID('dbo.usp_PivotWithDynamicColumns', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.usp_PivotWithDynamicColumns;
+IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
+    DROP TABLE #SQLProducts;
+GO
+
+/* #endregion */
 /*##=============================================*/
 /*## END QUERY BODY                              */
 /*##=============================================*/
