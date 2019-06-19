@@ -239,7 +239,35 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
 
 /* Aggregate result data */
 SELECT
-    Device              = ISNULL(NULLIF(Systems.NetBios_Name0, '-'), 'N/A')
+    Device              = Devices.[Name]
+    , Domain            = Systems.Full_Domain_Name0
+    , OperatingSystem   = (
+
+        /* Get OS caption by version */
+        CASE
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 5.%'              THEN 'Windows XP'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.0%'             THEN 'Windows Vista'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.1%'             THEN 'Windows 7'
+            WHEN Systems.Operating_System_Name_And0 LIKE 'Windows_7 Entreprise 6.1'      THEN 'Windows 7'
+            WHEN Systems.Operating_System_Name_And0 =    'Windows Embedded Standard 6.1' THEN 'Windows 7'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.2%'             THEN 'Windows 8'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.3%'             THEN 'Windows 8.1'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 5.%'                   THEN 'Windows Server 2003'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.0%'                  THEN 'Windows Server 2008'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.1%'                  THEN 'Windows Server 2008 R2'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.2%'                  THEN 'Windows Server 2012'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
+            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
+                CASE
+                    WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) > 10017763 THEN 'Windows Server 2019'
+                    ELSE 'Windows Server 2016'
+                END
+            )
+            ELSE Systems.Operating_System_Name_And0
+        END
+    )
     , Release           = (
         'SQL ' + (SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4))
     )
@@ -257,6 +285,15 @@ SELECT
     , ProductID         = SQLProductID.ProductID0
     , ProductKey        = SQLProductID.DigitalProductID0
     , InstanceID        = SQLProducts.InstanceID
+    , IsVirtualMachine  = (
+        CASE Devices.IsVirtualMachine
+          WHEN 0 THEN 'No'
+            ELSE 'Yes'
+        END
+    )
+    , CPUs              = COUNT(Processor.ResourceID)
+    , CPUCores          = Processor.NumberOfCores0
+    , LogicalProcessors = Processor.NumberOfLogicalProcessors0
     , [Clustered]       = (
         CASE SQLProducts.[Clustered]
             WHEN 0 THEN 'No'
@@ -282,14 +319,42 @@ SELECT
     )
     , SQLStates         = SQLProducts.SQLStates
 FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
+    JOIN v_R_System AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
+    JOIN v_CombinedDeviceResources AS Devices ON Devices.MachineID = CollectionMembers.ResourceID
+    JOIN v_GS_PROCESSOR AS Processor ON Processor.ResourceID = CollectionMembers.ResourceID
     JOIN #SQLProducts AS SQLProducts ON SQLProducts.ResourceID = CollectionMembers.ResourceID
-    JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
+    LEFT JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
         AND SQLProductID.Release0 = (
             SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4)
         )
         AND SQLProductID.ProductID0 IS NOT NULL
-    JOIN v_R_System AS Systems ON Systems.ResourceID = SQLProducts.ResourceID
 WHERE CollectionMembers.CollectionID = @CollectionID
+GROUP BY
+    Devices.[Name]
+	, Systems.Full_Domain_Name0
+	, Systems.Operating_System_Name_and0
+	, Systems.Build01
+    , SQLProducts.FileVersion
+    , SQLProducts.SKUName
+    , SQLProducts.SPLevel
+    , SQLProducts.[Version]
+    , SQLProducts.[Language]
+    , SQLProducts.IsWOW64
+    , SQLProductID.ProductID0
+    , SQLProductID.DigitalProductID0
+    , SQLProducts.InstanceID
+    , Devices.IsVirtualMachine
+    , Processor.NumberOfCores0
+    , Processor.NumberOfLogicalProcessors0
+    , SQLProducts.[Clustered]
+    , SQLProducts.VSName
+    , SQLProducts.StartupParameters
+    , SQLProducts.RegRoot
+    , SQLProducts.Datapath
+    , SQLProducts.DumpDir
+    , SQLProducts.ErrorReporting
+    , SQLProducts.SQMReproting
+    , SQLProducts.SQLStates
 
 /* Drop previously created objects */
 IF OBJECT_ID('dbo.usp_PivotWithDynamicColumns', 'P') IS NOT NULL
