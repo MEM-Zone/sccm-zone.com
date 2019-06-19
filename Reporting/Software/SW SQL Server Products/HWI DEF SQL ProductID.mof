@@ -11,7 +11,7 @@ SMS_Class_ID("EXT|SQL_PRODUCTID|1.0")]
 
 Class SQL_ProductID: SMS_Class_Template
 {
-    [SMS_Report(true),  key]    string  Version;
+    [SMS_Report(true),  key]    string  Release;
     [SMS_Report(true)      ]    string  ProductID;
     [SMS_Report(true)      ]    boolean DigitalProductID[];
 };

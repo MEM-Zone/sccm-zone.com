@@ -11,14 +11,14 @@
 //-- Create custom WMI class
 //-  Class qualifiers
     [
-        Description("The SQL_ProductID class contains the obfuscated SQL license key. You can use this information for SQL version reporting."): ToInstance
+        Description("The SQL_ProductID class contains the obfuscated SQL license key. You can use this information for SQL reporting."): ToInstance
     ]
 
 //-  Class properties
 Class SQL_ProductID
 {
     [key]
-    string  Version;
+    string  Release;
     string  ProductID;
     boolean DigitalProductID[];
 };
@@ -28,7 +28,7 @@ Class SQL_ProductID
 [DYNPROPS]
 Instance of SQL_ProductID
 {
-    Version = "2017";
+    Release = "2017";
     [
         PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\140\\Tools\\ClientSetup|ProductID"),
         Dynamic,
@@ -48,7 +48,7 @@ Instance of SQL_ProductID
 [DYNPROPS]
 Instance of SQL_ProductID
 {
-    Version = "2016";
+    Release = "2016";
     [
         PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\130\\Tools\\ClientSetup|ProductID"),
         Dynamic,
@@ -68,7 +68,7 @@ Instance of SQL_ProductID
 [DYNPROPS]
 Instance of SQL_ProductID
 {
-    Version = "2014";
+    Release = "2014";
     [
         PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\120\\Tools\\Setup|ProductID"),
         Dynamic,
@@ -88,7 +88,7 @@ Instance of SQL_ProductID
 [DYNPROPS]
 Instance of SQL_ProductID
 {
-    Version = "2012";
+    Release = "2012";
     [
         PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\110\\Tools\\Setup|ProductID"),
         Dynamic,
@@ -108,7 +108,7 @@ Instance of SQL_ProductID
 [DYNPROPS]
 Instance of SQL_ProductID
 {
-    Version = "2008";
+    Release = "2008";
     [
         PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\MSSQL10\\Setup|ProductID"),
         Dynamic,
@@ -128,7 +128,7 @@ Instance of SQL_ProductID
 [DYNPROPS]
 Instance of SQL_ProductID
 {
-    Version = "Legacy";
+    Release = "Legacy";
     [
         PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\90\\ProductID|ProductID"),
         Dynamic,

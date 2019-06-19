@@ -192,50 +192,50 @@ VALUES
 /* Get SQL 2017 data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-        @TableName         = N'dbo.v_GS_EXT_SQL_2017_Property0',
-        @NonPivotedColumn  = N'ResourceID',
-        @DynamicColumn     = N'PropertyName0',
-        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName         = N'dbo.v_GS_EXT_SQL_2017_Property0',
+    @NonPivotedColumn  = N'ResourceID',
+    @DynamicColumn     = N'PropertyName0',
+    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL 2016 data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-        @TableName         = N'dbo.v_GS_EXT_SQL_2016_Property0',
-        @NonPivotedColumn  = N'ResourceID',
-        @DynamicColumn     = N'PropertyName0',
-        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName         = N'dbo.v_GS_EXT_SQL_2016_Property0',
+    @NonPivotedColumn  = N'ResourceID',
+    @DynamicColumn     = N'PropertyName0',
+    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL 2014 data data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-        @TableName         = N'dbo.v_GS_EXT_SQL_2014_Property0',
-        @NonPivotedColumn  = N'ResourceID',
-        @DynamicColumn     = N'PropertyName0',
-        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName         = N'dbo.v_GS_EXT_SQL_2014_Property0',
+    @NonPivotedColumn  = N'ResourceID',
+    @DynamicColumn     = N'PropertyName0',
+    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL 2012 data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-        @TableName         = N'dbo.v_GS_EXT_SQL_2012_Property0',
-        @NonPivotedColumn  = N'ResourceID',
-        @DynamicColumn     = N'PropertyName0',
-        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName         = N'dbo.v_GS_EXT_SQL_2012_Property0',
+    @NonPivotedColumn  = N'ResourceID',
+    @DynamicColumn     = N'PropertyName0',
+    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL 2008 data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-        @TableName         = N'dbo.v_GS_EXT_SQL_2008_Property0',
-        @NonPivotedColumn  = N'ResourceID',
-        @DynamicColumn     = N'PropertyName0',
-        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName         = N'dbo.v_GS_EXT_SQL_2008_Property0',
+    @NonPivotedColumn  = N'ResourceID',
+    @DynamicColumn     = N'PropertyName0',
+    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL Legacy data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-        @TableName         = N'dbo.v_GS_EXT_SQL_Legacy_Property0',
-        @NonPivotedColumn  = N'ResourceID',
-        @DynamicColumn     = N'PropertyName0',
-        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName         = N'dbo.v_GS_EXT_SQL_Legacy_Property0',
+    @NonPivotedColumn  = N'ResourceID',
+    @DynamicColumn     = N'PropertyName0',
+    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Aggregate result data */
 SELECT
@@ -283,12 +283,12 @@ SELECT
     , SQLStates         = SQLProducts.SQLStates
 FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
     JOIN #SQLProducts AS SQLProducts ON SQLProducts.ResourceID = CollectionMembers.ResourceID
-    LEFT JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
-        AND SQLProductID.Version0 = ( ------------------------------>>>>>>>>>>>>> Change mof file to edition!!!!
+    JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
+        AND SQLProductID.Release0 = (
             SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4)
         )
         AND SQLProductID.ProductID0 IS NOT NULL
-    LEFT JOIN v_R_System AS Systems ON Systems.ResourceID = SQLProducts.ResourceID
+    JOIN v_R_System AS Systems ON Systems.ResourceID = SQLProducts.ResourceID
 WHERE CollectionMembers.CollectionID = @CollectionID
 
 /* Drop previously created objects */
