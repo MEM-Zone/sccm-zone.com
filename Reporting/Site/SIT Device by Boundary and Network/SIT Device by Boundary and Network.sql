@@ -72,7 +72,7 @@ AS (
                 ELSE Systems.Operating_System_Name_And0
             END
         )
-        , DomainOrWorkgroup = ISNULL(Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
+        , DomainOrWorkgroup = ISNULL(Systems.Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
         , ADSite            = CombinedResources.ADSiteName
         , SCCMSite          = Sites.SiteName
         , SCCMSiteCode      = CombinedResources.SiteCode
