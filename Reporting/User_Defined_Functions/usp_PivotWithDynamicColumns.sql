@@ -20,7 +20,7 @@
 .NOTES
     Created by Ioan Popovici.
     Credit to CSifiso W. Ndlovu.
-    Replace the <CM_Your_Site_Code> with your CM or custom database name.
+    Replace the <CM_Your_CM_DB> with your CM database name.
     Run the code in SQL Server Management Studio.
 .LINK
     https://www.sqlshack.com/multiple-options-to-transposing-rows-into-columns/ (Sifiso W. Ndlovu)
@@ -31,11 +31,11 @@
 */
 
 /*##=============================================*/
-/*## FUNCTION QUERY BODY                         */
+/*## QUERY BODY                                  */
 /*##=============================================*/
 /* #region FunctionQueryBody */
 
-USE [<CM_Your_Site_Code>]
+USE [<CM_Your_CM_DB>]
 GO
 
 SET NOCOUNT ON
@@ -99,10 +99,7 @@ AS
         EXECUTE dbo.sp_executesql @DynamicPivotQuery
     END;
 
-/* Send the current batch of Transact-SQL statements to instance for processing */
-GO
-
 /* #endregion */
 /*##=============================================*/
-/*## END FUNCTION QUERY BODY                     */
+/*## END QUERY BODY                              */
 /*##=============================================*/
