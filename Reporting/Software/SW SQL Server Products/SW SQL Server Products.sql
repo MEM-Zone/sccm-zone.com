@@ -5,7 +5,7 @@
     Gets SQL Product info, id and license key.
 .NOTES
     Created by Ioan Popovici.
-    Requires the usp_PivotWithDynamicColumns stored procedure (Embedded/Database).
+    Requires the usp_PivotWithDynamicColumns stored procedure.
     Requires SQL Property and ProductID extensions.
     Part of a report should not be run separately.
 .LINK
@@ -19,136 +19,23 @@
 */
 
 /*##=============================================*/
-/*## FUNCTION LISTINGS                           */
-/*##=============================================*/
-/* #region FunctionListings */
-
-/* #region usp_PivotWithDynamicColumns */
-/*
-.SYNOPSIS
-    Pivots with dynamic columns.
-.DESCRIPTION
-    Pivots with dynamic columns using dynamic SQL to get the pivot columns.
-.PARAMETER TableName
-    Specifies the source pivot table name.
-.PARAMETER NonPivotedColumn
-    Specifies the non pivoded column name.
-.PARAMETER DynamicColumn
-    Specifies the column form which to dinamically get the pivot column list.
-.PARAMETER AggregationColumn
-    Specifies the aggregation column.
-.EXAMPLE
-    EXECUTE usp_PivotWithDynamicColumns
-        @TableName         = N'SomeTableName'
-        @NonPivotedColumn  = N'ResourceID',
-        @DynamicColumn     = N'PropertyName0',
-        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
-.NOTES
-    Created by Ioan Popovici.
-    Credit to CSifiso W. Ndlovu.
-    Replace the <CM_Your_Site_Code> with your CM or custom database name.
-    Run the code in SQL Server Management Studio.
-.LINK
-    https://www.sqlshack.com/multiple-options-to-transposing-rows-into-columns/ (Sifiso W. Ndlovu)
-.LINK
-    https://SCCM.Zone
-.LINK
-    https://SCCM.Zone/Issues
-*/
-
-/*##=============================================*/
-/*## FUNCTION QUERY BODY                         */
-/*##=============================================*/
-/* #region FunctionQueryBody */
-
-SET NOCOUNT ON
-GO
-
-IF OBJECT_ID('dbo.usp_PivotWithDynamicColumns', 'P') IS NOT NULL
-    DROP PROCEDURE dbo.usp_PivotWithDynamicColumns;
-GO
-
-CREATE PROCEDURE dbo.usp_PivotWithDynamicColumns (
-    @TableName           AS NVARCHAR(MAX)
-    , @NonPivotedColumn  AS NVARCHAR(MAX)
-    , @DynamicColumn     AS NVARCHAR(MAX)
-    , @AggregationColumn AS NVARCHAR(MAX)
-)
-AS
-    BEGIN
-
-        /* Variable declaration */
-        DECLARE @DynamicColumnQuery AS NVARCHAR(MAX);
-        DECLARE @DynamicPivotQuery  AS NVARCHAR(MAX);
-        DECLARE @ColumnList         AS NVARCHAR(MAX);
-
-        /* Assemble pivot columns query */
-        SET @DynamicColumnQuery = ('
-            SET @ColumnList = (
-                STUFF(
-                    (
-                        SELECT DISTINCT
-                            '','' + QUOTENAME(DB.'+@DynamicColumn+')
-                        FROM '+@TableName+' AS DB
-                        FOR XML PATH(''''), TYPE
-                    ).value(''.'', ''NVARCHAR(MAX)'')
-                    , 1, 1, ''''
-                )
-            )
-        ')
-
-        /* Get pivot columns dynamically and output to @ColumnList variable */
-        EXECUTE dbo.sp_executesql @DynamicColumnQuery
-            , N'@TableName NVARCHAR(MAX), @DynamicColumn NVARCHAR(MAX), @ColumnList NVARCHAR(MAX) OUTPUT'
-            , @TableName
-            , @DynamicColumn
-            , @ColumnList OUTPUT
-
-        /* Assemble pivot query */
-        SET @DynamicPivotQuery = ('
-            SELECT
-                '+@NonPivotedColumn+', '+@ColumnList+'
-            FROM (
-                SELECT
-                    '+@NonPivotedColumn+'
-                    , DynamicColumnAlias    = '+@DynamicColumn+'
-                    , AggregationAlias      = '+@AggregationColumn+'
-            FROM '+@TableName+'
-            )
-            SEARCH PIVOT (MAX(AggregationAlias) FOR DynamicColumnAlias IN ('+@ColumnList+'))p
-        ') --'p' is intentional, do not remove!
-
-        /* Perform pivot */
-        EXECUTE dbo.sp_executesql @DynamicPivotQuery
-    END;
-
-/* Send the current batch of Transact-SQL statements to instance for processing */
-GO
-
-/* #endregion */
-/*##=============================================*/
-/*## END FUNCTION QUERY BODY                     */
-/*##=============================================*/
-/* #endregion */
-
-/* #endregion */
-/*##=============================================*/
-/*## END FUNCTION LISTINGS                       */
-/*##=============================================*/
-
-/*##=============================================*/
 /*## QUERY BODY                                  */
 /*##=============================================*/
 /* #region QueryBody */
 
+/* Test variable declaration !! Need to be commented for Production !! */
+--DECLARE @UserSIDs        AS NVARCHAR(10) = 'Disabled';
+--DECLARE @CollectionID    AS NVARCHAR(10) = 'SMS00001';
+
+/* Variable declaration */
+DECLARE @TableName         AS NVARCHAR(MAX);
+DECLARE @NonPivotedColumn  AS NVARCHAR(MAX);
+DECLARE @DynamicColumn     AS NVARCHAR(MAX);
+DECLARE @AggregationColumn AS NVARCHAR(MAX);
+
 /* Perform cleanup */
 IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
     DROP TABLE #SQLProducts;
-GO
-
-/* Testing variables !! Need to be commented for Production !! */
-DECLARE @UserSIDs       AS NVARCHAR(10) = 'Disabled';
-DECLARE @CollectionID   AS NVARCHAR(10) = 'SMS00001';
 
 /* Create SQLProducts table */
 CREATE TABLE #SQLProducts (
@@ -192,55 +79,55 @@ VALUES
 /* Get SQL 2017 data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-    @TableName         = N'dbo.v_GS_EXT_SQL_2017_Property0',
-    @NonPivotedColumn  = N'ResourceID',
-    @DynamicColumn     = N'PropertyName0',
-    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName           = N'dbo.v_GS_EXT_SQL_2017_Property0'
+    , @NonPivotedColumn  = N'ResourceID'
+    , @DynamicColumn     = N'PropertyName0'
+    , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL 2016 data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-    @TableName         = N'dbo.v_GS_EXT_SQL_2016_Property0',
-    @NonPivotedColumn  = N'ResourceID',
-    @DynamicColumn     = N'PropertyName0',
-    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName           = N'dbo.v_GS_EXT_SQL_2016_Property0'
+    , @NonPivotedColumn  = N'ResourceID'
+    , @DynamicColumn     = N'PropertyName0'
+    , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL 2014 data data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-    @TableName         = N'dbo.v_GS_EXT_SQL_2014_Property0',
-    @NonPivotedColumn  = N'ResourceID',
-    @DynamicColumn     = N'PropertyName0',
-    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName           = N'dbo.v_GS_EXT_SQL_2014_Property0'
+    , @NonPivotedColumn  = N'ResourceID'
+    , @DynamicColumn     = N'PropertyName0'
+    , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL 2012 data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-    @TableName         = N'dbo.v_GS_EXT_SQL_2012_Property0',
-    @NonPivotedColumn  = N'ResourceID',
-    @DynamicColumn     = N'PropertyName0',
-    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName           = N'dbo.v_GS_EXT_SQL_2012_Property0'
+    , @NonPivotedColumn  = N'ResourceID'
+    , @DynamicColumn     = N'PropertyName0'
+    , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL 2008 data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-    @TableName         = N'dbo.v_GS_EXT_SQL_2008_Property0',
-    @NonPivotedColumn  = N'ResourceID',
-    @DynamicColumn     = N'PropertyName0',
-    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName           = N'dbo.v_GS_EXT_SQL_2008_Property0'
+    , @NonPivotedColumn  = N'ResourceID'
+    , @DynamicColumn     = N'PropertyName0'
+    , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Get SQL Legacy data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-    @TableName         = N'dbo.v_GS_EXT_SQL_Legacy_Property0',
-    @NonPivotedColumn  = N'ResourceID',
-    @DynamicColumn     = N'PropertyName0',
-    @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    @TableName         = N'dbo.v_GS_EXT_SQL_Legacy_Property0'
+    , @NonPivotedColumn  = N'ResourceID'
+    , @DynamicColumn     = N'PropertyName0'
+    , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
 
 /* Aggregate result data */
 SELECT
     Device              = Devices.[Name]
-    , Domain            = Systems.Full_Domain_Name0
+    , DomainOrWorkgroup = ISNULL(Systems.Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
     , OperatingSystem   = (
 
         /* Get OS caption by version */
@@ -271,6 +158,15 @@ SELECT
     , Release           = (
         'SQL ' + (SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4))
     )
+    , EditionGroup      = (
+        CASE
+            WHEN SQLProducts.SKUName LIKE '%devel%' THEN 'Developer'
+            WHEN SQLProducts.SKUName LIKE '%workg%' THEN 'Workgroup'
+            WHEN SQLProducts.SKUName LIKE '%stand%' THEN 'Standard'
+            WHEN SQLProducts.SKUName LIKE '%enter%' THEN 'Enterprise'
+            ELSE SQLProducts.SKUName
+        END
+    )
     , [Edition]         = SQLProducts.SKUName
     , ServicePack       = SQLProducts.SPLevel
     , [Version]         = SQLProducts.[Version]
@@ -283,7 +179,7 @@ SELECT
         END
     )
     , ProductID         = SQLProductID.ProductID0
-    , ProductKey        = SQLProductID.DigitalProductID0
+    , ProductKey        = ISNULL(SQLProductID.DigitalProductID0, 'N/A')
     , InstanceID        = SQLProducts.InstanceID
     , IsVirtualMachine  = (
         CASE Devices.IsVirtualMachine
@@ -332,6 +228,7 @@ WHERE CollectionMembers.CollectionID = @CollectionID
 GROUP BY
     Devices.[Name]
 	, Systems.Full_Domain_Name0
+    , Systems.Resource_Domain_Or_Workgr0
 	, Systems.Operating_System_Name_and0
 	, Systems.Build01
     , SQLProducts.FileVersion
@@ -356,12 +253,9 @@ GROUP BY
     , SQLProducts.SQMReproting
     , SQLProducts.SQLStates
 
-/* Drop previously created objects */
-IF OBJECT_ID('dbo.usp_PivotWithDynamicColumns', 'P') IS NOT NULL
-    DROP PROCEDURE dbo.usp_PivotWithDynamicColumns;
+/* Perform cleanup */
 IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
     DROP TABLE #SQLProducts;
-GO
 
 /* #endregion */
 /*##=============================================*/
