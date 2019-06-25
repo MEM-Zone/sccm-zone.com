@@ -188,8 +188,8 @@ SELECT
         END
     )
     , CPUs              = COUNT(Processor.ResourceID)
-    , CPUCores          = Processor.NumberOfCores0
-    , LogicalProcessors = Processor.NumberOfLogicalProcessors0
+    , PhysicalCores     = SUM(Processor.NumberOfCores0)
+    , LogicalCores      = SUM(Processor.NumberOfLogicalProcessors0)
     , [Clustered]       = (
         CASE SQLProducts.[Clustered]
             WHEN 0 THEN 'No'
