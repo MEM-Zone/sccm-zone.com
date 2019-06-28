@@ -1,19 +1,19 @@
 /*
 .SYNOPSIS
-    Gets SQL Product info.
+    Gets SQL product info.
 .DESCRIPTION
-    Gets SQL Product info, id and license key.
+    Gets SQL product info, id and product key.
 .NOTES
     Created by Ioan Popovici.
     Requires the usp_PivotWithDynamicColumns stored procedure.
     Requires SQL Property and ProductID extensions.
     Part of a report should not be run separately.
 .LINK
-    https://SCCM.Zone/SW-SQL-Server-Porducts
+    https://SCCM.Zone/SW-SQL-Server-Products
 .LINK
-    https://SCCM.Zone/SW-SQL-Server-Porducts-CHANGELOG
+    https://SCCM.Zone/SW-SQL-Server-Products-CHANGELOG
 .LINK
-    https://SCCM.Zone/SW-SQL-Server-Porducts-GIT
+    https://SCCM.Zone/SW-SQL-Server-Products-GIT
 .LINK
     https://SCCM.Zone/Issues
 */

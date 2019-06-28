@@ -98,6 +98,11 @@ AS
         /* Perform pivot */
         EXECUTE dbo.sp_executesql @DynamicPivotQuery
     END;
+GO
+
+/* Grants execute rights for this stored procedure to SCCM reporting users */
+GRANT EXECUTE ON OBJECT::dbo.usp_PivotWithDynamicColumns
+    TO smsschm_users;
 
 /* #endregion */
 /*##=============================================*/
