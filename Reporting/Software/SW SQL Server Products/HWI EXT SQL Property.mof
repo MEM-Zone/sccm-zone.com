@@ -5,6 +5,16 @@
 //-- Set default WMI namespace
 #Pragma NameSpace("\\\\.\\ROOT\\cimv2")
 
+//----------| Old SQL extension cleanup |---------
+
+//-- !! UNCOMMENT TO ACTIVATE !! (Remove '//' from '//#Pragma')
+//#Pragma DeleteClass("SQL_2017", NOFAIL)
+//#Pragma DeleteClass("SQL_2016", NOFAIL)
+//#Pragma DeleteClass("SQL_2014", NOFAIL)
+//#Pragma DeleteClass("SQL_2012", NOFAIL)
+//#Pragma DeleteClass("SQL_2008", NOFAIL)
+//#Pragma DeleteClass("SQL_2000_And_2005", NOFAIL)
+
 //---------------| SQL 2017 class |---------------
 
 //-- Create custom WMI class
