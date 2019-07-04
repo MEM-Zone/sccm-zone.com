@@ -8,6 +8,7 @@
     * Added: Product Key, Clustered, Operating System, VM, CPUs, Physical Cored, Logical Cores information
     * Release is not a hack anymore
     * Code repetition, property name guessing and duplicates have been almst eliminated by pivoting the result table and using a stored procedure.
+    * Report and report template have been updated to the new standard template.
 
 ## 1.0 - 2016-02-08
 
