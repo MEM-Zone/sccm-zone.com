@@ -124,7 +124,7 @@ CREATE TABLE #SQLProducts (
     , SKUName           NVARCHAR(100)
     , SPLevel           NVARCHAR(2)
     , SQLStates         NVARCHAR(10)
-    , SQMReproting      BIT
+    , SQMReporting      BIT
     , StartupParameters NVARCHAR(MAX)
     , [Version]         NVARCHAR(25)
     , VSName            NVARCHAR(50)
@@ -189,7 +189,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
 /* Get SQL Legacy data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-    @TableName         = N'dbo.v_GS_EXT_SQL_Legacy_Property0'
+    @TableName           = N'dbo.v_GS_EXT_SQL_Legacy_Property0'
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
@@ -218,7 +218,7 @@ SELECT
             WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
             WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
                 CASE
-                    WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) &gt; 10017763 THEN 'Windows Server 2019'
+                    WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) > 10017763 THEN 'Windows Server 2019'
                     ELSE 'Windows Server 2016'
                 END
             )
@@ -277,8 +277,8 @@ SELECT
             ELSE 'Yes'
         END
     )
-    , SQMReproting      = (
-        CASE SQLProducts.SQMReproting
+    , SQMReporting      = (
+        CASE SQLProducts.SQMReporting
             WHEN 0 THEN 'No'
             ELSE 'Yes'
         END
@@ -320,7 +320,7 @@ GROUP BY
     , SQLProducts.Datapath
     , SQLProducts.DumpDir
     , SQLProducts.ErrorReporting
-    , SQLProducts.SQMReproting
+    , SQLProducts.SQMReporting
     , SQLProducts.SQLStates
 
 /* Perform cleanup */
@@ -434,8 +434,8 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
           <DataField>ErrorReporting</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="SQMReproting">
-          <DataField>SQMReproting</DataField>
+        <Field Name="SQMReporting">
+          <DataField>SQMReporting</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="SQLStates">

@@ -54,7 +54,7 @@ CREATE TABLE #SQLProducts (
     , SKUName           NVARCHAR(100)
     , SPLevel           NVARCHAR(2)
     , SQLStates         NVARCHAR(10)
-    , SQMReproting      BIT
+    , SQMReporting      BIT
     , StartupParameters NVARCHAR(MAX)
     , [Version]         NVARCHAR(25)
     , VSName            NVARCHAR(50)
@@ -119,7 +119,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
 /* Get SQL Legacy data */
 INSERT INTO #SQLProducts
 EXECUTE dbo.usp_PivotWithDynamicColumns
-    @TableName         = N'dbo.v_GS_EXT_SQL_Legacy_Property0'
+    @TableName           = N'dbo.v_GS_EXT_SQL_Legacy_Property0'
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
@@ -207,8 +207,8 @@ SELECT
             ELSE 'Yes'
         END
     )
-    , SQMReproting      = (
-        CASE SQLProducts.SQMReproting
+    , SQMReporting      = (
+        CASE SQLProducts.SQMReporting
             WHEN 0 THEN 'No'
             ELSE 'Yes'
         END
@@ -250,7 +250,7 @@ GROUP BY
     , SQLProducts.Datapath
     , SQLProducts.DumpDir
     , SQLProducts.ErrorReporting
-    , SQLProducts.SQMReproting
+    , SQLProducts.SQMReporting
     , SQLProducts.SQLStates
 
 /* Perform cleanup */
