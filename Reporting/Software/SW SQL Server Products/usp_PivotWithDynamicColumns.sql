@@ -11,16 +11,28 @@
     Specifies the column form which to dinamically get the pivot column list.
 .PARAMETER AggregationColumn
     Specifies the aggregation column.
+.PARAMETER StaticColumnList
+    Specifies the static column list for the pivot.
+    Note that specifying this parameter makes the pivot 'static'.
+    Must be NULL for the dynamic pivot to work.
 .EXAMPLE
     EXECUTE usp_PivotWithDynamicColumns
         @TableName         = N'SomeTableName'
         @NonPivotedColumn  = N'ResourceID',
         @DynamicColumn     = N'PropertyName0',
         @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+        @StaticColumnList  = NULL
+.EXAMPLE
+    EXECUTE usp_PivotWithDynamicColumns
+        @TableName         = N'SomeTableName'
+        @NonPivotedColumn  = N'ResourceID',
+        @DynamicColumn     = N'PropertyName0',
+        @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+        @StaticColumnList  = N'[Column1],[Column2],[Column3]'
 .NOTES
     Created by Ioan Popovici.
     Credit to CSifiso W. Ndlovu.
-    Replace the <CM_Your_CM_DB> with your CM database name.
+    Replace the <SITE_CODE> with your CM Site Code.
     Run the code in SQL Server Management Studio.
 .LINK
     https://www.sqlshack.com/multiple-options-to-transposing-rows-into-columns/ (Sifiso W. Ndlovu)
@@ -35,7 +47,7 @@
 /*##=============================================*/
 /* #region FunctionQueryBody */
 
-USE [<CM_Your_CM_DB>]
+USE [CM_<SITE_CODE>]
 GO
 
 SET NOCOUNT ON
@@ -50,6 +62,7 @@ CREATE PROCEDURE dbo.usp_PivotWithDynamicColumns (
     , @NonPivotedColumn  AS NVARCHAR(MAX)
     , @DynamicColumn     AS NVARCHAR(MAX)
     , @AggregationColumn AS NVARCHAR(MAX)
+    , @StaticColumnList  AS NVARCHAR(MAX)
 )
 AS
     BEGIN
@@ -59,27 +72,33 @@ AS
         DECLARE @DynamicPivotQuery  AS NVARCHAR(MAX);
         DECLARE @ColumnList         AS NVARCHAR(MAX);
 
-        /* Assemble pivot columns query */
-        SET @DynamicColumnQuery = ('
-            SET @ColumnList = (
-                STUFF(
-                    (
-                        SELECT DISTINCT
-                            '','' + QUOTENAME(DB.'+@DynamicColumn+')
-                        FROM '+@TableName+' AS DB
-                        FOR XML PATH(''''), TYPE
-                    ).value(''.'', ''NVARCHAR(MAX)'')
-                    , 1, 1, ''''
-                )
-            )
-        ')
+        IF @StaticColumnList IS NOT NULL
+            SET @ColumnList = @StaticColumnList
+        ELSE
+            BEGIN
+                /* Assemble pivot columns query */
+                SET @DynamicColumnQuery = ('
+                    SET @ColumnList = (
+                        STUFF(
+                            (
+                                SELECT DISTINCT
+                                    '','' + QUOTENAME(DB.'+@DynamicColumn+')
+                                FROM '+@TableName+' AS DB
+                                FOR XML PATH(''''), TYPE
+                            ).value(''.'', ''NVARCHAR(MAX)'')
+                            , 1, 1, ''''
+                        )
+                    )
+                ')
 
-        /* Get pivot columns dynamically and output to @ColumnList variable */
-        EXECUTE dbo.sp_executesql @DynamicColumnQuery
-            , N'@TableName NVARCHAR(MAX), @DynamicColumn NVARCHAR(MAX), @ColumnList NVARCHAR(MAX) OUTPUT'
-            , @TableName
-            , @DynamicColumn
-            , @ColumnList OUTPUT
+                /* Get pivot columns dynamically and output to @ColumnList variable */
+                EXECUTE dbo.sp_executesql @DynamicColumnQuery
+                    , N'@TableName NVARCHAR(MAX), @DynamicColumn NVARCHAR(MAX), @ColumnList NVARCHAR(MAX) OUTPUT'
+                    , @TableName
+                    , @DynamicColumn
+                    , @ColumnList OUTPUT
+                PRINT @ColumnList
+            END
 
         /* Assemble pivot query */
         SET @DynamicPivotQuery = ('

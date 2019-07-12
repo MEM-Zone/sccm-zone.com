@@ -32,6 +32,7 @@ DECLARE @TableName         AS NVARCHAR(MAX);
 DECLARE @NonPivotedColumn  AS NVARCHAR(MAX);
 DECLARE @DynamicColumn     AS NVARCHAR(MAX);
 DECLARE @AggregationColumn AS NVARCHAR(MAX);
+DECLARE @StaticColumnList  AS NVARCHAR(MAX);
 
 /* Perform cleanup */
 IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
@@ -40,28 +41,22 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
 /* Create SQLProducts table */
 CREATE TABLE #SQLProducts (
     ResourceID          NVARCHAR(25)
-    , [Clustered]       BIT
-    , Datapath          NVARCHAR(250)
-    , DumpDir           NVARCHAR(250)
-    , ErrorReporting    BIT
-    , FileVersion       NVARCHAR(50)
-    , InstallPath       NVARCHAR(250)
-    , InstanceID        NVARCHAR(100)
-    , IsWOW64           BIT
-    , [Language]        NVARCHAR(10)
-    , RegRoot           NVARCHAR(250)
     , SKU               NVARCHAR(100)
     , SKUName           NVARCHAR(100)
-    , SPLevel           NVARCHAR(2)
-    , SQLStates         NVARCHAR(10)
-    , SQMReporting      BIT
-    , StartupParameters NVARCHAR(MAX)
     , [Version]         NVARCHAR(25)
-    , VSName            NVARCHAR(50)
+    , FileVersion       NVARCHAR(50)
+    , SPLevel           NVARCHAR(2)
+    , InstanceID        NVARCHAR(100)
+    , IsClustered       NVARCHAR(3)
+    , IsWOW64           NVARCHAR(3)
+    , SQMReporting      NVARCHAR(3)
 )
 
 /* Initialize SQLRelease table */
 DECLARE @SQLRelease Table (FileVersion NVARCHAR(4), Release NVARCHAR(10))
+
+/* Populate StaticColumnList */
+SET @StaticColumnList = N'[SKUNAME],[SKU],[VERSION],[FILEVERSION],[SPLEVEL],[INSTANCEID],[CLUSTERED],[ISWOW64],[SQMREPORTING]'
 
 /* Populate SQLRelease table */
 INSERT INTO @SQLRelease (FileVersion, Release)
@@ -83,6 +78,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+	, @StaticColumnList  = @StaticColumnList
 
 /* Get SQL 2016 data */
 INSERT INTO #SQLProducts
@@ -91,6 +87,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList
 
 /* Get SQL 2014 data data */
 INSERT INTO #SQLProducts
@@ -99,6 +96,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList
 
 /* Get SQL 2012 data */
 INSERT INTO #SQLProducts
@@ -107,6 +105,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList
 
 /* Get SQL 2008 data */
 INSERT INTO #SQLProducts
@@ -115,6 +114,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList
 
 /* Get SQL Legacy data */
 INSERT INTO #SQLProducts
@@ -123,6 +123,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList
 
 /* Aggregate result data */
 SELECT
@@ -164,18 +165,29 @@ SELECT
             WHEN SQLProducts.SKUName LIKE '%workg%' THEN 'Workgroup'
             WHEN SQLProducts.SKUName LIKE '%stand%' THEN 'Standard'
             WHEN SQLProducts.SKUName LIKE '%enter%' THEN 'Enterprise'
+            WHEN SQLProducts.SKUName LIKE '%expre%' THEN 'Express'
+            WHEN SQLProducts.SKUName LIKE '%web%'   THEN 'Web'
+            WHEN SQLProducts.SKUName LIKE '%windo%' THEN 'WID'
+            WHEN SQLProducts.SKUName IS NULL        THEN 'N/A'
             ELSE SQLProducts.SKUName
         END
     )
-    , [Edition]         = SQLProducts.SKUName
+    , [Edition]         = ISNULL(NULLIF(SQLProducts.SKUName, ''), 'N/A')
     , ServicePack       = SQLProducts.SPLevel
     , [Version]         = SQLProducts.[Version]
     , CUVersion         = SQLProducts.FileVersion
-    , [Language]        = SQLProducts.[Language]
     , Bitness           = (
+        CASE
+            WHEN SQLProducts.SKUName LIKE '%64%' THEN 'x64'
+            WHEN SQLProducts.SKUName IS NOT NULL THEN 'x86'
+            ELSE 'N/A'
+        END
+    )
+    , IsWOW64           = (
         CASE SQLProducts.IsWOW64
-            WHEN 0 THEN 'x64'
-            ELSE 'x86'
+            WHEN 0 THEN 'No'
+            WHEN 1 THEN 'Yes'
+            ELSE NULL
         END
     )
     , ProductID         = SQLProductID.ProductID0
@@ -183,37 +195,28 @@ SELECT
     , InstanceID        = SQLProducts.InstanceID
     , IsVirtualMachine  = (
         CASE Devices.IsVirtualMachine
-          WHEN 0 THEN 'No'
-            ELSE 'Yes'
+            WHEN 0 THEN 'No'
+            WHEN 1 THEN 'Yes'
+            ELSE NULL
         END
     )
     , CPUs              = COUNT(Processor.ResourceID)
     , PhysicalCores     = SUM(Processor.NumberOfCores0)
     , LogicalCores      = SUM(Processor.NumberOfLogicalProcessors0)
-    , [Clustered]       = (
-        CASE SQLProducts.[Clustered]
+    , IsClustered       = (
+        CASE SQLProducts.IsClustered
             WHEN 0 THEN 'No'
-            ELSE 'Yes'
+            WHEN 1 THEN 'Yes'
+            ELSE NULL
         END
     )
-    , NetworkName       = SQLProducts.VSName
-    , StartupParameters = SQLProducts.StartupParameters
-    , RegistryRoot      = SQLProducts.RegRoot
-    , DataPath          = SQLProducts.Datapath
-    , LogPath           = SQLProducts.DumpDir
-    , ErrorReporting    = (
-        CASE SQLProducts.ErrorReporting
-            WHEN 0 THEN 'No'
-            ELSE 'Yes'
-        END
-    )
-    , SQMReporting      = (
+    , CEIPReporting      = (
         CASE SQLProducts.SQMReporting
             WHEN 0 THEN 'No'
-            ELSE 'Yes'
+            WHEN 1 THEN 'Yes'
+            ELSE NULL
         END
     )
-    , SQLStates         = SQLProducts.SQLStates
 FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
     JOIN v_R_System AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
     JOIN v_CombinedDeviceResources AS Devices ON Devices.MachineID = CollectionMembers.ResourceID
@@ -235,7 +238,6 @@ GROUP BY
     , SQLProducts.SKUName
     , SQLProducts.SPLevel
     , SQLProducts.[Version]
-    , SQLProducts.[Language]
     , SQLProducts.IsWOW64
     , SQLProductID.ProductID0
     , SQLProductID.DigitalProductID0
@@ -243,15 +245,8 @@ GROUP BY
     , Devices.IsVirtualMachine
     , Processor.NumberOfCores0
     , Processor.NumberOfLogicalProcessors0
-    , SQLProducts.[Clustered]
-    , SQLProducts.VSName
-    , SQLProducts.StartupParameters
-    , SQLProducts.RegRoot
-    , SQLProducts.Datapath
-    , SQLProducts.DumpDir
-    , SQLProducts.ErrorReporting
+    , SQLProducts.IsClustered
     , SQLProducts.SQMReporting
-    , SQLProducts.SQLStates
 
 /* Perform cleanup */
 IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
