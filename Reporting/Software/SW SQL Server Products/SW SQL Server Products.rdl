@@ -67,6 +67,10 @@ ORDER BY
           <QueryParameter Name="@CollectionID">
             <Value>=Parameters!CollectionID.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@Filter">
+            <Value>=Join(Parameters!Filter.Value, ",")</Value>
+            <rd:UserDefined>true</rd:UserDefined>
+          </QueryParameter>
         </QueryParameters>
         <CommandText>/*
 .SYNOPSIS
@@ -76,7 +80,7 @@ ORDER BY
 .NOTES
     Created by Ioan Popovici.
     Requires the usp_PivotWithDynamicColumns stored procedure.
-    Requires SQL Property and ProductID extensions.
+    Requires SQL Property and ProductID HWI extensions.
     Part of a report should not be run separately.
 .LINK
     https://SCCM.Zone/SW-SQL-Server-Products
@@ -94,14 +98,16 @@ ORDER BY
 /* #region QueryBody */
 
 /* Test variable declaration !! Need to be commented for Production !! */
---DECLARE @UserSIDs        AS NVARCHAR(10) = 'Disabled';
---DECLARE @CollectionID    AS NVARCHAR(10) = 'SMS00001';
+--DECLARE @UserSIDs          AS NVARCHAR(10) = 'Disabled';
+--DECLARE @CollectionID      AS NVARCHAR(10) = 'SMS00001';
+--DECLARE @Filter            AS NVARCHAR(20) = 'WID';
 
 /* Variable declaration */
 DECLARE @TableName         AS NVARCHAR(MAX);
 DECLARE @NonPivotedColumn  AS NVARCHAR(MAX);
 DECLARE @DynamicColumn     AS NVARCHAR(MAX);
 DECLARE @AggregationColumn AS NVARCHAR(MAX);
+DECLARE @StaticColumnList  AS NVARCHAR(MAX);
 
 /* Perform cleanup */
 IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
@@ -110,28 +116,19 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
 /* Create SQLProducts table */
 CREATE TABLE #SQLProducts (
     ResourceID          NVARCHAR(25)
-    , [Clustered]       BIT
-    , Datapath          NVARCHAR(250)
-    , DumpDir           NVARCHAR(250)
-    , ErrorReporting    BIT
-    , FileVersion       NVARCHAR(50)
-    , InstallPath       NVARCHAR(250)
-    , InstanceID        NVARCHAR(100)
-    , IsWOW64           BIT
-    , [Language]        NVARCHAR(10)
-    , RegRoot           NVARCHAR(250)
-    , SKU               NVARCHAR(100)
     , SKUName           NVARCHAR(100)
-    , SPLevel           NVARCHAR(2)
-    , SQLStates         NVARCHAR(10)
-    , SQMReporting      BIT
-    , StartupParameters NVARCHAR(MAX)
     , [Version]         NVARCHAR(25)
-    , VSName            NVARCHAR(50)
+    , FileVersion       NVARCHAR(50)
+    , SPLevel           NVARCHAR(2)
+    , IsClustered       NVARCHAR(3)
+    , SQMReporting      NVARCHAR(3)
 )
 
 /* Initialize SQLRelease table */
 DECLARE @SQLRelease Table (FileVersion NVARCHAR(4), Release NVARCHAR(10))
+
+/* Populate StaticColumnList */
+SET @StaticColumnList = N'[SKUNAME],[VERSION],[FILEVERSION],[SPLEVEL],[CLUSTERED],[SQMREPORTING]'
 
 /* Populate SQLRelease table */
 INSERT INTO @SQLRelease (FileVersion, Release)
@@ -153,6 +150,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+	, @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2016 data */
 INSERT INTO #SQLProducts
@@ -161,6 +159,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2014 data data */
 INSERT INTO #SQLProducts
@@ -169,6 +168,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2012 data */
 INSERT INTO #SQLProducts
@@ -177,6 +177,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2008 data */
 INSERT INTO #SQLProducts
@@ -185,6 +186,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL Legacy data */
 INSERT INTO #SQLProducts
@@ -193,135 +195,141 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Aggregate result data */
-SELECT
-    Device              = Devices.[Name]
-    , DomainOrWorkgroup = ISNULL(Systems.Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
-    , OperatingSystem   = (
-
-        /* Get OS caption by version */
-        CASE
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 5.%'              THEN 'Windows XP'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.0%'             THEN 'Windows Vista'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.1%'             THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 LIKE 'Windows_7 Entreprise 6.1'      THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 =    'Windows Embedded Standard 6.1' THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.2%'             THEN 'Windows 8'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.3%'             THEN 'Windows 8.1'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 5.%'                   THEN 'Windows Server 2003'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.0%'                  THEN 'Windows Server 2008'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.1%'                  THEN 'Windows Server 2008 R2'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.2%'                  THEN 'Windows Server 2012'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
-                CASE
-                    WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) > 10017763 THEN 'Windows Server 2019'
-                    ELSE 'Windows Server 2016'
-                END
-            )
-            ELSE Systems.Operating_System_Name_And0
-        END
-    )
-    , Release           = (
-        'SQL ' + (SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4))
-    )
-    , EditionGroup      = (
-        CASE
-            WHEN SQLProducts.SKUName LIKE '%devel%' THEN 'Developer'
-            WHEN SQLProducts.SKUName LIKE '%workg%' THEN 'Workgroup'
-            WHEN SQLProducts.SKUName LIKE '%stand%' THEN 'Standard'
-            WHEN SQLProducts.SKUName LIKE '%enter%' THEN 'Enterprise'
-            ELSE SQLProducts.SKUName
-        END
-    )
-    , [Edition]         = SQLProducts.SKUName
-    , ServicePack       = SQLProducts.SPLevel
-    , [Version]         = SQLProducts.[Version]
-    , CUVersion         = SQLProducts.FileVersion
-    , [Language]        = SQLProducts.[Language]
-    , Bitness           = (
-        CASE SQLProducts.IsWOW64
-            WHEN 0 THEN 'x64'
-            ELSE 'x86'
-        END
-    )
-    , ProductID         = SQLProductID.ProductID0
-    , ProductKey        = ISNULL(SQLProductID.DigitalProductID0, 'N/A')
-    , InstanceID        = SQLProducts.InstanceID
-    , IsVirtualMachine  = (
-        CASE Devices.IsVirtualMachine
-          WHEN 0 THEN 'No'
-            ELSE 'Yes'
-        END
-    )
-    , CPUs              = COUNT(Processor.ResourceID)
-    , PhysicalCores     = SUM(Processor.NumberOfCores0)
-    , LogicalCores      = SUM(Processor.NumberOfLogicalProcessors0)
-    , [Clustered]       = (
-        CASE SQLProducts.[Clustered]
-            WHEN 0 THEN 'No'
-            ELSE 'Yes'
-        END
-    )
-    , NetworkName       = SQLProducts.VSName
-    , StartupParameters = SQLProducts.StartupParameters
-    , RegistryRoot      = SQLProducts.RegRoot
-    , DataPath          = SQLProducts.Datapath
-    , LogPath           = SQLProducts.DumpDir
-    , ErrorReporting    = (
-        CASE SQLProducts.ErrorReporting
-            WHEN 0 THEN 'No'
-            ELSE 'Yes'
-        END
-    )
-    , SQMReporting      = (
-        CASE SQLProducts.SQMReporting
-            WHEN 0 THEN 'No'
-            ELSE 'Yes'
-        END
-    )
-    , SQLStates         = SQLProducts.SQLStates
-FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
-    JOIN v_R_System AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
-    JOIN v_CombinedDeviceResources AS Devices ON Devices.MachineID = CollectionMembers.ResourceID
-    JOIN v_GS_PROCESSOR AS Processor ON Processor.ResourceID = CollectionMembers.ResourceID
-    JOIN #SQLProducts AS SQLProducts ON SQLProducts.ResourceID = CollectionMembers.ResourceID
-    LEFT JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
-        AND SQLProductID.Release0 = (
-            SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4)
+WITH SQLProducts_CTE (Release, EditionGroup, [Edition], [Version], ServicePack, CUVersion, IsClustered, Bitness, CEIPReporting, ProductKey, Device, DomainOrWorkgroup, OperatingSystem, IsVirtualMachine, CPUs, PhysicalCores, LogicalCores)
+AS (
+    SELECT
+        Release             = (
+            'SQL ' + (SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4))
         )
-        AND SQLProductID.ProductID0 IS NOT NULL
-WHERE CollectionMembers.CollectionID = @CollectionID
-GROUP BY
-    Devices.[Name]
-	, Systems.Full_Domain_Name0
-    , Systems.Resource_Domain_Or_Workgr0
-	, Systems.Operating_System_Name_and0
-	, Systems.Build01
-    , SQLProducts.FileVersion
-    , SQLProducts.SKUName
-    , SQLProducts.SPLevel
-    , SQLProducts.[Version]
-    , SQLProducts.[Language]
-    , SQLProducts.IsWOW64
-    , SQLProductID.ProductID0
-    , SQLProductID.DigitalProductID0
-    , SQLProducts.InstanceID
-    , Devices.IsVirtualMachine
-    , Processor.NumberOfCores0
-    , Processor.NumberOfLogicalProcessors0
-    , SQLProducts.[Clustered]
-    , SQLProducts.VSName
-    , SQLProducts.StartupParameters
-    , SQLProducts.RegRoot
-    , SQLProducts.Datapath
-    , SQLProducts.DumpDir
-    , SQLProducts.ErrorReporting
-    , SQLProducts.SQMReporting
-    , SQLProducts.SQLStates
+        , EditionGroup      = (
+            CASE
+                WHEN SQLProducts.SKUName LIKE '%enter%' THEN 'Enterprise'
+                WHEN SQLProducts.SKUName LIKE '%stand%' THEN 'Standard'
+                WHEN SQLProducts.SKUName LIKE '%expre%' THEN 'Express'
+                WHEN SQLProducts.SKUName LIKE '%devel%' THEN 'Developer'
+                WHEN SQLProducts.SKUName LIKE '%windo%' THEN 'WID'
+                WHEN SQLProducts.SKUName IS NULL        THEN 'N/A'
+                ELSE 'Legacy'
+            END
+        )
+        , [Edition]         = ISNULL(NULLIF(SQLProducts.SKUName, ''), 'N/A')
+        , [Version]         = SQLProducts.[Version]
+        , ServicePack       = SQLProducts.SPLevel
+        , CUVersion         = SQLProducts.FileVersion
+        , IsClustered       = (
+            CASE SQLProducts.IsClustered
+                WHEN 0 THEN 'No'
+                WHEN 1 THEN 'Yes'
+                ELSE NULL
+            END
+        )
+        , Bitness           = (
+            CASE
+                WHEN SQLProducts.SKUName LIKE '%64%' THEN 'x64'
+                WHEN SQLProducts.SKUName IS NOT NULL THEN 'x86'
+                ELSE 'N/A'
+            END
+        )
+        , CEIPReporting     = (
+            CASE SQLProducts.SQMReporting
+                WHEN 0 THEN 'No'
+                WHEN 1 THEN 'Yes'
+                ELSE NULL
+            END
+        )
+        , ProductKey        = ISNULL(SQLProductID.DigitalProductID0, 'N/A')
+        , Device            = Devices.[Name]
+        , DomainOrWorkgroup = ISNULL(Systems.Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
+        , OperatingSystem   = (
+
+            /* Get OS caption by version */
+            CASE
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 5.%'              THEN 'Windows XP'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.0%'             THEN 'Windows Vista'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.1%'             THEN 'Windows 7'
+                WHEN Systems.Operating_System_Name_And0 LIKE 'Windows_7 Entreprise 6.1'      THEN 'Windows 7'
+                WHEN Systems.Operating_System_Name_And0 =    'Windows Embedded Standard 6.1' THEN 'Windows 7'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.2%'             THEN 'Windows 8'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.3%'             THEN 'Windows 8.1'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 5.%'                   THEN 'Windows Server 2003'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.0%'                  THEN 'Windows Server 2008'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.1%'                  THEN 'Windows Server 2008 R2'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.2%'                  THEN 'Windows Server 2012'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
+                    CASE
+                        WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) &gt; 10017763 THEN 'Windows Server 2019'
+                        ELSE 'Windows Server 2016'
+                    END
+                )
+                ELSE Systems.Operating_System_Name_And0
+            END
+        )
+        , IsVirtualMachine  = (
+            CASE Devices.IsVirtualMachine
+                WHEN 0 THEN 'No'
+                WHEN 1 THEN 'Yes'
+                ELSE NULL
+            END
+        )
+        , CPUs              = COUNT(Processor.ResourceID)
+        , PhysicalCores     = SUM(Processor.NumberOfCores0)
+        , LogicalCores      = SUM(Processor.NumberOfLogicalProcessors0)
+    FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
+        JOIN v_R_System AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
+        JOIN v_CombinedDeviceResources AS Devices ON Devices.MachineID = CollectionMembers.ResourceID
+        JOIN v_GS_PROCESSOR AS Processor ON Processor.ResourceID = CollectionMembers.ResourceID
+        JOIN #SQLProducts AS SQLProducts ON SQLProducts.ResourceID = CollectionMembers.ResourceID
+        LEFT JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
+            AND SQLProductID.Release0 = (
+                SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4)
+            )
+            AND SQLProductID.ProductID0 IS NOT NULL
+    WHERE CollectionMembers.CollectionID = @CollectionID
+    GROUP BY
+        SQLProducts.FileVersion
+        , SQLProducts.SKUName
+        , SQLProducts.[Version]
+        , SQLProducts.SPLevel
+        , SQLProducts.IsClustered
+        , SQLProducts.SQMReporting
+        , SQLProductID.DigitalProductID0
+        , Devices.[Name]
+        , Systems.Full_Domain_Name0
+        , Systems.Resource_Domain_Or_Workgr0
+        , Systems.Operating_System_Name_and0
+        , Systems.Build01
+        , Devices.IsVirtualMachine
+        , Processor.NumberOfCores0
+        , Processor.NumberOfLogicalProcessors0
+)
+
+/* Filter results */
+SELECT
+    Release
+    , EditionGroup
+    , [Edition]
+    , [Version]
+    , ServicePack
+    , CUVersion
+    , IsClustered
+    , Bitness
+    , CEIPReporting
+    , ProductKey
+    , Device
+    , DomainOrWorkgroup
+    , OperatingSystem
+    , IsVirtualMachine
+    , CPUs
+    , PhysicalCores
+    , LogicalCores
+FROM SQLProducts_CTE
+WHERE EditionGroup NOT IN (@Filter)
 
 /* Perform cleanup */
 IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
@@ -358,28 +366,12 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
           <DataField>ServicePack</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="Language">
-          <DataField>Language</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="Bitness">
           <DataField>Bitness</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="ProductID">
-          <DataField>ProductID</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="ProductKey">
           <DataField>ProductKey</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Clustered">
-          <DataField>Clustered</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="NetworkName">
-          <DataField>NetworkName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="Device">
@@ -410,36 +402,12 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
           <DataField>LogicalCores</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="InstanceID">
-          <DataField>InstanceID</DataField>
+        <Field Name="IsClustered">
+          <DataField>IsClustered</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="StartupParameters">
-          <DataField>StartupParameters</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="RegistryRoot">
-          <DataField>RegistryRoot</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="DataPath">
-          <DataField>DataPath</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="LogPath">
-          <DataField>LogPath</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="ErrorReporting">
-          <DataField>ErrorReporting</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="SQMReporting">
-          <DataField>SQMReporting</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="SQLStates">
-          <DataField>SQLStates</DataField>
+        <Field Name="CEIPReporting">
+          <DataField>CEIPReporting</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -560,7 +528,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
             <Top>0.44815in</Top>
             <Left>0.04887in</Left>
             <Height>0in</Height>
-            <Width>19.69531in</Width>
+            <Width>20.67956in</Width>
             <ZIndex>1</ZIndex>
             <Style>
               <Border>
@@ -1370,16 +1338,17 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox288">
+                        <Textbox Name="TV_Total_DevicesPerEditionGroup">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=CountDistinct(Fields!Device.Value)</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1388,7 +1357,6 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox288</rd:DefaultName>
                           <Style>
                             <Border>
                               <Style>None</Style>
@@ -1608,16 +1576,17 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="TV_Total_DevicesPerEditionGroup">
+                        <Textbox Name="Textbox10">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=CountDistinct(Fields!Device.Value)</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1626,6 +1595,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <rd:DefaultName>Textbox10</rd:DefaultName>
                           <Style>
                             <Border>
                               <Style>None</Style>
@@ -1852,7 +1822,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="TV_Total_DevicesPerEdition">
+                        <Textbox Name="TV_Total_DevicesPerKey">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -2449,10 +2419,10 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                           <TablixHeader>
                                             <Size>2.38063cm</Size>
                                             <CellContents>
-                                              <Textbox Name="TH_Clustered">
+                                              <Textbox Name="TH_IsClustered">
                                                 <CanGrow>true</CanGrow>
                                                 <UserSort>
-                                                  <SortExpression>=Fields!Clustered.Value</SortExpression>
+                                                  <SortExpression>=Fields!IsClustered.Value</SortExpression>
                                                   <SortExpressionScope>Edition</SortExpressionScope>
                                                 </UserSort>
                                                 <KeepTogether>true</KeepTogether>
@@ -2543,16 +2513,20 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                               <TablixMembers>
                                                 <TablixMember>
                                                   <TablixHeader>
-                                                    <Size>5.82021cm</Size>
+                                                    <Size>2.5cm</Size>
                                                     <CellContents>
-                                                      <Textbox Name="TH_ProductKey">
+                                                      <Textbox Name="TH_CEIPReporting">
                                                         <CanGrow>true</CanGrow>
+                                                        <UserSort>
+                                                          <SortExpression>=Fields!CEIPReporting.Value</SortExpression>
+                                                          <SortExpressionScope>Edition</SortExpressionScope>
+                                                        </UserSort>
                                                         <KeepTogether>true</KeepTogether>
                                                         <Paragraphs>
                                                           <Paragraph>
                                                             <TextRuns>
                                                               <TextRun>
-                                                                <Value>=SrsResources.Localization.GetString("ProductKey", User!Language)</Value>
+                                                                <Value>=SrsResources.Localization.GetString("CEIP", User!Language)</Value>
                                                                 <Style>
                                                                   <FontFamily>Segoe UI</FontFamily>
                                                                   <FontWeight>Bold</FontWeight>
@@ -2587,19 +2561,16 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                   <TablixMembers>
                                                     <TablixMember>
                                                       <TablixHeader>
-                                                        <Size>3.37313cm</Size>
+                                                        <Size>5.82021cm</Size>
                                                         <CellContents>
-                                                          <Textbox Name="TH_Device">
+                                                          <Textbox Name="TH_ProductKey">
                                                             <CanGrow>true</CanGrow>
-                                                            <UserSort>
-                                                              <SortExpression>=Fields!Device.Value</SortExpression>
-                                                            </UserSort>
                                                             <KeepTogether>true</KeepTogether>
                                                             <Paragraphs>
                                                               <Paragraph>
                                                                 <TextRuns>
                                                                   <TextRun>
-                                                                    <Value>=SrsResources.Localization.GetString("Device", User!Language)</Value>
+                                                                    <Value>=SrsResources.Localization.GetString("ProductKey", User!Language)</Value>
                                                                     <Style>
                                                                       <FontFamily>Segoe UI</FontFamily>
                                                                       <FontWeight>Bold</FontWeight>
@@ -2632,7 +2603,56 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                         </CellContents>
                                                       </TablixHeader>
                                                       <TablixMembers>
-                                                        <TablixMember />
+                                                        <TablixMember>
+                                                          <TablixHeader>
+                                                            <Size>3.37313cm</Size>
+                                                            <CellContents>
+                                                              <Textbox Name="TH_Device">
+                                                                <CanGrow>true</CanGrow>
+                                                                <UserSort>
+                                                                  <SortExpression>=Fields!Device.Value</SortExpression>
+                                                                </UserSort>
+                                                                <KeepTogether>true</KeepTogether>
+                                                                <Paragraphs>
+                                                                  <Paragraph>
+                                                                    <TextRuns>
+                                                                      <TextRun>
+                                                                        <Value>=SrsResources.Localization.GetString("Device", User!Language)</Value>
+                                                                        <Style>
+                                                                          <FontFamily>Segoe UI</FontFamily>
+                                                                          <FontWeight>Bold</FontWeight>
+                                                                        </Style>
+                                                                      </TextRun>
+                                                                    </TextRuns>
+                                                                    <Style>
+                                                                      <TextAlign>Center</TextAlign>
+                                                                    </Style>
+                                                                  </Paragraph>
+                                                                </Paragraphs>
+                                                                <Style>
+                                                                  <Border>
+                                                                    <Style>None</Style>
+                                                                  </Border>
+                                                                  <TopBorder>
+                                                                    <Style>Solid</Style>
+                                                                  </TopBorder>
+                                                                  <BottomBorder>
+                                                                    <Style>Solid</Style>
+                                                                  </BottomBorder>
+                                                                  <BackgroundColor>LightGrey</BackgroundColor>
+                                                                  <VerticalAlign>Middle</VerticalAlign>
+                                                                  <PaddingLeft>2pt</PaddingLeft>
+                                                                  <PaddingRight>2pt</PaddingRight>
+                                                                  <PaddingTop>2pt</PaddingTop>
+                                                                  <PaddingBottom>2pt</PaddingBottom>
+                                                                </Style>
+                                                              </Textbox>
+                                                            </CellContents>
+                                                          </TablixHeader>
+                                                          <TablixMembers>
+                                                            <TablixMember />
+                                                          </TablixMembers>
+                                                        </TablixMember>
                                                       </TablixMembers>
                                                     </TablixMember>
                                                   </TablixMembers>
@@ -2679,10 +2699,13 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                       <Value>=Fields!CUVersion.Value</Value>
                     </SortExpression>
                     <SortExpression>
-                      <Value>=Fields!Clustered.Value</Value>
+                      <Value>=Fields!IsClustered.Value</Value>
                     </SortExpression>
                     <SortExpression>
                       <Value>=Fields!Bitness.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!CEIPReporting.Value</Value>
                     </SortExpression>
                     <SortExpression>
                       <Value>=Fields!ProductKey.Value</Value>
@@ -2740,6 +2763,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                           <PaddingBottom>2pt</PaddingBottom>
                         </Style>
                       </Textbox>
+                      <rd:Selected>true</rd:Selected>
                     </CellContents>
                   </TablixHeader>
                   <TablixMembers>
@@ -3007,9 +3031,9 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                               <TablixMembers>
                                                 <TablixMember>
                                                   <TablixHeader>
-                                                    <Size>5.82021cm</Size>
+                                                    <Size>2.5cm</Size>
                                                     <CellContents>
-                                                      <Textbox Name="Textbox228">
+                                                      <Textbox Name="Textbox2">
                                                         <CanGrow>true</CanGrow>
                                                         <KeepTogether>true</KeepTogether>
                                                         <Paragraphs>
@@ -3028,7 +3052,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                             </Style>
                                                           </Paragraph>
                                                         </Paragraphs>
-                                                        <rd:DefaultName>Textbox228</rd:DefaultName>
+                                                        <rd:DefaultName>Textbox2</rd:DefaultName>
                                                         <Style>
                                                           <Border>
                                                             <Style>None</Style>
@@ -3045,9 +3069,9 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                   <TablixMembers>
                                                     <TablixMember>
                                                       <TablixHeader>
-                                                        <Size>3.37313cm</Size>
+                                                        <Size>5.82021cm</Size>
                                                         <CellContents>
-                                                          <Textbox Name="Textbox229">
+                                                          <Textbox Name="Textbox228">
                                                             <CanGrow>true</CanGrow>
                                                             <KeepTogether>true</KeepTogether>
                                                             <Paragraphs>
@@ -3066,7 +3090,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                                 </Style>
                                                               </Paragraph>
                                                             </Paragraphs>
-                                                            <rd:DefaultName>Textbox229</rd:DefaultName>
+                                                            <rd:DefaultName>Textbox228</rd:DefaultName>
                                                             <Style>
                                                               <Border>
                                                                 <Style>None</Style>
@@ -3080,6 +3104,46 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                           </Textbox>
                                                         </CellContents>
                                                       </TablixHeader>
+                                                      <TablixMembers>
+                                                        <TablixMember>
+                                                          <TablixHeader>
+                                                            <Size>3.37313cm</Size>
+                                                            <CellContents>
+                                                              <Textbox Name="Textbox229">
+                                                                <CanGrow>true</CanGrow>
+                                                                <KeepTogether>true</KeepTogether>
+                                                                <Paragraphs>
+                                                                  <Paragraph>
+                                                                    <TextRuns>
+                                                                      <TextRun>
+                                                                        <Value />
+                                                                        <Style>
+                                                                          <FontFamily>Segoe UI</FontFamily>
+                                                                          <FontSize>9pt</FontSize>
+                                                                        </Style>
+                                                                      </TextRun>
+                                                                    </TextRuns>
+                                                                    <Style>
+                                                                      <TextAlign>Center</TextAlign>
+                                                                    </Style>
+                                                                  </Paragraph>
+                                                                </Paragraphs>
+                                                                <rd:DefaultName>Textbox229</rd:DefaultName>
+                                                                <Style>
+                                                                  <Border>
+                                                                    <Style>None</Style>
+                                                                  </Border>
+                                                                  <VerticalAlign>Middle</VerticalAlign>
+                                                                  <PaddingLeft>2pt</PaddingLeft>
+                                                                  <PaddingRight>2pt</PaddingRight>
+                                                                  <PaddingTop>2pt</PaddingTop>
+                                                                  <PaddingBottom>2pt</PaddingBottom>
+                                                                </Style>
+                                                              </Textbox>
+                                                            </CellContents>
+                                                          </TablixHeader>
+                                                        </TablixMember>
+                                                      </TablixMembers>
                                                     </TablixMember>
                                                   </TablixMembers>
                                                 </TablixMember>
@@ -3378,17 +3442,16 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                               <TablixMembers>
                                                 <TablixMember>
                                                   <TablixHeader>
-                                                    <Size>5.82021cm</Size>
+                                                    <Size>2.5cm</Size>
                                                     <CellContents>
-                                                      <Textbox Name="Textbox160">
+                                                      <Textbox Name="Textbox3">
                                                         <CanGrow>true</CanGrow>
                                                         <KeepTogether>true</KeepTogether>
                                                         <Paragraphs>
                                                           <Paragraph>
                                                             <TextRuns>
                                                               <TextRun>
-                                                                <Value xml:space="preserve">
-</Value>
+                                                                <Value />
                                                                 <Style>
                                                                   <FontFamily>Segoe UI</FontFamily>
                                                                   <FontSize>9pt</FontSize>
@@ -3396,11 +3459,11 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                               </TextRun>
                                                             </TextRuns>
                                                             <Style>
-                                                              <TextAlign>Left</TextAlign>
+                                                              <TextAlign>Center</TextAlign>
                                                             </Style>
                                                           </Paragraph>
                                                         </Paragraphs>
-                                                        <rd:DefaultName>Textbox160</rd:DefaultName>
+                                                        <rd:DefaultName>Textbox3</rd:DefaultName>
                                                         <Style>
                                                           <Border>
                                                             <Style>None</Style>
@@ -3418,16 +3481,17 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                   <TablixMembers>
                                                     <TablixMember>
                                                       <TablixHeader>
-                                                        <Size>3.37313cm</Size>
+                                                        <Size>5.82021cm</Size>
                                                         <CellContents>
-                                                          <Textbox Name="Textbox169">
+                                                          <Textbox Name="Textbox160">
                                                             <CanGrow>true</CanGrow>
                                                             <KeepTogether>true</KeepTogether>
                                                             <Paragraphs>
                                                               <Paragraph>
                                                                 <TextRuns>
                                                                   <TextRun>
-                                                                    <Value />
+                                                                    <Value xml:space="preserve">
+</Value>
                                                                     <Style>
                                                                       <FontFamily>Segoe UI</FontFamily>
                                                                       <FontSize>9pt</FontSize>
@@ -3435,11 +3499,11 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                                   </TextRun>
                                                                 </TextRuns>
                                                                 <Style>
-                                                                  <TextAlign>Center</TextAlign>
+                                                                  <TextAlign>Left</TextAlign>
                                                                 </Style>
                                                               </Paragraph>
                                                             </Paragraphs>
-                                                            <rd:DefaultName>Textbox169</rd:DefaultName>
+                                                            <rd:DefaultName>Textbox160</rd:DefaultName>
                                                             <Style>
                                                               <Border>
                                                                 <Style>None</Style>
@@ -3454,6 +3518,47 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                           </Textbox>
                                                         </CellContents>
                                                       </TablixHeader>
+                                                      <TablixMembers>
+                                                        <TablixMember>
+                                                          <TablixHeader>
+                                                            <Size>3.37313cm</Size>
+                                                            <CellContents>
+                                                              <Textbox Name="Textbox169">
+                                                                <CanGrow>true</CanGrow>
+                                                                <KeepTogether>true</KeepTogether>
+                                                                <Paragraphs>
+                                                                  <Paragraph>
+                                                                    <TextRuns>
+                                                                      <TextRun>
+                                                                        <Value />
+                                                                        <Style>
+                                                                          <FontFamily>Segoe UI</FontFamily>
+                                                                          <FontSize>9pt</FontSize>
+                                                                        </Style>
+                                                                      </TextRun>
+                                                                    </TextRuns>
+                                                                    <Style>
+                                                                      <TextAlign>Center</TextAlign>
+                                                                    </Style>
+                                                                  </Paragraph>
+                                                                </Paragraphs>
+                                                                <rd:DefaultName>Textbox169</rd:DefaultName>
+                                                                <Style>
+                                                                  <Border>
+                                                                    <Style>None</Style>
+                                                                  </Border>
+                                                                  <BackgroundColor>WhiteSmoke</BackgroundColor>
+                                                                  <VerticalAlign>Middle</VerticalAlign>
+                                                                  <PaddingLeft>2pt</PaddingLeft>
+                                                                  <PaddingRight>2pt</PaddingRight>
+                                                                  <PaddingTop>2pt</PaddingTop>
+                                                                  <PaddingBottom>2pt</PaddingBottom>
+                                                                </Style>
+                                                              </Textbox>
+                                                            </CellContents>
+                                                          </TablixHeader>
+                                                        </TablixMember>
+                                                      </TablixMembers>
                                                     </TablixMember>
                                                   </TablixMembers>
                                                 </TablixMember>
@@ -3662,14 +3767,14 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                               <TablixHeader>
                                                 <Size>2.38063cm</Size>
                                                 <CellContents>
-                                                  <Textbox Name="TV_Clustered">
+                                                  <Textbox Name="TV_IsClustered">
                                                     <CanGrow>true</CanGrow>
                                                     <KeepTogether>true</KeepTogether>
                                                     <Paragraphs>
                                                       <Paragraph>
                                                         <TextRuns>
                                                           <TextRun>
-                                                            <Value>=Fields!Clustered.Value</Value>
+                                                            <Value>=Fields!IsClustered.Value</Value>
                                                             <Style>
                                                               <FontFamily>Segoe UI</FontFamily>
                                                               <FontSize>9pt</FontSize>
@@ -3743,17 +3848,27 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                   </TablixHeader>
                                                   <TablixMembers>
                                                     <TablixMember>
+                                                      <Group Name="CEIPReporting">
+                                                        <GroupExpressions>
+                                                          <GroupExpression>=Fields!CEIPReporting.Value</GroupExpression>
+                                                        </GroupExpressions>
+                                                      </Group>
+                                                      <SortExpressions>
+                                                        <SortExpression>
+                                                          <Value>=Fields!CEIPReporting.Value</Value>
+                                                        </SortExpression>
+                                                      </SortExpressions>
                                                       <TablixHeader>
-                                                        <Size>5.82021cm</Size>
+                                                        <Size>2.5cm</Size>
                                                         <CellContents>
-                                                          <Textbox Name="ProductKey">
+                                                          <Textbox Name="TV_CEIPReporting">
                                                             <CanGrow>true</CanGrow>
                                                             <KeepTogether>true</KeepTogether>
                                                             <Paragraphs>
                                                               <Paragraph>
                                                                 <TextRuns>
                                                                   <TextRun>
-                                                                    <Value />
+                                                                    <Value>=Fields!CEIPReporting.Value</Value>
                                                                     <Style>
                                                                       <FontFamily>Segoe UI</FontFamily>
                                                                       <FontSize>9pt</FontSize>
@@ -3761,11 +3876,10 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                                   </TextRun>
                                                                 </TextRuns>
                                                                 <Style>
-                                                                  <TextAlign>Left</TextAlign>
+                                                                  <TextAlign>Center</TextAlign>
                                                                 </Style>
                                                               </Paragraph>
                                                             </Paragraphs>
-                                                            <rd:DefaultName>ProductKey</rd:DefaultName>
                                                             <Style>
                                                               <Border>
                                                                 <Style>None</Style>
@@ -3782,9 +3896,9 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                       <TablixMembers>
                                                         <TablixMember>
                                                           <TablixHeader>
-                                                            <Size>3.37313cm</Size>
+                                                            <Size>5.82021cm</Size>
                                                             <CellContents>
-                                                              <Textbox Name="Textbox300">
+                                                              <Textbox Name="ProductKey">
                                                                 <CanGrow>true</CanGrow>
                                                                 <KeepTogether>true</KeepTogether>
                                                                 <Paragraphs>
@@ -3799,64 +3913,15 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                                       </TextRun>
                                                                     </TextRuns>
                                                                     <Style>
-                                                                      <TextAlign>Center</TextAlign>
-                                                                    </Style>
-                                                                  </Paragraph>
-                                                                </Paragraphs>
-                                                                <rd:DefaultName>Textbox300</rd:DefaultName>
-                                                                <Style>
-                                                                  <Border>
-                                                                    <Style>None</Style>
-                                                                  </Border>
-                                                                  <VerticalAlign>Middle</VerticalAlign>
-                                                                  <PaddingLeft>2pt</PaddingLeft>
-                                                                  <PaddingRight>2pt</PaddingRight>
-                                                                  <PaddingTop>2pt</PaddingTop>
-                                                                  <PaddingBottom>2pt</PaddingBottom>
-                                                                </Style>
-                                                              </Textbox>
-                                                            </CellContents>
-                                                          </TablixHeader>
-                                                        </TablixMember>
-                                                      </TablixMembers>
-                                                      <KeepWithGroup>After</KeepWithGroup>
-                                                    </TablixMember>
-                                                    <TablixMember>
-                                                      <Group Name="DeviceAndKeyDetails" />
-                                                      <SortExpressions>
-                                                        <SortExpression>
-                                                          <Value>=Fields!ProductKey.Value</Value>
-                                                        </SortExpression>
-                                                      </SortExpressions>
-                                                      <TablixMembers>
-                                                        <TablixMember>
-                                                          <TablixHeader>
-                                                            <Size>5.82021cm</Size>
-                                                            <CellContents>
-                                                              <Textbox Name="TV_ProductKey">
-                                                                <CanGrow>true</CanGrow>
-                                                                <KeepTogether>true</KeepTogether>
-                                                                <Paragraphs>
-                                                                  <Paragraph>
-                                                                    <TextRuns>
-                                                                      <TextRun>
-                                                                        <Value>=Code.GetSQLProductKey(Split(Replace(Fields!ProductKey.Value, " ",""), ","), Left(Fields!Version.Value, 2))</Value>
-                                                                        <Style>
-                                                                          <FontFamily>Segoe UI</FontFamily>
-                                                                          <FontSize>9pt</FontSize>
-                                                                        </Style>
-                                                                      </TextRun>
-                                                                    </TextRuns>
-                                                                    <Style>
                                                                       <TextAlign>Left</TextAlign>
                                                                     </Style>
                                                                   </Paragraph>
                                                                 </Paragraphs>
+                                                                <rd:DefaultName>ProductKey</rd:DefaultName>
                                                                 <Style>
                                                                   <Border>
                                                                     <Style>None</Style>
                                                                   </Border>
-                                                                  <BackgroundColor>WhiteSmoke</BackgroundColor>
                                                                   <VerticalAlign>Middle</VerticalAlign>
                                                                   <PaddingLeft>2pt</PaddingLeft>
                                                                   <PaddingRight>2pt</PaddingRight>
@@ -3871,14 +3936,62 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                               <TablixHeader>
                                                                 <Size>3.37313cm</Size>
                                                                 <CellContents>
-                                                                  <Textbox Name="TV_Device">
+                                                                  <Textbox Name="Textbox300">
                                                                     <CanGrow>true</CanGrow>
                                                                     <KeepTogether>true</KeepTogether>
                                                                     <Paragraphs>
                                                                       <Paragraph>
                                                                         <TextRuns>
                                                                           <TextRun>
-                                                                            <Value>=Fields!Device.Value</Value>
+                                                                            <Value />
+                                                                            <Style>
+                                                                              <FontFamily>Segoe UI</FontFamily>
+                                                                              <FontSize>9pt</FontSize>
+                                                                            </Style>
+                                                                          </TextRun>
+                                                                        </TextRuns>
+                                                                        <Style>
+                                                                          <TextAlign>Center</TextAlign>
+                                                                        </Style>
+                                                                      </Paragraph>
+                                                                    </Paragraphs>
+                                                                    <rd:DefaultName>Textbox300</rd:DefaultName>
+                                                                    <Style>
+                                                                      <Border>
+                                                                        <Style>None</Style>
+                                                                      </Border>
+                                                                      <VerticalAlign>Middle</VerticalAlign>
+                                                                      <PaddingLeft>2pt</PaddingLeft>
+                                                                      <PaddingRight>2pt</PaddingRight>
+                                                                      <PaddingTop>2pt</PaddingTop>
+                                                                      <PaddingBottom>2pt</PaddingBottom>
+                                                                    </Style>
+                                                                  </Textbox>
+                                                                </CellContents>
+                                                              </TablixHeader>
+                                                            </TablixMember>
+                                                          </TablixMembers>
+                                                        </TablixMember>
+                                                        <TablixMember>
+                                                          <Group Name="DeviceAndKeyDetails" />
+                                                          <SortExpressions>
+                                                            <SortExpression>
+                                                              <Value>=Fields!ProductKey.Value</Value>
+                                                            </SortExpression>
+                                                          </SortExpressions>
+                                                          <TablixMembers>
+                                                            <TablixMember>
+                                                              <TablixHeader>
+                                                                <Size>5.82021cm</Size>
+                                                                <CellContents>
+                                                                  <Textbox Name="TV_ProductKey">
+                                                                    <CanGrow>true</CanGrow>
+                                                                    <KeepTogether>true</KeepTogether>
+                                                                    <Paragraphs>
+                                                                      <Paragraph>
+                                                                        <TextRuns>
+                                                                          <TextRun>
+                                                                            <Value>=Code.GetSQLProductKey(Split(Replace(Fields!ProductKey.Value, " ",""), ","), Left(Fields!Version.Value, 2))</Value>
                                                                             <Style>
                                                                               <FontFamily>Segoe UI</FontFamily>
                                                                               <FontSize>9pt</FontSize>
@@ -3905,15 +4018,55 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                                 </CellContents>
                                                               </TablixHeader>
                                                               <TablixMembers>
-                                                                <TablixMember />
+                                                                <TablixMember>
+                                                                  <TablixHeader>
+                                                                    <Size>3.37313cm</Size>
+                                                                    <CellContents>
+                                                                      <Textbox Name="TV_Device">
+                                                                        <CanGrow>true</CanGrow>
+                                                                        <KeepTogether>true</KeepTogether>
+                                                                        <Paragraphs>
+                                                                          <Paragraph>
+                                                                            <TextRuns>
+                                                                              <TextRun>
+                                                                                <Value>=Fields!Device.Value</Value>
+                                                                                <Style>
+                                                                                  <FontFamily>Segoe UI</FontFamily>
+                                                                                  <FontSize>9pt</FontSize>
+                                                                                </Style>
+                                                                              </TextRun>
+                                                                            </TextRuns>
+                                                                            <Style>
+                                                                              <TextAlign>Left</TextAlign>
+                                                                            </Style>
+                                                                          </Paragraph>
+                                                                        </Paragraphs>
+                                                                        <Style>
+                                                                          <Border>
+                                                                            <Style>None</Style>
+                                                                          </Border>
+                                                                          <BackgroundColor>WhiteSmoke</BackgroundColor>
+                                                                          <VerticalAlign>Middle</VerticalAlign>
+                                                                          <PaddingLeft>2pt</PaddingLeft>
+                                                                          <PaddingRight>2pt</PaddingRight>
+                                                                          <PaddingTop>2pt</PaddingTop>
+                                                                          <PaddingBottom>2pt</PaddingBottom>
+                                                                        </Style>
+                                                                      </Textbox>
+                                                                    </CellContents>
+                                                                  </TablixHeader>
+                                                                  <TablixMembers>
+                                                                    <TablixMember />
+                                                                  </TablixMembers>
+                                                                </TablixMember>
                                                               </TablixMembers>
                                                             </TablixMember>
                                                           </TablixMembers>
+                                                          <Visibility>
+                                                            <ToggleItem>TV_CEIPReporting</ToggleItem>
+                                                          </Visibility>
                                                         </TablixMember>
                                                       </TablixMembers>
-                                                      <Visibility>
-                                                        <ToggleItem>TV_Bitness</ToggleItem>
-                                                      </Visibility>
                                                     </TablixMember>
                                                   </TablixMembers>
                                                 </TablixMember>
@@ -4236,9 +4389,9 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                               <TablixMembers>
                                                 <TablixMember>
                                                   <TablixHeader>
-                                                    <Size>5.82021cm</Size>
+                                                    <Size>2.5cm</Size>
                                                     <CellContents>
-                                                      <Textbox Name="Textbox122">
+                                                      <Textbox Name="Textbox6">
                                                         <CanGrow>true</CanGrow>
                                                         <KeepTogether>true</KeepTogether>
                                                         <Paragraphs>
@@ -4255,7 +4408,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                             <Style />
                                                           </Paragraph>
                                                         </Paragraphs>
-                                                        <rd:DefaultName>Textbox122</rd:DefaultName>
+                                                        <rd:DefaultName>Textbox6</rd:DefaultName>
                                                         <Style>
                                                           <Border>
                                                             <Style>None</Style>
@@ -4273,9 +4426,9 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                   <TablixMembers>
                                                     <TablixMember>
                                                       <TablixHeader>
-                                                        <Size>3.37313cm</Size>
+                                                        <Size>5.82021cm</Size>
                                                         <CellContents>
-                                                          <Textbox Name="Textbox172">
+                                                          <Textbox Name="Textbox122">
                                                             <CanGrow>true</CanGrow>
                                                             <KeepTogether>true</KeepTogether>
                                                             <Paragraphs>
@@ -4292,7 +4445,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                                 <Style />
                                                               </Paragraph>
                                                             </Paragraphs>
-                                                            <rd:DefaultName>Textbox172</rd:DefaultName>
+                                                            <rd:DefaultName>Textbox122</rd:DefaultName>
                                                             <Style>
                                                               <Border>
                                                                 <Style>None</Style>
@@ -4308,7 +4461,46 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                         </CellContents>
                                                       </TablixHeader>
                                                       <TablixMembers>
-                                                        <TablixMember />
+                                                        <TablixMember>
+                                                          <TablixHeader>
+                                                            <Size>3.37313cm</Size>
+                                                            <CellContents>
+                                                              <Textbox Name="Textbox172">
+                                                                <CanGrow>true</CanGrow>
+                                                                <KeepTogether>true</KeepTogether>
+                                                                <Paragraphs>
+                                                                  <Paragraph>
+                                                                    <TextRuns>
+                                                                      <TextRun>
+                                                                        <Value />
+                                                                        <Style>
+                                                                          <FontFamily>Segoe UI</FontFamily>
+                                                                          <FontWeight>Bold</FontWeight>
+                                                                        </Style>
+                                                                      </TextRun>
+                                                                    </TextRuns>
+                                                                    <Style />
+                                                                  </Paragraph>
+                                                                </Paragraphs>
+                                                                <rd:DefaultName>Textbox172</rd:DefaultName>
+                                                                <Style>
+                                                                  <Border>
+                                                                    <Style>None</Style>
+                                                                  </Border>
+                                                                  <BackgroundColor>LightGrey</BackgroundColor>
+                                                                  <VerticalAlign>Middle</VerticalAlign>
+                                                                  <PaddingLeft>2pt</PaddingLeft>
+                                                                  <PaddingRight>2pt</PaddingRight>
+                                                                  <PaddingTop>2pt</PaddingTop>
+                                                                  <PaddingBottom>2pt</PaddingBottom>
+                                                                </Style>
+                                                              </Textbox>
+                                                            </CellContents>
+                                                          </TablixHeader>
+                                                          <TablixMembers>
+                                                            <TablixMember />
+                                                          </TablixMembers>
+                                                        </TablixMember>
                                                       </TablixMembers>
                                                     </TablixMember>
                                                   </TablixMembers>
@@ -4335,7 +4527,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
             <Top>1.2997cm</Top>
             <Left>0.12413cm</Left>
             <Height>3.6cm</Height>
-            <Width>50.02608cm</Width>
+            <Width>52.52608cm</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -4351,7 +4543,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
           </Border>
         </Style>
       </Body>
-      <Width>50.30896cm</Width>
+      <Width>52.80896cm</Width>
       <Page>
         <PageHeader>
           <Height>2.49515cm</Height>
@@ -4397,7 +4589,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
               <Top>0.60444in</Top>
               <Left>0.05in</Left>
               <Height>0in</Height>
-              <Width>19.69418in</Width>
+              <Width>20.67843in</Width>
               <ZIndex>1</ZIndex>
               <Style>
                 <Border>
@@ -4469,7 +4661,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
               <Top>0.06944in</Top>
               <Left>0.04887in</Left>
               <Height>0in</Height>
-              <Width>19.69531in</Width>
+              <Width>20.67956in</Width>
               <ZIndex>1</ZIndex>
               <Style>
                 <Border>
@@ -4565,6 +4757,48 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
         </DataSetReference>
       </ValidValues>
     </ReportParameter>
+    <ReportParameter Name="Filter">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>N/A</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Filter by edition groups (multiple selection)</Prompt>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>Enterprise</Value>
+            <Label>Enterprise</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>Standard</Value>
+            <Label>Standard</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>Express</Value>
+            <Label>Express</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>Developer</Value>
+            <Label>Developer</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>Legacy</Value>
+            <Label>Legacy</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>WID</Value>
+            <Label>WID</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>N/A</Value>
+            <Label>N/A</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -4590,6 +4824,11 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>CollectionID</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>Filter</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

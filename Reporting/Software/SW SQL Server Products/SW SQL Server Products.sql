@@ -24,8 +24,9 @@
 /* #region QueryBody */
 
 /* Test variable declaration !! Need to be commented for Production !! */
---DECLARE @UserSIDs        AS NVARCHAR(10) = 'Disabled';
---DECLARE @CollectionID    AS NVARCHAR(10) = 'SMS00001';
+--DECLARE @UserSIDs          AS NVARCHAR(10) = 'Disabled';
+--DECLARE @CollectionID      AS NVARCHAR(10) = 'SMS00001';
+--DECLARE @Filter            AS NVARCHAR(20) = 'WID';
 
 /* Variable declaration */
 DECLARE @TableName         AS NVARCHAR(MAX);
@@ -45,9 +46,7 @@ CREATE TABLE #SQLProducts (
     , [Version]         NVARCHAR(25)
     , FileVersion       NVARCHAR(50)
     , SPLevel           NVARCHAR(2)
-    , InstanceID        NVARCHAR(100)
     , IsClustered       NVARCHAR(3)
-    , IsWOW64           NVARCHAR(3)
     , SQMReporting      NVARCHAR(3)
 )
 
@@ -55,7 +54,7 @@ CREATE TABLE #SQLProducts (
 DECLARE @SQLRelease Table (FileVersion NVARCHAR(4), Release NVARCHAR(10))
 
 /* Populate StaticColumnList */
-SET @StaticColumnList = N'[SKUNAME],[VERSION],[FILEVERSION],[SPLEVEL],[INSTANCEID],[CLUSTERED],[ISWOW64],[SQMREPORTING]'
+SET @StaticColumnList = N'[SKUNAME],[VERSION],[FILEVERSION],[SPLEVEL],[CLUSTERED],[SQMREPORTING]'
 
 /* Populate SQLRelease table */
 INSERT INTO @SQLRelease (FileVersion, Release)
@@ -77,7 +76,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
-	, @StaticColumnList  = @StaticColumnList
+	, @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2016 data */
 INSERT INTO #SQLProducts
@@ -86,7 +85,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
-    , @StaticColumnList  = @StaticColumnList
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2014 data data */
 INSERT INTO #SQLProducts
@@ -95,7 +94,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
-    , @StaticColumnList  = @StaticColumnList
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2012 data */
 INSERT INTO #SQLProducts
@@ -104,7 +103,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
-    , @StaticColumnList  = @StaticColumnList
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2008 data */
 INSERT INTO #SQLProducts
@@ -113,7 +112,7 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
-    , @StaticColumnList  = @StaticColumnList
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL Legacy data */
 INSERT INTO #SQLProducts
@@ -122,130 +121,141 @@ EXECUTE dbo.usp_PivotWithDynamicColumns
     , @NonPivotedColumn  = N'ResourceID'
     , @DynamicColumn     = N'PropertyName0'
     , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
-    , @StaticColumnList  = @StaticColumnList
+    , @StaticColumnList  = @StaticColumnList;
 
 /* Aggregate result data */
-SELECT
-    Device              = Devices.[Name]
-    , DomainOrWorkgroup = ISNULL(Systems.Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
-    , OperatingSystem   = (
-
-        /* Get OS caption by version */
-        CASE
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 5.%'              THEN 'Windows XP'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.0%'             THEN 'Windows Vista'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.1%'             THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 LIKE 'Windows_7 Entreprise 6.1'      THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 =    'Windows Embedded Standard 6.1' THEN 'Windows 7'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.2%'             THEN 'Windows 8'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.3%'             THEN 'Windows 8.1'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 5.%'                   THEN 'Windows Server 2003'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.0%'                  THEN 'Windows Server 2008'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.1%'                  THEN 'Windows Server 2008 R2'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.2%'                  THEN 'Windows Server 2012'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
-            WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
-                CASE
-                    WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) > 10017763 THEN 'Windows Server 2019'
-                    ELSE 'Windows Server 2016'
-                END
-            )
-            ELSE Systems.Operating_System_Name_And0
-        END
-    )
-    , Release           = (
-        'SQL ' + (SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4))
-    )
-    , EditionGroup      = (
-        CASE
-            WHEN SQLProducts.SKUName LIKE '%devel%' THEN 'Developer'
-            WHEN SQLProducts.SKUName LIKE '%workg%' THEN 'Workgroup'
-            WHEN SQLProducts.SKUName LIKE '%stand%' THEN 'Standard'
-            WHEN SQLProducts.SKUName LIKE '%enter%' THEN 'Enterprise'
-            WHEN SQLProducts.SKUName LIKE '%expre%' THEN 'Express'
-            WHEN SQLProducts.SKUName LIKE '%web%'   THEN 'Web'
-            WHEN SQLProducts.SKUName LIKE '%windo%' THEN 'WID'
-            WHEN SQLProducts.SKUName IS NULL        THEN 'N/A'
-            ELSE SQLProducts.SKUName
-        END
-    )
-    , [Edition]         = ISNULL(NULLIF(SQLProducts.SKUName, ''), 'N/A')
-    , ServicePack       = SQLProducts.SPLevel
-    , [Version]         = SQLProducts.[Version]
-    , CUVersion         = SQLProducts.FileVersion
-    , Bitness           = (
-        CASE
-            WHEN SQLProducts.SKUName LIKE '%64%' THEN 'x64'
-            WHEN SQLProducts.SKUName IS NOT NULL THEN 'x86'
-            ELSE 'N/A'
-        END
-    )
-    , IsWOW64           = (
-        CASE SQLProducts.IsWOW64
-            WHEN 0 THEN 'No'
-            WHEN 1 THEN 'Yes'
-            ELSE NULL
-        END
-    )
-    , ProductID         = SQLProductID.ProductID0
-    , ProductKey        = ISNULL(SQLProductID.DigitalProductID0, 'N/A')
-    , InstanceID        = SQLProducts.InstanceID
-    , IsVirtualMachine  = (
-        CASE Devices.IsVirtualMachine
-            WHEN 0 THEN 'No'
-            WHEN 1 THEN 'Yes'
-            ELSE NULL
-        END
-    )
-    , CPUs              = COUNT(Processor.ResourceID)
-    , PhysicalCores     = SUM(Processor.NumberOfCores0)
-    , LogicalCores      = SUM(Processor.NumberOfLogicalProcessors0)
-    , IsClustered       = (
-        CASE SQLProducts.IsClustered
-            WHEN 0 THEN 'No'
-            WHEN 1 THEN 'Yes'
-            ELSE NULL
-        END
-    )
-    , CEIPReporting      = (
-        CASE SQLProducts.SQMReporting
-            WHEN 0 THEN 'No'
-            WHEN 1 THEN 'Yes'
-            ELSE NULL
-        END
-    )
-FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
-    JOIN v_R_System AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
-    JOIN v_CombinedDeviceResources AS Devices ON Devices.MachineID = CollectionMembers.ResourceID
-    JOIN v_GS_PROCESSOR AS Processor ON Processor.ResourceID = CollectionMembers.ResourceID
-    JOIN #SQLProducts AS SQLProducts ON SQLProducts.ResourceID = CollectionMembers.ResourceID
-    LEFT JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
-        AND SQLProductID.Release0 = (
-            SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4)
+WITH SQLProducts_CTE (Release, EditionGroup, [Edition], [Version], ServicePack, CUVersion, IsClustered, Bitness, CEIPReporting, ProductKey, Device, DomainOrWorkgroup, OperatingSystem, IsVirtualMachine, CPUs, PhysicalCores, LogicalCores)
+AS (
+    SELECT
+        Release             = (
+            'SQL ' + (SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4))
         )
-        AND SQLProductID.ProductID0 IS NOT NULL
-WHERE CollectionMembers.CollectionID = @CollectionID
-GROUP BY
-    Devices.[Name]
-	, Systems.Full_Domain_Name0
-    , Systems.Resource_Domain_Or_Workgr0
-	, Systems.Operating_System_Name_and0
-	, Systems.Build01
-    , SQLProducts.FileVersion
-    , SQLProducts.SKUName
-    , SQLProducts.SPLevel
-    , SQLProducts.[Version]
-    , SQLProducts.IsWOW64
-    , SQLProductID.ProductID0
-    , SQLProductID.DigitalProductID0
-    , SQLProducts.InstanceID
-    , Devices.IsVirtualMachine
-    , Processor.NumberOfCores0
-    , Processor.NumberOfLogicalProcessors0
-    , SQLProducts.IsClustered
-    , SQLProducts.SQMReporting
+        , EditionGroup      = (
+            CASE
+                WHEN SQLProducts.SKUName LIKE '%enter%' THEN 'Enterprise'
+                WHEN SQLProducts.SKUName LIKE '%stand%' THEN 'Standard'
+                WHEN SQLProducts.SKUName LIKE '%expre%' THEN 'Express'
+                WHEN SQLProducts.SKUName LIKE '%devel%' THEN 'Developer'
+                WHEN SQLProducts.SKUName LIKE '%windo%' THEN 'WID'
+                WHEN SQLProducts.SKUName IS NULL        THEN 'N/A'
+                ELSE 'Legacy'
+            END
+        )
+        , [Edition]         = ISNULL(NULLIF(SQLProducts.SKUName, ''), 'N/A')
+        , [Version]         = SQLProducts.[Version]
+        , ServicePack       = SQLProducts.SPLevel
+        , CUVersion         = SQLProducts.FileVersion
+        , IsClustered       = (
+            CASE SQLProducts.IsClustered
+                WHEN 0 THEN 'No'
+                WHEN 1 THEN 'Yes'
+                ELSE NULL
+            END
+        )
+        , Bitness           = (
+            CASE
+                WHEN SQLProducts.SKUName LIKE '%64%' THEN 'x64'
+                WHEN SQLProducts.SKUName IS NOT NULL THEN 'x86'
+                ELSE 'N/A'
+            END
+        )
+        , CEIPReporting     = (
+            CASE SQLProducts.SQMReporting
+                WHEN 0 THEN 'No'
+                WHEN 1 THEN 'Yes'
+                ELSE NULL
+            END
+        )
+        , ProductKey        = ISNULL(SQLProductID.DigitalProductID0, 'N/A')
+        , Device            = Devices.[Name]
+        , DomainOrWorkgroup = ISNULL(Systems.Full_Domain_Name0, Systems.Resource_Domain_Or_Workgr0)
+        , OperatingSystem   = (
+
+            /* Get OS caption by version */
+            CASE
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 5.%'              THEN 'Windows XP'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.0%'             THEN 'Windows Vista'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.1%'             THEN 'Windows 7'
+                WHEN Systems.Operating_System_Name_And0 LIKE 'Windows_7 Entreprise 6.1'      THEN 'Windows 7'
+                WHEN Systems.Operating_System_Name_And0 =    'Windows Embedded Standard 6.1' THEN 'Windows 7'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.2%'             THEN 'Windows 8'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 6.3%'             THEN 'Windows 8.1'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Workstation 10%'              THEN 'Windows 10'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 5.%'                   THEN 'Windows Server 2003'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.0%'                  THEN 'Windows Server 2008'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.1%'                  THEN 'Windows Server 2008 R2'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.2%'                  THEN 'Windows Server 2012'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 6.3%'                  THEN 'Windows Server 2012 R2'
+                WHEN Systems.Operating_System_Name_And0 LIKE '%Server 10%'                   THEN (
+                    CASE
+                        WHEN CAST(REPLACE(Build01, '.', '') AS INTEGER) > 10017763 THEN 'Windows Server 2019'
+                        ELSE 'Windows Server 2016'
+                    END
+                )
+                ELSE Systems.Operating_System_Name_And0
+            END
+        )
+        , IsVirtualMachine  = (
+            CASE Devices.IsVirtualMachine
+                WHEN 0 THEN 'No'
+                WHEN 1 THEN 'Yes'
+                ELSE NULL
+            END
+        )
+        , CPUs              = COUNT(Processor.ResourceID)
+        , PhysicalCores     = SUM(Processor.NumberOfCores0)
+        , LogicalCores      = SUM(Processor.NumberOfLogicalProcessors0)
+    FROM fn_rbac_FullCollectionMembership(@UserSIDs) AS CollectionMembers
+        JOIN v_R_System AS Systems ON Systems.ResourceID = CollectionMembers.ResourceID
+        JOIN v_CombinedDeviceResources AS Devices ON Devices.MachineID = CollectionMembers.ResourceID
+        JOIN v_GS_PROCESSOR AS Processor ON Processor.ResourceID = CollectionMembers.ResourceID
+        JOIN #SQLProducts AS SQLProducts ON SQLProducts.ResourceID = CollectionMembers.ResourceID
+        LEFT JOIN dbo.v_GS_EXT_SQL_PRODUCTID0 AS SQLProductID ON SQLProductID.ResourceID = SQLProducts.ResourceID
+            AND SQLProductID.Release0 = (
+                SELECT Release FROM @SQLRelease WHERE FileVersion = LEFT(SQLProducts.FileVersion, 4)
+            )
+            AND SQLProductID.ProductID0 IS NOT NULL
+    WHERE CollectionMembers.CollectionID = @CollectionID
+    GROUP BY
+        SQLProducts.FileVersion
+        , SQLProducts.SKUName
+        , SQLProducts.[Version]
+        , SQLProducts.SPLevel
+        , SQLProducts.IsClustered
+        , SQLProducts.SQMReporting
+        , SQLProductID.DigitalProductID0
+        , Devices.[Name]
+        , Systems.Full_Domain_Name0
+        , Systems.Resource_Domain_Or_Workgr0
+        , Systems.Operating_System_Name_and0
+        , Systems.Build01
+        , Devices.IsVirtualMachine
+        , Processor.NumberOfCores0
+        , Processor.NumberOfLogicalProcessors0
+)
+
+/* Filter results */
+SELECT
+    Release
+    , EditionGroup
+    , [Edition]
+    , [Version]
+    , ServicePack
+    , CUVersion
+    , IsClustered
+    , Bitness
+    , CEIPReporting
+    , ProductKey
+    , Device
+    , DomainOrWorkgroup
+    , OperatingSystem
+    , IsVirtualMachine
+    , CPUs
+    , PhysicalCores
+    , LogicalCores
+FROM SQLProducts_CTE
+WHERE EditionGroup NOT IN (@Filter)
 
 /* Perform cleanup */
 IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
