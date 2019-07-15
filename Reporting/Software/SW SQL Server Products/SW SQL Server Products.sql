@@ -5,11 +5,13 @@
     Gets SQL product info, id and product key.
 .NOTES
     Created by Ioan Popovici.
-    Requires the usp_PivotWithDynamicColumns stored procedure.
+    Requires the usp_PivotWithDynamicColumns stored procedure (SQL Support Functions).
     Requires SQL Property and ProductID HWI extensions.
     Part of a report should not be run separately.
 .LINK
     https://SCCM.Zone/SW-SQL-Server-Products
+.LINK
+    https://SCCM.Zone/SQL-SupportFunctions
 .LINK
     https://SCCM.Zone/SW-SQL-Server-Products-CHANGELOG
 .LINK

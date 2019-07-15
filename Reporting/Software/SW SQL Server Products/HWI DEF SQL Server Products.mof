@@ -1,5 +1,5 @@
 //======================================================
-//----------| SQL property definition start |-----------
+//---------------| SQL definition start |---------------
 //======================================================
 
 //---------------| SQL 2017 definitions |---------------
@@ -104,6 +104,20 @@ Class SQL_Legacy_Property: SMS_Class_Template
     [SMS_Report(true), key]    uint32 SqlServiceType;
 };
 
+//-------------| SQL ProductID definition |-------------
+
+[Dynamic, Provider("MS_VIEW_INSTANCE_PROVIDER"),
+SMS_Report(true),
+SMS_Group_Name("SQL ProductID"),
+SMS_Class_ID("EXT|SQL_PRODUCTID|1.0")]
+
+Class SQL_ProductID: SMS_Class_Template
+{
+    [SMS_Report(true),  key]    string  Release;
+    [SMS_Report(true)      ]    string  ProductID;
+    [SMS_Report(true)      ]    boolean DigitalProductID[];
+};
+
 //======================================================
-//-----------| SQL property definition end |------------
+//----------------| SQL definition end |----------------
 //======================================================

@@ -1,5 +1,12 @@
 # SW SQL Server Products release history
 
+## 2.5.1 - 2019-07-15
+
+### Changes
+
+    * Merged definition and extension files for Property and ProductID
+    * Added support functions link
+
 ## 2.5 - 2019-07-15
 
 ### Changes
