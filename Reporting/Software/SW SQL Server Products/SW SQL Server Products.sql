@@ -6,7 +6,7 @@
 .NOTES
     Created by Ioan Popovici.
     Requires the usp_PivotWithDynamicColumns stored procedure.
-    Requires SQL Property and ProductID extensions.
+    Requires SQL Property and ProductID HWI extensions.
     Part of a report should not be run separately.
 .LINK
     https://SCCM.Zone/SW-SQL-Server-Products
@@ -41,7 +41,6 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
 /* Create SQLProducts table */
 CREATE TABLE #SQLProducts (
     ResourceID          NVARCHAR(25)
-    , SKU               NVARCHAR(100)
     , SKUName           NVARCHAR(100)
     , [Version]         NVARCHAR(25)
     , FileVersion       NVARCHAR(50)
@@ -56,7 +55,7 @@ CREATE TABLE #SQLProducts (
 DECLARE @SQLRelease Table (FileVersion NVARCHAR(4), Release NVARCHAR(10))
 
 /* Populate StaticColumnList */
-SET @StaticColumnList = N'[SKUNAME],[SKU],[VERSION],[FILEVERSION],[SPLEVEL],[INSTANCEID],[CLUSTERED],[ISWOW64],[SQMREPORTING]'
+SET @StaticColumnList = N'[SKUNAME],[VERSION],[FILEVERSION],[SPLEVEL],[INSTANCEID],[CLUSTERED],[ISWOW64],[SQMREPORTING]'
 
 /* Populate SQLRelease table */
 INSERT INTO @SQLRelease (FileVersion, Release)
