@@ -1,5 +1,13 @@
 # SW SQL Server Products release history
 
+## 2.6.0 - 2019-07-17
+
+### Changes
+
+    * Added GetSQLProductKey.vb to the project folder
+    * Added the ability to hide the product key
+    * Fixed a typo
+
 ## 2.5.1 - 2019-07-15
 
 ### Changes

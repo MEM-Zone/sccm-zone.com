@@ -2570,7 +2570,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                               <Paragraph>
                                                                 <TextRuns>
                                                                   <TextRun>
-                                                                    <Value>=SrsResources.Localization.GetString("ProductKey", User!Language)</Value>
+                                                                    <Value>=SrsResources.Localization.GetString("Product Key", User!Language)</Value>
                                                                     <Style>
                                                                       <FontFamily>Segoe UI</FontFamily>
                                                                       <FontWeight>Bold</FontWeight>
@@ -2763,7 +2763,6 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                           <PaddingBottom>2pt</PaddingBottom>
                         </Style>
                       </Textbox>
-                      <rd:Selected>true</rd:Selected>
                     </CellContents>
                   </TablixHeader>
                   <TablixMembers>
@@ -3991,7 +3990,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                                       <Paragraph>
                                                                         <TextRuns>
                                                                           <TextRun>
-                                                                            <Value>=Code.GetSQLProductKey(Split(Replace(Fields!ProductKey.Value, " ",""), ","), Left(Fields!Version.Value, 2))</Value>
+                                                                            <Value>=IIF(Parameters!HideProductKey.Value = false, Code.GetSQLProductKey(Split(Replace(Fields!ProductKey.Value, " ",""), ","), Left(Fields!Version.Value, 2)), "Hidden")</Value>
                                                                             <Style>
                                                                               <FontFamily>Segoe UI</FontFamily>
                                                                               <FontSize>9pt</FontSize>
@@ -3999,7 +3998,7 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
                                                                           </TextRun>
                                                                         </TextRuns>
                                                                         <Style>
-                                                                          <TextAlign>Left</TextAlign>
+                                                                          <TextAlign>Center</TextAlign>
                                                                         </Style>
                                                                       </Paragraph>
                                                                     </Paragraphs>
@@ -4799,6 +4798,15 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
+    <ReportParameter Name="HideProductKey">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>false</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Hide Product Key</Prompt>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -4829,6 +4837,11 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
           <ColumnIndex>2</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>Filter</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>HideProductKey</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
@@ -4901,6 +4914,6 @@ End Function
     <CodeModule>SrsResources, Culture=neutral</CodeModule>
   </CodeModules>
   <rd:ReportUnitType>Cm</rd:ReportUnitType>
-  <rd:ReportServerUrl>http://ulb-cm-sql-01a/ReportServer</rd:ReportServerUrl>
+  <rd:ReportServerUrl></rd:ReportServerUrl>
   <rd:ReportID>6fbd236a-d836-4950-8788-14b828deb616</rd:ReportID>
 </Report>
