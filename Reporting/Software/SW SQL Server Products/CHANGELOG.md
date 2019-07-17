@@ -1,5 +1,11 @@
 # SW SQL Server Products release history
 
+## 2.6.2 - 2019-07-17
+
+### Changes
+
+    * Updated SQL releases definition list. Should fix the empty release bug.
+
 ## 2.6.1 - 2019-07-17
 
 ### Changes

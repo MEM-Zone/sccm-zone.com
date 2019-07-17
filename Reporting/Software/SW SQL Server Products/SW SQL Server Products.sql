@@ -52,7 +52,7 @@ CREATE TABLE #SQLProducts (
     , SQMReporting      NVARCHAR(3)
 )
 
-/* Initialize SQLRelease table */
+/* Create SQLRelease table */
 DECLARE @SQLRelease Table (FileVersion NVARCHAR(4), Release NVARCHAR(10))
 
 /* Populate StaticColumnList */
@@ -61,9 +61,12 @@ SET @StaticColumnList = N'[SKUNAME],[VERSION],[FILEVERSION],[SPLEVEL],[CLUSTERED
 /* Populate SQLRelease table */
 INSERT INTO @SQLRelease (FileVersion, Release)
 VALUES
-      ('2017', '2017')
-    , ('2016', '2016')
+    ('2017', '2017')
+    , ('2016', '2017')
+    , ('2015', '2016')
     , ('2014', '2014')
+    , ('2013', '2014')
+    , ('2012', '2012')
     , ('2011', '2012')
     , ('2009', '2008 R2')
     , ('2007', '2008')
