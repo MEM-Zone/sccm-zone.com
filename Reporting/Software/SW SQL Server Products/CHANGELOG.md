@@ -1,5 +1,11 @@
 # SW SQL Server Products release history
 
+## 2.6.3 - 2019-07-17
+
+### Changes
+
+    * Updated SQL releases definition list to also match 2012 CTP1 and CTP3.
+
 ## 2.6.2 - 2019-07-17
 
 ### Changes
