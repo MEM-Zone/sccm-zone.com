@@ -1,5 +1,11 @@
 # SW SQL Server Products release history
 
+## 2.6.1 - 2019-07-17
+
+### Changes
+
+    * Fixed radio buttons not showing up in report viewer
+
 ## 2.6.0 - 2019-07-17
 
 ### Changes

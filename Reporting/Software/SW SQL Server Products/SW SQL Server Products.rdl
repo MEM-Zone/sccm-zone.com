@@ -4763,9 +4763,14 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
           <Value>N/A</Value>
         </Values>
       </DefaultValue>
+      <AllowBlank>true</AllowBlank>
       <Prompt>Filter by edition groups (multiple selection)</Prompt>
       <ValidValues>
         <ParameterValues>
+          <ParameterValue>
+            <Value>N/A</Value>
+            <Label>N/A</Label>
+          </ParameterValue>
           <ParameterValue>
             <Value>Enterprise</Value>
             <Label>Enterprise</Label>
@@ -4790,10 +4795,6 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
             <Value>WID</Value>
             <Label>WID</Label>
           </ParameterValue>
-          <ParameterValue>
-            <Value>N/A</Value>
-            <Label>N/A</Label>
-          </ParameterValue>
         </ParameterValues>
       </ValidValues>
       <MultiValue>true</MultiValue>
@@ -4806,6 +4807,18 @@ IF OBJECT_ID('tempdb..#SQLProducts', 'U') IS NOT NULL
         </Values>
       </DefaultValue>
       <Prompt>Hide Product Key</Prompt>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>true</Value>
+            <Label>Yes</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>false</Value>
+            <Label>No</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
     </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
