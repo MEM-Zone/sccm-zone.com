@@ -723,43 +723,48 @@ Function Get-CCMCachedApplications {
 
                 ## Get application content ID
                 ForEach ($DeploymentType in $ApplicationDTs) {
-                    #  Assemble Invoke-Method arguments
-                    $Arguments = [hashtable]@{
-                        'AppDeliveryTypeID' = [string]$($DeploymentType.ID)
-                        'Revision'          = [uint32]$($DeploymentType.Revision)
-                        'ActionType'        = 'Install'
-                    }
-                    #  Get app content ID via GetContentInfo wmi method
-                    $AppContentID = (Invoke-CimMethod -Namespace 'Root\ccm\cimodels' -ClassName 'CCM_AppDeliveryType' -MethodName 'GetContentInfo' -Arguments $Arguments -Verbose:$false).ContentID
 
-                    ## Get the cache info for the application using the ContentID
-                    $AppCacheInfo = $CacheInfo | Where-Object { $($_.ContentID) -eq $AppContentID }
+                    ## Get allowed actions (each action can have a different content id)
+                    ForEach ($ActionType in $DeploymentType.AllowedActions) {
 
-                    ## Debug info
-                    Write-Log -Message "CachedInfo: `n $($AppCacheInfo | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
+                        #  Assemble Invoke-Method arguments
+                        $Arguments = [hashtable]@{
+                            'AppDeliveryTypeID' = [string]$($DeploymentType.ID)
+                            'Revision'          = [uint32]$($DeploymentType.Revision)
+                            'ActionType'        = [string]$($ActionType)
+                        }
+                        #  Get app content ID via GetContentInfo wmi method
+                        $AppContentID = (Invoke-CimMethod -Namespace 'Root\ccm\cimodels' -ClassName 'CCM_AppDeliveryType' -MethodName 'GetContentInfo' -Arguments $Arguments -Verbose:$false).ContentID
 
-                    ## Accounting for cache items with multiple CacheElementIDs
-                    ForEach ($CacheItem in $AppCacheInfo) {
+                        ## Get the cache info for the application using the ContentID
+                        $AppCacheInfo = $CacheInfo | Where-Object { $($_.ContentID) -eq $AppContentID }
 
-                        ## If the application is in the cache, assemble properties and add it to the result object
-                        If ($CacheItem) {
-                            #  Set content size to 0 if null to avoid division by 0
-                            If ($($CacheItem.ContentSize) -eq 0) { [int]$AppContentSize = 0 } Else { [int]$AppContentSize = $($CacheItem.ContentSize) }
-                            #  Assemble result object props
-                            $CachedAppProps = [ordered]@{
-                                Name              = $($Application.Name)
-                                DeploymentType    = $($DeploymentType.Name)
-                                InstallState      = $($Application.InstallState)
-                                ContentID         = $($CacheItem.ContentID)
-                                ContentVersion    = $($CacheItem.ContentVersion)
-                                ReferenceCount    = $($CacheItem.ReferenceCount)
-                                LastReferenceTime = $($CacheItem.LastReferenceTime)
-                                Location          = $($CacheItem.Location)
-                                'Size(MB)'        = '{0:N2}' -f $($AppContentSize / 1KB)
-                                CacheElementID    = $($CacheItem.CacheElementID)
+                        ## Debug info
+                        Write-Log -Message "CachedInfo: `n $($AppCacheInfo | Out-String)" -DebugMessage -ScriptSection ${CmdletName}
+
+                        ## Accounting for cache items with multiple CacheElementIDs
+                        ForEach ($CacheItem in $AppCacheInfo) {
+
+                            ## If the application is in the cache, assemble properties and add it to the result object
+                            If ($CacheItem) {
+                                #  Set content size to 0 if null to avoid division by 0
+                                If ($($CacheItem.ContentSize) -eq 0) { [int]$AppContentSize = 0 } Else { [int]$AppContentSize = $($CacheItem.ContentSize) }
+                                #  Assemble result object props
+                                $CachedAppProps = [ordered]@{
+                                    Name              = $($Application.Name)
+                                    DeploymentType    = $($DeploymentType.Name)
+                                    InstallState      = $($Application.InstallState)
+                                    ContentID         = $($CacheItem.ContentID)
+                                    ContentVersion    = $($CacheItem.ContentVersion)
+                                    ReferenceCount    = $($CacheItem.ReferenceCount)
+                                    LastReferenceTime = $($CacheItem.LastReferenceTime)
+                                    Location          = $($CacheItem.Location)
+                                    'Size(MB)'        = '{0:N2}' -f $($AppContentSize / 1KB)
+                                    CacheElementID    = $($CacheItem.CacheElementID)
+                                }
+                                #  Add items to result object
+                                $CachedApps += New-Object 'PSObject' -Property $CachedAppProps
                             }
-                            #  Add items to result object
-                            $CachedApps += New-Object 'PSObject' -Property $CachedAppProps
                         }
                     }
                 }
