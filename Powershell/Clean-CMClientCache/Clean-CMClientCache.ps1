@@ -1082,7 +1082,7 @@ Function Remove-CCMCacheElement {
         [psobject]$RemovedCache = @()
 
         ## Set the date threshold
-        [datetime]$OlderThan = (Get-Date).AddDays( - $ReferencedThreshold)
+        [datetime]$OlderThan = (Get-Date).ToUniversalTime().AddDays( - $ReferencedThreshold)
     }
     Process {
         Try {
