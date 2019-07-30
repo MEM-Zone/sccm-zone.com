@@ -1,5 +1,12 @@
 # Clean-CMClientCache release history
 
+## 4.1 - 2019-07-30
+
+## Changes (Fixed by Wolfereign - Big Thanks!)
+
+    * Fixed skip cache bug with LastReferenceTime by changing $OlderThan date to UTC.
+    * Fixed skip cache bug where script handles only 'Install' action type.
+
 ## 4.0 - 2019-03-15
 
 ## Changes
