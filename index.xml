@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SCCM Zone</title>
+    <link>https://sccm-zone.com/</link>
+    <description>Recent content on SCCM Zone</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 18 Jul 2019 14:46:56 +0000</lastBuildDate>
+    
+	<atom:link href="https://sccm-zone.com/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>SQL Server Product and Version Reporting with SCCM</title>
+      <link>https://sccm-zone.com/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/</link>
+      <pubDate>Thu, 18 Jul 2019 14:46:56 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/</guid>
+      <description>SQL licensing is always a pain but this report should make it a little easier…
+Report release history
+Previous report version
+Originaly published on sccmf12twice.com
+This is the second iteration of my SQL version report. When I look back on my previous work I always cringe and this was no exception. A while back, I received a request to add the SQL key to the report, so I began examining the old code.</description>
+    </item>
+    
+    <item>
+      <title>SCCM Application Detection Method using in Console Application Version</title>
+      <link>https://sccm-zone.com/posts/2019-04-01_sccm-application-detection-method-using-in-console-application-version/</link>
+      <pubDate>Mon, 01 Apr 2019 16:19:15 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2019-04-01_sccm-application-detection-method-using-in-console-application-version/</guid>
+      <description>Say no to application version hardcoded in the detection script.
+T
+This method is valid for any application. In this case I will use the configuration manager client upgrade application. You might ask yourself, why not use the automatic client upgrade? Well, because the client upgrade can only run during a maintenance window. I won’t go into details, but unless this behavior changes, I cannot use this feature with my current configuration.</description>
+    </item>
+    
+    <item>
+      <title>Devices by Boundary and Network Information in SCCM</title>
+      <link>https://sccm-zone.com/posts/2019-03-13_devices-by-boundary-and-network-information-in-sccm/</link>
+      <pubDate>Wed, 13 Mar 2019 18:42:18 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2019-03-13_devices-by-boundary-and-network-information-in-sccm/</guid>
+      <description>Got to have this report for boundaries review :)
+Report release history
+T
+his all started with a simple boundary review when I figured It might be handy to have a boundary report. After some research It started to dawn on me that this would not be an easy task.
+In the SCCM DB there is no correlation between boundaries and IP’s so there goes the easy way. After a lot of banging my head on the desk this is what I came up with.</description>
+    </item>
+    
+    <item>
+      <title>Extend the SCCM Console to show Collection Membership using Console Builder</title>
+      <link>https://sccm-zone.com/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/</link>
+      <pubDate>Thu, 28 Feb 2019 17:32:05 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/</guid>
+      <description>Let’s be frank the collection membership should be visible in the console by default. Here’s how to do it…
+U
+sing RCT to show the collection membership is slow and awkward. In my search to find a better option I stumbled onto the SCCM Console Builder. This is an amazing tool that is already built-in and allows a wide range of customization. I used Zeng Yinghua’s blog post as a guide when creating this extension.</description>
+    </item>
+    
+    <item>
+      <title>Installed Software Reporting with SCCM</title>
+      <link>https://sccm-zone.com/posts/2018-12-06_installed-software-reporting-with-sccm/</link>
+      <pubDate>Thu, 06 Dec 2018 19:05:27 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-12-06_installed-software-reporting-with-sccm/</guid>
+      <description>Installed software reporting made easy…
+Report release history
+I
+was sitting on this one for a while for no good reason. I built it and then completely forgot about it. A few days ago I was trying to find a part of the query, used in this report realized that I forgot to publish it.
+Most software reports out there are pretty basic so I decided to buid something new.</description>
+    </item>
+    
+    <item>
+      <title>BitLocker Compliance and Policy Reporting with SCCM</title>
+      <link>https://sccm-zone.com/posts/2018-11-02_bitlocker-compliance-and-policy-reporting-with-sccm/</link>
+      <pubDate>Fri, 02 Nov 2018 13:03:15 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-11-02_bitlocker-compliance-and-policy-reporting-with-sccm/</guid>
+      <description>If you are looking for a comprehensive BitLocker report, look no more…
+Report release history
+My
+vague promises of publishing a BitLocker report based on HWI seem to have come true. This is a complete report that also displays BitLocker GPO settings. In order to get the BitLocker and Policy data, you need to extend the SCCM Hardware Inventory. If you don’t want to do that you can use my BitLocker Configuration Baseline together with the Baseline Report with Actual Values.</description>
+    </item>
+    
+    <item>
+      <title>Software Update Compliance in SCCM with System information</title>
+      <link>https://sccm-zone.com/posts/2018-10-16_software-update-compliance-in-sccm-with-system-information/</link>
+      <pubDate>Tue, 16 Oct 2018 17:09:40 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-10-16_software-update-compliance-in-sccm-with-system-information/</guid>
+      <description>Sometimes you need all the data in one place…
+Report release history
+I
+hate software update reports but a customer wanted a lot more data than any reports we had. My limited SQL skillset was a real pain here.
+I struggled with the ‘Pending Restart Reason’ until I read in some obscure forum that the value is in fact a bit-mask. The bit-mask is then used to get all the available states for a machine.</description>
+    </item>
+    
+    <item>
+      <title>Maintenance Windows Reporting in SCCM</title>
+      <link>https://sccm-zone.com/posts/2018-08-24_maintenance-windows-reporting-in-sccm/</link>
+      <pubDate>Fri, 24 Aug 2018 16:23:26 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-08-24_maintenance-windows-reporting-in-sccm/</guid>
+      <description>Sometimes you just need all maintenance windows in one place…
+Report release history
+T
+here comes a time when you need to cleanup or view all maintenance windows for your environment. I had this for a while but realized only today that there is no builtin report that can show you all maintenance windows in SCCM. Without further ado…
+Import the SSRS Report  Download the report file**## Maintenance windows report** [**_SD Maintenance Windows by Collection and Type_**](https://raw.</description>
+    </item>
+    
+    <item>
+      <title>Those are just for HWI, also if you do that the views in the database will be deleted and you will…</title>
+      <link>https://sccm-zone.com/posts/2018-07-18_those-are-just-for-hwi-also-if-you-do-that-the-views-in-the-database-will-be-deleted-and-you-will/</link>
+      <pubDate>Wed, 18 Jul 2018 14:50:45 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-07-18_those-are-just-for-hwi-also-if-you-do-that-the-views-in-the-database-will-be-deleted-and-you-will/</guid>
+      <description>Those are just for HWI, also if you do that the views in the database will be deleted and you will have to gather HWI again.
+Are you sure you modified the configuration.mof file correctly? That’s the one that actually creates the WMI entries. It takes stuff from here:</description>
+    </item>
+    
+    <item>
+      <title>LOL I can confirm that the last part of the process Component Cleanup is adding about ~3 GB to the…</title>
+      <link>https://sccm-zone.com/posts/2018-05-24_lol-i-can-confirm-that-the-last-part-of-the-process-component-cleanup-is-adding-about-3-gb-to-the/</link>
+      <pubDate>Thu, 24 May 2018 11:13:32 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-05-24_lol-i-can-confirm-that-the-last-part-of-the-process-component-cleanup-is-adding-about-3-gb-to-the/</guid>
+      <description>LOL
+I can confirm that the last part of the process Component Cleanup is adding about ~3 GB to the OS!
+I’m looking into it
+Before
+After</description>
+    </item>
+    
+    <item>
+      <title>Application and Package Deployments Reporting by Collection with SCCM</title>
+      <link>https://sccm-zone.com/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/</link>
+      <pubDate>Wed, 23 May 2018 16:51:00 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/</guid>
+      <description>Deployments reports for all collection members available get it while it’s hot…
+Report release history
+T
+here are no default reports that can display results for each collection member. There is a report that lists deployments for a specific collection but that’s it. If a collection member has a deployment on a different collection you are out of luck. Well not anymore…
+I used the ‘All package and program deployments to a specified user/device’ as reference.</description>
+    </item>
+    
+    <item>
+      <title>Repairing corrupted Windows Update Database with PowerShell and SCCM</title>
+      <link>https://sccm-zone.com/posts/2018-05-17_repairing-corrupted-windows-update-database-with-powershell-and-sccm/</link>
+      <pubDate>Thu, 17 May 2018 17:43:31 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-05-17_repairing-corrupted-windows-update-database-with-powershell-and-sccm/</guid>
+      <description>When a botched software update corrupts half of your fleet windows update database this script might come in handy…
+Script release history
+L
+ast month lot of complains about slowness started pouring in and an angry mob began to assemble outside of my office. Somehow the WUDatastore got corrupted on a few thousand machines causing severe slowdowns.
+In my case the application event log was full of ESENT errors (event id 623).</description>
+    </item>
+    
+    <item>
+      <title>@peroeriksson99 I’m pretty sure that’s incorrect, I don’t have most versions and all the views have…</title>
+      <link>https://sccm-zone.com/posts/2018-04-16_peroeriksson99-im-pretty-sure-thats-incorrect-i-dont-have-most-versions-and-all-the-views-have/</link>
+      <pubDate>Mon, 16 Apr 2018 17:41:59 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-04-16_peroeriksson99-im-pretty-sure-thats-incorrect-i-dont-have-most-versions-and-all-the-views-have/</guid>
+      <description>@peroeriksson99
+I’m pretty sure that’s incorrect, I don’t have most versions and all the views have been created. Maybe I’m missing something though.
+You can create the view like this:
+USE [CM_SITECODE]GO/****** Object: View [SCCM_Ext].[vex_GS_CUSTOM_SQL_2017_Property_2_00] Script Date: 4/16/2018 7:37:48 PM ******/SET ANSI_NULLS ONGOSET QUOTED_IDENTIFIER ONGOcreate view [SCCM_Ext].[vex_GS_CUSTOM_SQL_2017_Property_2_00] as select &amp;amp;#39;U&amp;amp;#39; as [ChangeAction],MachineID as [ResourceID],MachineID as [BatchingKey],InstanceKey as [GroupKey],TimeKey as [TimeStamp],rowversion as [rowversion],IsReadOnly00 as [IsReadOnly0],PropertyIndex00 as [PropertyIndex0],PropertyName00 as [PropertyName0],PropertyNumValue00 as [PropertyNumValue0],PropertyStrValue00 as [PropertyStrValue0],PropertyValueType00 as [PropertyValueType0],ServiceName00 as [ServiceName0],SqlServiceType00 as [SqlServiceType0] from dbo.</description>
+    </item>
+    
+    <item>
+      <title>BIOS version Reporting by Manufacturer and Model with SCCM</title>
+      <link>https://sccm-zone.com/posts/2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm/</link>
+      <pubDate>Thu, 25 Jan 2018 11:35:30 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm/</guid>
+      <description>With the Meltdown and Spectre looming on the horizon you might need to have a BIOS version report ready…
+Report release history
+A
+few days ago I was asked to provide a BIOS version report for our Lenovo and Dell machines. Since you guys might find it useful I decided to publish it.
+Import the SSRS Report  Download the report files**## Without Company information** [**_HW BIOS by Manufacturer and Model for Collection.</description>
+    </item>
+    
+    <item>
+      <title>Installing a Certificate with SCCM using Configuration Items</title>
+      <link>https://sccm-zone.com/posts/2017-10-11_installing-a-certificate-with-sccm-using-configuration-items/</link>
+      <pubDate>Wed, 11 Oct 2017 16:08:10 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-10-11_installing-a-certificate-with-sccm-using-configuration-items/</guid>
+      <description>Is a expired certificate is giving you a hard time? SCCM to the rescue!
+Select-Certificate release history __ Add-Certificate release history
+A
+while back a WSUS self-signed certificate expired for one of our clients. Instead of modifying 50+ GPOs I created a Configuration Item and solved the problem in ~30 minutes.
+Certificate Certificate Serial Number Get the Certificate Serial Number
+Certificate Base-64 key Export the certificate in Base-64 format</description>
+    </item>
+    
+    <item>
+      <title>Baseline Reporting with Actual Values output in SCCM</title>
+      <link>https://sccm-zone.com/posts/2017-09-22_baseline-reporting-with-actual-values-output-in-sccm/</link>
+      <pubDate>Fri, 22 Sep 2017 16:47:12 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-09-22_baseline-reporting-with-actual-values-output-in-sccm/</guid>
+      <description>If you need a simple report for all your baselines, search no more!
+Report release history
+A
+few days ago I got an interesting request on my blog for a BitLocker report based on a Configuration Baseline. So I figured it was high time to update and publish my own Baseline Compliance Report.
+Import the SSRS Report  Download the report file**## Configuration Baseline Compliance by CI with Values** [**_CB Configuration Baseline Compliance by Configuration Item with Values.</description>
+    </item>
+    
+    <item>
+      <title>Test Network Connectivity on TCP Ports using Multiline Input with PowerShell</title>
+      <link>https://sccm-zone.com/posts/2017-09-14_test-network-connectivity-on-tcp-ports-using-multiline-input-with-powershell/</link>
+      <pubDate>Thu, 14 Sep 2017 10:38:34 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-09-14_test-network-connectivity-on-tcp-ports-using-multiline-input-with-powershell/</guid>
+      <description>How to use the new shiny PowerShell commandlets to perform TCP port tests…
+Script release history
+D
+iscovery and Publishing have always been a pain, because of their many requirements. One of these requirements is a bunch of TCP ports that need to be open for the Discovery and Publishing to work. In a perfect world this wouldn’t be a problem, the networking team would take care of it, end of story.</description>
+    </item>
+    
+    <item>
+      <title>Creating an Updated Windows 7 OSD Image with SCCM Build and Capture</title>
+      <link>https://sccm-zone.com/posts/2017-08-31_creating-an-updated-windows-7-osd-image-with-sccm-build-and-capture/</link>
+      <pubDate>Thu, 31 Aug 2017 14:50:31 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-08-31_creating-an-updated-windows-7-osd-image-with-sccm-build-and-capture/</guid>
+      <description>Creating a OSD Image can be a hassle but with a bit of automation you can drop a lot of overhead
+T
+he recommendation is to use MDT for creating your OSD Image, but I achieved the same results using SCCM.
+Here I’m using Windows 7 with Office 2010, but the process is similar for every OS and Office Version.
+Image specs Injected in the Base Image  Windows 7, fully updated</description>
+    </item>
+    
+    <item>
+      <title>Add packages to a Windows Image using DISM PowerShell commandlets</title>
+      <link>https://sccm-zone.com/posts/2017-08-29_add-packages-to-a-windows-image-using-dism-powershell-commandlets/</link>
+      <pubDate>Tue, 29 Aug 2017 09:40:30 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-08-29_add-packages-to-a-windows-image-using-dism-powershell-commandlets/</guid>
+      <description>Stop using DISM.exe, use PowerShell DISM commandlets instead…
+Script release history
+L
+ast week, I was working on a post on how to get a updated Windows 7 image using SCCM Offline Servicing and DISM. I spent a few hours making and testing a batch file, writing the post and simplifying the language. I was about to press “Publish” when my idiotic brain began to wonder why I’m posting a batch file in 2017.</description>
+    </item>
+    
+    <item>
+      <title>Checking Installation Compliance for multiple KBs with SCCM</title>
+      <link>https://sccm-zone.com/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/</link>
+      <pubDate>Fri, 18 Aug 2017 15:13:16 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/</guid>
+      <description>Compliance report and expired updates make you WannaCry? Captain SCCM to the rescue!
+Report release history
+T
+he WannaCry outbreak continues to be a pain, because some clients are still unpatched. Since most of us expire the updates after a while, reporting can become a challenge.
+&amp;gt; Notes
+&amp;gt; The sql user defined function is needed as a pre-requisite.### Import the SSRS Report
+ Download the report file**## KB Compliance by ArticleID and Client State** [_SU KB Compliance by ArticleID.</description>
+    </item>
+    
+    <item>
+      <title>Cleaning the Windows Image before Sysprep during an SCCM B&amp;C Task Sequence</title>
+      <link>https://sccm-zone.com/posts/2017-08-01_cleaning-the-windows-image-before-sysprep-during-an-sccm-bc-task-sequence/</link>
+      <pubDate>Tue, 01 Aug 2017 14:53:25 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-08-01_cleaning-the-windows-image-before-sysprep-during-an-sccm-bc-task-sequence/</guid>
+      <description>Cleaning update caches and other junk before Sysprep was always a hurdle… until now :)
+Script release history
+I
+was creating a Windows image some time ago and wanted to slim down the image before capturing it.
+After some research, I found the Action-CleanupBeforeSysprep script by Mikael Nystrom
+It’s a very nice script but it has MDT dependencies and for some reason whenever I see VBScript I get shivers down my spine.</description>
+    </item>
+    
+    <item>
+      <title>Add computers from a file to a SCCM Collection using PowerShell and System File Watcher</title>
+      <link>https://sccm-zone.com/posts/2017-02-05_add-computers-from-a-file-to-a-sccm-collection-using-powershell-and-system-file-watcher/</link>
+      <pubDate>Sun, 05 Feb 2017 12:32:50 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-02-05_add-computers-from-a-file-to-a-sccm-collection-using-powershell-and-system-file-watcher/</guid>
+      <description>Add computers from a file to a collection just by saving…
+Script release history
+T
+he script will use two CSV files containing mail notification settings and computer names. Collection direct membership rules are removed before adding new computers. Feel free to adjust the templates and script provided bellow to suit your needs.
+Script Membership rules configuration file parameters  **DeviceName
+Computer name (NetBios Name**).
+ **CollectionName
+Maintenance windows collection (Collection Name**).</description>
+    </item>
+    
+    <item>
+      <title>Setting SCCM Maintenance Windows using PowerShell and System File Watcher</title>
+      <link>https://sccm-zone.com/posts/2017-01-29_setting-sccm-maintenance-windows-using-powershell-and-system-file-watcher/</link>
+      <pubDate>Sun, 29 Jan 2017 13:01:55 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2017-01-29_setting-sccm-maintenance-windows-using-powershell-and-system-file-watcher/</guid>
+      <description>Don’t wanna give access to the console just because a client wants to set his own maintenance windows? Here’s how to do it…
+Script release history
+T
+he script will use two CSV files containing mail and maintenance window configuration. Feel free to adjust the templates and script provided bellow to suit your needs.
+Script Maintenance windows configuration file parmeters  **CollectionName
+Maintenance windows collection (Collection Name**).
+ **Date</description>
+    </item>
+    
+    <item>
+      <title>Disable Push Install for a SCCM Collection</title>
+      <link>https://sccm-zone.com/posts/2016-11-14_disable-push-install-for-a-sccm-collection/</link>
+      <pubDate>Mon, 14 Nov 2016 19:35:48 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-11-14_disable-push-install-for-a-sccm-collection/</guid>
+      <description>Have you ever wished that you could disable push install for a specific collection? Welp there is a supported way of doing it…
+Script release history
+T
+urns out there is a registry key you can use for this purpose, it’s not perfect but it’s the best option I could find.
+The following script is adding computers from a specified device collection to the ExcludeServers registry list and optionally sends a mail report with the help of a csv configuration file.</description>
+    </item>
+    
+    <item>
+      <title>It’s probably because you did not set the PowerShell execution policy to Bypass in Client Settings…</title>
+      <link>https://sccm-zone.com/posts/2016-11-01_its-probably-because-you-did-not-set-the-powershell-execution-policy-to-bypass-in-client-settings/</link>
+      <pubDate>Tue, 01 Nov 2016 18:17:12 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-11-01_its-probably-because-you-did-not-set-the-powershell-execution-policy-to-bypass-in-client-settings/</guid>
+      <description>It’s probably because you did not set the PowerShell execution policy to Bypass in Client Settings, see image below.
+Set PowerShell execution policy to Bypass</description>
+    </item>
+    
+    <item>
+      <title>Powershell Error Handling for multiple commands</title>
+      <link>https://sccm-zone.com/posts/2016-05-19_powershell-error-handling-for-multiple-commands/</link>
+      <pubDate>Thu, 19 May 2016 14:00:45 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-05-19_powershell-error-handling-for-multiple-commands/</guid>
+      <description>What if I told you…
+A
+friend of mine asked me how to do error handling in powershell for multiple commands. There is no simple answer to this as there are multiple ways of doing it in powershell. In the examples below I need to delete a powershell module that is located in one of the paths defined in the OSDScriptsPath variable. This are just and examples and should be treated as such.</description>
+    </item>
+    
+    <item>
+      <title>Fix Sysprep Error on Windows 2008 R2 or Windows 7 after installing Windows Management Framework 5.0</title>
+      <link>https://sccm-zone.com/posts/2016-03-25_fix-sysprep-error-on-windows-2008-r2-or-windows-7-after-installing-windows-management-framework-5.0/</link>
+      <pubDate>Fri, 25 Mar 2016 18:48:35 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-03-25_fix-sysprep-error-on-windows-2008-r2-or-windows-7-after-installing-windows-management-framework-5.0/</guid>
+      <description>I always hate it when sysprep fails but this time it had a happy ending…
+Problem  Install Windows Management Framework 5.0 (Contains PowerShell 5.0)
+on Windows 2008 R2 or Windows 7.
+ Run sysprep.
+ Sysprep fails with:Sysprep_Generalize_MiStreamProv: RegDeleteValue for target uri failed with error = 2[gle=0x00000002] Sysprep_Generalize_MiStreamProv: RegDeleteValue for full payload time failed with error = 2[gle=0x00000002]
+  Solution  Add the following key to registry:[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\StreamProvider] “LastFullPayloadTime”=dword:00000000</description>
+    </item>
+    
+    <item>
+      <title>SCCM Common Push Install Errors</title>
+      <link>https://sccm-zone.com/posts/2016-02-29_sccm-common-push-install-errors/</link>
+      <pubDate>Mon, 29 Feb 2016 17:11:06 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-02-29_sccm-common-push-install-errors/</guid>
+      <description>I’ve gathered a list of common errors, it may help you find a root cause when troubleshooting SCCM Push Install.
+Here is the .pdf CM Push Install Errors.pdf
+Here is the .xlsx CM Push Install Errors.xlsx
+Here is the .png When the Network Admin tells you that all required ports are open and you know they’re not…
+ Use Github for 🐛 reporting, or 🌈 and🦄 requests
+ 🙏 Please subscribe or clap for this article, it makes a difference!</description>
+    </item>
+    
+    <item>
+      <title>Set SCCM Maintenance Windows based on Patch Tuesday with PowerShell</title>
+      <link>https://sccm-zone.com/posts/2016-02-25_set-sccm-maintenance-windows-based-on-patch-tuesday-with-powershell/</link>
+      <pubDate>Thu, 25 Feb 2016 17:17:07 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-02-25_set-sccm-maintenance-windows-based-on-patch-tuesday-with-powershell/</guid>
+      <description>This is a well known limitation SCCM but it can be addressed with non-recurrent Maintenance Windows.
+Script release history
+Script Configuration file parameters The script is using a “configuration” CSV where you can specify the script parameters.
+ CollectionName Specifies the collection name for which to set maintenance windows.
+ Year Specifies the maintenance window year.
+ Month
+Specifies the maintenance window month.
+ OffsetWeeks Specifies the maintenance window offset number of weeks after patch Tuesday.</description>
+    </item>
+    
+    <item>
+      <title>Get Active Directory Computer information from all domains in multiple forests</title>
+      <link>https://sccm-zone.com/posts/2016-02-23_get-active-directory-computer-information-from-all-domains-in-multiple-forests/</link>
+      <pubDate>Tue, 23 Feb 2016 22:20:43 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-02-23_get-active-directory-computer-information-from-all-domains-in-multiple-forests/</guid>
+      <description>If you have a multiple forest structure and need to collect computer information from all domains in those forests you might find this script useful.
+Script release history
+T
+he following script takes a list of forests as input via GUI. It then parses all domains in these forests collecting Host Name, Operating System and Domain information for all non disabled computer accounts. The collected information will then be exported to a CSV file.</description>
+    </item>
+    
+    <item>
+      <title>SCCM detailed, filterable Port Documentation in Excel format</title>
+      <link>https://sccm-zone.com/posts/2016-02-11_sccm-detailed-filterable-port-documentation-in-excel-format/</link>
+      <pubDate>Thu, 11 Feb 2016 17:56:42 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-02-11_sccm-detailed-filterable-port-documentation-in-excel-format/</guid>
+      <description>If you ever needed some ports open for your SCCM infrastructure you know what I’m talking about…
+T
+here is a complete documentation on technet but it’s not filterable and you must go trough a ton of it in order to get the information you need.
+I’ve created an excel sheet to make things easier. You just have to put in your SCCM infrastructure systems with the corresponding IP addresses and it will automatically fill in the a sheet that is filterable and has all the information you need.</description>
+    </item>
+    
+    <item>
+      <title>SQL Version Detection and Reporting with SCCM</title>
+      <link>https://sccm-zone.com/posts/2016-02-08_sql-version-detection-and-reporting-with-sccm/</link>
+      <pubDate>Mon, 08 Feb 2016 13:37:36 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-02-08_sql-version-detection-and-reporting-with-sccm/</guid>
+      <description>SQL version reporting with SCCM done right…
+New version here
+By
+default, the SQL information that can be gathered with SCCM is incomplete. The version, service pack and cumulative update information are available in WMI, but are not stored in the cimv2 namespace. In order to be able to gather the relevant SQL information, a hardware inventory extension is required.
+&amp;gt; Notes&amp;gt; ALWAYS BACK-UP YOUR CONFIGURATION.MOF FILE BEFORE ANY CHANGES!</description>
+    </item>
+    
+    <item>
+      <title>SCCM RamDiskTFTPWindowSize Bug Fix</title>
+      <link>https://sccm-zone.com/posts/2016-02-08_sccm-ramdisktftpwindowsize-bug-fix/</link>
+      <pubDate>Mon, 08 Feb 2016 12:09:48 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2016-02-08_sccm-ramdisktftpwindowsize-bug-fix/</guid>
+      <description>This is a long standing bug in SCCM, the RamDiskTFTPWindowSize should be the way to speed up PXE boot but…
+!!! UPDATE !!! — Finally fixed in SCCM 1603—!!! UPDATE !!! VMware PXE Limitations
+In order to speed up PXE booting in SCCM you have two options  Most of the articles I’ve read suggest increasing RamDiskTFTPBlockSize but it’s obviously the wrong option because it causes IP Fragmentation.
+ Using RamDiskTFTPWindowSize should be the right way to do it, but after tinkering with it I’ve experienced no speed improvements.</description>
+    </item>
+    
+    <item>
+      <title>Cleaning the SCCM Cache the right way with PowerShell</title>
+      <link>https://sccm-zone.com/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/</link>
+      <pubDate>Thu, 19 Nov 2015 22:04:03 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/</guid>
+      <description>Hundreds of low disk space alerts in SCOM after Patch Tuesday? I know the feeling…
+Script release history
+I’
+ve been struggling a bit to find a good solution for the cache cleanup problem. The cache is supposed to clean itself but that’s not always the case. I have three year old cache items that te not deleted when needed. Deleting the files directly is not supported because the Client is not notified, and the SCCM SDK is quite limited.</description>
+    </item>
+    
+    <item>
+      <title>Create a BitLocker Encryption Compliance Report for all Drives in SCCM</title>
+      <link>https://sccm-zone.com/posts/2015-01-28_create-a-bitlocker-encryption-compliance-report-for-all-drives-in-sccm/</link>
+      <pubDate>Wed, 28 Jan 2015 13:39:53 +0000</pubDate>
+      
+      <guid>https://sccm-zone.com/posts/2015-01-28_create-a-bitlocker-encryption-compliance-report-for-all-drives-in-sccm/</guid>
+      <description>This can be achieved fairly easy using SCCM Configuration Items (CI) and Configuration Baselines (CB).
+Script release history
+Script Script parameters  DriveType Specifies the drive type(s) for which to get the bitlocker status. Default is: ‘3’.
+ DriveLetter Specifies the drive letter(s) for which to get the bitlocker status. Default is: ‘All’.
+  Gets the BitLocker protection status
+Configuration Item Create the CI
+Set the Operating System on which the CI can run</description>
+    </item>
+    
+  </channel>
+</rss>
