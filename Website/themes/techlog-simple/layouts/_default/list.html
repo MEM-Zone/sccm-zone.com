@@ -1,0 +1,57 @@
+{{ partial "header.html" . }}
+<div class="row">
+  <div class="col-lg-9">
+    {{ if and ( eq .Kind "taxonomy" ) ( eq .Type "authors" ) }}
+    <div class="row">
+      <h2>{{ .Name }}'s articles</h2>
+    </div>
+    {{ with ( .Site.GetPage "page" ( printf "profiles/%s" ( replace .Name " " "-" | lower ) ) ) }}
+    <div class="row">
+      {{ .Content }}
+    </div>
+    <hr/>
+    {{ end }}
+    {{ end }}
+
+    {{ $paginator := .Paginate ( where .Site.RegularPages "Section" "ne" "profiles" ) }}
+    {{ range $idx, $page := $paginator.Pages }}
+    {{ if $page.Section }}
+    <article>
+      <div class="row">
+        <h3><a href="{{ .RelPermalink}}">{{ .Title }}</a></h3>
+      </div>
+      <div class="row">
+        <span class="ml-1">Created At: {{ .Date.Format "2006.01.02" }}</span>
+        <span class="ml-1">Updated At: {{ .Lastmod.Format "2006.01.02" }}</span>
+        {{ if .Params.Authors }}
+        <span class="ml-1">Author(s): 
+        {{ with .Params.Authors }}
+        {{ range . }}
+        <a class="ml-1 badge badge-pill badge-secondary" href="{{ "/authors/" | relLangURL }}{{ . | urlize }}/">{{ . }}</a>
+        {{ end }}
+        {{ end }}
+        </span>
+        {{ end }}
+      </div>
+      <div class="row">
+        {{ .Summary }}
+      </div>
+      <div class="row">
+        {{ with .Params.Tags }}
+        {{ range . }}
+        <a class="ml-1 badge badge-pill badge-secondary" href="{{ "/tags/" | relLangURL }}{{ . | urlize }}/">{{ . }}</a>
+        {{ end }}
+        {{ end }}
+      </div>
+    </article>
+    <hr/>
+    {{ end }}
+    {{ end }}
+    {{ partial "pagination.html" . }}
+  </div>
+
+  <div class="col-lg-3">
+    {{ partial "sidebar.html" . }}
+  </div>
+</div>
+{{ partial "footer.html" . }}

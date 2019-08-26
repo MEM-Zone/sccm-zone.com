@@ -1,0 +1,6 @@
+baseURL = "https://sccm-zone.com"
+languageCode = "en-us"
+title = "SCCM Zone"
+theme = "techlog-simple"
+[blackfriday]
+extensions = ["hardLineBreak"]

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="{{ "common/favicon.ico" | relURL }}">
+    <!-- Bootstrap CDN: https://getbootstrap.com/docs/4.0/getting-started/introduction/ -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Font Awesome CDN: https://www.bootstrapcdn.com/fontawesome/ -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ "common/site.css" | relURL }}">
+    <!-- Open Graph: https://developers.facebook.com/docs/plugins/share-button -->
+    {{ if .Page.IsHome }}
+    <title>{{ .Site.Title }}</title>
+    <meta property="og:title"       content="{{ .Site.Title }}" />
+    <meta property="og:type"        content="website" />
+    {{ else }}
+    <title>{{ .Site.Title }} :: {{ .Title }}</title>
+    <meta property="og:title"       content="{{ .Site.Title }} :: {{ .Title }}" />
+    <meta property="og:type"        content="article" />
+    {{ end }}
+    <meta property="og:url"         content="{{ .Permalink }}" />
+    <meta property="og:description" content="{{ .Description }}" />
+    {{ range $ext := ( slice "png" "jpg" "jpeg" ) }}
+    {{ $ogImagePath := ( delimit ( slice $.File.Dir $.File.TranslationBaseName "/og" $ext ) "" "." ) }}
+    {{ if ( fileExists ( print "static/" $ogImagePath ) ) }}
+    <meta property="og:image"       content="{{ $ogImagePath | absURL }}" />
+    <meta property="twitter:image"  content="{{ $ogImagePath | absURL }}" />
+    <meta property="twitter:image:src"  content="{{ $ogImagePath | absURL }}" />
+    {{ end }}
+    {{ end }}
+    <meta name="twitter:card"       content="summary" />
+    {{ with $.Site.Params.Twitter }}
+    <meta name="twitter:site"       content="@{{ . }}" />
+    {{ end }}
+    <!-- /Open Graph -->
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      {{ if $.Site.Params.SNS }}
+      <span class="navbar-text mr-1">I am on</span>
+      {{ end }}
+      <ul class="navbar-nav">
+        {{ with $.Site.Params.SNS.GitHub }}
+        <li class="nav-item">
+          <a class="nav-link" target="github_{{ . }}" href="https://github.com/{{ . }}">GitHub<i class="ml-1 fab fa-github"></i></a>
+        </li>
+        {{ end }}
+        {{ with $.Site.Params.SNS.Twitter }}
+        <li class="nav-item">
+          <a class="nav-link" target="twitter_{{ . }}" href="https://twitter.com/@{{ . }}">Twitter<i class="ml-1 fab fa-twitter"></i></a>
+        </li>
+        {{ end }}
+        {{ with .Site.Params.SNS.Instagram }}
+        <li class="nav-item">
+          <a class="nav-link" target="instagram_{{ . }}" href="https://www.instagram.com/{{ . }}">Instagram<i class="ml-1 fab fa-instagram"></i></a>
+        </li>
+        {{ end }}
+        {{ with .Site.Params.SNS.Facebook }}
+        <li class="nav-item">
+          <a class="nav-link" target="facebook_{{ . }}" href="https://www.facebook.com/{{ . }}">Facebook<i class="ml-1 fab fa-facebook"></i></a>
+        </li>
+        {{ end }}
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="{{ .Site.BaseURL }}">{{ .Site.Title }}</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        <!-- left -->
+        <ul class="navbar-nav mr-auto">
+          {{ if .IsTranslated }}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbar_dropdown_lang" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              {{ i18n "showTranslations" }}
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbar_dropdown_lang">
+              {{ range .Translations }}
+              <a class="dropdown-item" href="{{ .Permalink }}">
+                <span class="badge badge-light">{{ .Language.LanguageName }}</span>
+                {{ .Title }}
+              </a>
+              {{ end }}
+            </div>
+          </li>
+          {{ end }}
+          {{ if not .IsNode }}
+          {{ if .Params.Authors }}
+          <li class="nav-item">
+            <span class="nav-link disabled">Author(s): 
+              {{ with .Params.Authors }}
+              {{ range . }}
+              <a class="ml-1 badge badge-pill badge-secondary" href="{{ "/authors/" | relLangURL }}{{ . | urlize }}/">{{ . }}</a>
+              {{ end }}
+              {{ end }}
+            </span>
+          </li>
+          {{ end }}
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: {{ .Date.Format "2006.01.02" }}</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: {{ .Lastmod.Format "2006.01.02" }}</span>
+          </li>
+          {{ end }}
+        </ul>
+        <!-- /left, right -->
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url={{ .Permalink }}&text={{ .Title }}" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u={{ .Permalink }}" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url={{ .Permalink }}&title={{ .Title }}" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url={{ .Permalink }}" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/{{ .Permalink }}" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        <!-- /right -->
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
