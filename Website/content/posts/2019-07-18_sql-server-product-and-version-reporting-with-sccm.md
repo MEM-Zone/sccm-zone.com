@@ -6,18 +6,16 @@ lastmod: 2019-08-23T09:39:26.000+00:00
 description: ''
 subtitle: SQL licensing is always a pain but this report should make it a little easier…
 images:
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/1.jpeg"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/2.png"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/3.png"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/4.png"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/5.png"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/6.png"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/7.png"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/8.png"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/9.gif"
-- "/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/10.gif"
-aliases:
-- "/sccm-zone-sw-sql-server-products-395b89e14ab4"
+- "/uploads/1.jpeg"
+- "/uploads/2.png"
+- "/uploads/3.png"
+- "/uploads/4.png"
+- "/uploads/5.png"
+- "/uploads/6.png"
+- "/uploads/7.png"
+- "/uploads/8.png"
+- "/uploads/9.gif"
+- "/uploads/10.gif"
 
 ---
 SQL licensing is always a pain but this report should make it a little easier…
@@ -86,7 +84,7 @@ Compiling the configuration.mof file in the hinv folder on the CAS/PSS, will tri
 mofcomp.exe <CMInstallLocation>\Inboxes\clifiles.src\hinv\Configuration.mof
 ```
 
-![image](/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/2.png)
+![image](/uploads/2.png)
 
 Implement HWI extension in production
 
@@ -96,15 +94,15 @@ You need to add the new class definitions to the Default Client Settings
 
 * Import definitions.
 
-![image](/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/3.png)
+![image](/uploads/3.png)
 
 Click on Import and select the **HWI DEF SQL Server Products.mof** file
 
-![image](/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/4.png)
+![image](/uploads/4.png)
 
 Review the classes and click on Import.
 
-![image](/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/5.png)
+![image](/uploads/5.png)
 
 Make sure the new extension classes are enabled and click OK
 
@@ -131,7 +129,7 @@ environment on the next machine policy evaluation.
 mofcomp.exe <Configuration.mof_Directory>\Configuration.mof
 ```
 
-![image](/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/6.png)
+![image](/uploads/6.png)
 
 Compling the configuration.mof is done on a test environment here!
 
@@ -170,7 +168,7 @@ Get-CimClass -ClassName SQL_ProductID
 
 Use SSMS (SQL Server Management Studio) to check if the views are created in the CM database
 
-![image](/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/7.png)
+![image](/uploads/7.png)
 
 ## Import the SSRS Report
 
@@ -199,7 +197,7 @@ The usp_PivotWithDynamicColumns is needed in order to maximize code reuse and ha
 
 ## Preview
 
-![image](/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/8.png "Report preview")
+![image](/uploads/8.png "Report preview")
 
 ## Code
 
@@ -228,7 +226,7 @@ For reference only, the report includes this function.
 
 ***
 
-<center>![image](/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/images/9.gif "Random gif")</center>
+<center>![image](/uploads/9.gif "Random gif")</center>
 
 ***
 

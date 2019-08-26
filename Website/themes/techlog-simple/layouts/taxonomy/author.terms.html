@@ -1,0 +1,16 @@
+{{ partial "header.html" . }}
+<div class="row">
+  <div class="col-lg-9">
+    {{ $plural := .Data.Plural }}
+    {{ range $key, $value := .Data.Terms }}
+    <a class="m-1 btn btn-lg btn-secondary badge-pill" href="{{ "/" | relLangURL}}{{ $plural }}/{{ $key | urlize }}">
+      {{ $key }}
+      <span class="badge badge-light">{{ len $value }}</span>
+    </a>
+    {{ end }}
+  </div>
+  <div class="col-lg-3">
+    {{ partial "sidebar.html" . }}
+  </div>
+</div>
+{{ partial "footer.html" . }}

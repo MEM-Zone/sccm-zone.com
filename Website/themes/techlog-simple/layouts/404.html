@@ -1,0 +1,18 @@
+{{ partial "header.html" . }}
+<div class="row">
+  <div class="col-lg-9">
+    <h1>404</h1>
+  </div>
+  <div class="col-lg-3">
+    <h4>Recents</h4>
+    <ul>
+      {{ $recents := .Site.Pages | first 8 }}
+      {{ with $recents }}
+      {{ range . }}
+      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+      {{ end }}
+      {{ end }}
+    </ul>
+  </div>
+</div>
+{{ partial "footer.html" . }}
