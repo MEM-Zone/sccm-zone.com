@@ -1,6 +1,18 @@
-baseURL = "https://sccm-zone.com"
+baseURL = "https://sccm-zone.github.io/sccm-zone.com/"
 languageCode = "en-us"
+pluralizeListTitles = false
+pygmentsCodefences = true
+pygmentsCodefencesGuessSyntax = true
+pygmentsStyle = "monokai"
+relativeURLs = false
 title = "SCCM Zone"
 theme = "techlog-simple"
 [blackfriday]
 extensions = ["hardLineBreak"]
+[social]
+email = "hello@sccm-zone.com"
+twitter = "IoanPopovici"
+[taxonomies]
+author = "authors"
+category = "categories"
+tag = "tags"

@@ -1,6 +1,6 @@
 ---
-title: "{{ replace .Name "-" " " | title }}"
-date: {{ .Date }}
+title: "{{ replace .TranslationBaseName '-' ' ' | title }}"
+description: "{{ .Site.Params.description }}"
+date: "{{ .Date }}"
 draft: true
 ---
-
