@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://sccm-zone.com/posts/</loc>
+    <lastmod>2019-08-23T09:39:26+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sccm-zone.com/</loc>
+    <lastmod>2019-08-23T09:39:26+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sccm-zone.com/posts/2019-07-18_sql-server-product-and-version-reporting-with-sccm/</loc>
+    <lastmod>2019-08-23T09:39:26+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sccm-zone.com/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>https://sccm-zone.com/tags/</loc>
+  </url>
+  
+</urlset>
