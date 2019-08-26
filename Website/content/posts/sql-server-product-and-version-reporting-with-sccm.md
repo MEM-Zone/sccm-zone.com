@@ -48,7 +48,7 @@ This is the second iteration of my SQL version report. When I look back on my pr
   * [HWI EXT SQL Server Products.mof](https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Software/SW%20SQL%20Server%20Products/HWI%20EXT%20SQL%20Server%20Products.mof) (HWI Extension)
   * [HWI DEF SQL Server Products.mof](https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Software/SW%20SQL%20Server%20Products/HWI%20DEF%20SQL%20Server%20Products.mof) (HWI Definitions)
   * [SW SQL Server Products.rdl](https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Software/SW%20SQL%20Server%20Products/SW%20SQL%20Server%20Products.rdl) (SSRS Report)
-* SQL Stored Procedure → [Create the SQL Stored Procedure](Create-the-SQL-Stored-Procedure)
+* SQL Stored Procedure → [Create the SQL Stored Procedure](#Create-the-SQL-Stored-Procedure)
 
 ### HWI Extension
 
@@ -67,7 +67,7 @@ The extension needs to be added to the **&lt;CMInstallLocation&gt;\\Inboxes\\cli
 ```
 
 * Uncomment the '**Old SQL extension cleanup'** section to remove the old extension classes from the clients repositories if needed.
-* Use a test environment for validation as described in the [Test and Validation](#test-and-validation) section.
+* Use a test environment for validation as described in the [**Test and Validation**](#test-and-validation) section.
 
 > **Notes**
 > Always use a test environment before any changes in production!
@@ -217,7 +217,7 @@ For reference only, the report includes this query.
 
 For reference only, the report includes this function.
 
-<script src="https://embed.cacher.io/83576ed10a66f816abf812925f284fa17d58fc14.js?a=dac2e390b609c7b9b8c4f97ff5b0a4cc&t=atom_one_dark&r=0"></script>
+<script src="https://embed.cacher.io/83576ed10a66f816abf812925f284fa17d58fc14.js?a=dac2e390b609c7b9b8c4f97ff5b0a4cc&t=github_gist&r=0"></script>
 
 <script src="https://gist.github.com/Ioan-Popovici/db8228de1d96def7a455fdbf1b59f165.js"></script>
 
@@ -230,4 +230,6 @@ For reference only, the report includes this function.
 
 ***
 
-## Please use [Github](http://SCCM.Zone/GIT) for 🐛 reporting, or 🌈 and 🦄 requests
+## Support
+
+**Please use [Github](http://SCCM.Zone/GIT) for 🐛 reporting, or 🌈 and 🦄 requests**
