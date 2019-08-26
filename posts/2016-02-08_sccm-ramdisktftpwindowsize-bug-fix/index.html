@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/common/favicon.ico">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/common/site.css">
+    
+    
+    <title>SCCM Zone :: SCCM RamDiskTFTPWindowSize Bug Fix</title>
+    <meta property="og:title"       content="SCCM Zone :: SCCM RamDiskTFTPWindowSize Bug Fix" />
+    <meta property="og:type"        content="article" />
+    
+    <meta property="og:url"         content="https://sccm-zone.com/posts/2016-02-08_sccm-ramdisktftpwindowsize-bug-fix/" />
+    <meta property="og:description" content="" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <meta name="twitter:card"       content="summary" />
+    
+    
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      
+      <ul class="navbar-nav">
+        
+        
+        
+        
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="https://sccm-zone.com">SCCM Zone</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        
+        <ul class="navbar-nav mr-auto">
+          
+          
+          
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: 2016.02.08</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: 2019.08.23</span>
+          </li>
+          
+        </ul>
+        
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2016-02-08_sccm-ramdisktftpwindowsize-bug-fix%2f&text=SCCM%20RamDiskTFTPWindowSize%20Bug%20Fix" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.com%2fposts%2f2016-02-08_sccm-ramdisktftpwindowsize-bug-fix%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2016-02-08_sccm-ramdisktftpwindowsize-bug-fix%2f&title=SCCM%20RamDiskTFTPWindowSize%20Bug%20Fix" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2016-02-08_sccm-ramdisktftpwindowsize-bug-fix%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.com/posts/2016-02-08_sccm-ramdisktftpwindowsize-bug-fix/" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
+
+<div class="row">
+  <div class="col-lg-9">
+    <article>
+      <div class="row">
+        <h1>SCCM RamDiskTFTPWindowSize Bug Fix</h1>
+      </div>
+      
+
+<p><img src="/posts/2016-02-08_sccm-ramdisktftpwindowsize-bug-fix/images/1.jpeg" alt="image" /></p>
+
+<p>This is a long standing bug in SCCM, the RamDiskTFTPWindowSize should be the way to speed up PXE boot but…</p>
+
+<h4 id="update-finally-fixed-in-sccm-1603-update"><strong>!!! UPDATE !!! — Finally fixed in SCCM 1603—!!! UPDATE !!!</strong></h4>
+
+<p><a href="http://www.bctechnet.com/vmware-pxe-limitations/">VMware PXE Limitations</a></p>
+
+<h3 id="in-order-to-speed-up-pxe-booting-in-sccm-you-have-two-options"><strong>In order to speed up PXE booting in SCCM you have two options</strong></h3>
+
+<ul>
+<li>Most of the articles I’ve read suggest increasing <a href="http://windowsdeployments.net/how-to-speed-up-pxe-boot-in-wds-and-sccm/">RamDiskTFTPBlockSize</a> but it’s obviously the wrong option because it causes <a href="http://en.wikipedia.org/wiki/IP_fragmentation"><em>IP Fragmentation</em></a><em>.</em><br /></li>
+<li>Using RamDiskTFTPWindowSize should be the right way to do it, but after tinkering with it I’ve experienced no speed improvements. After a lot of searching I’ve finally learned that there is a <strong>bug</strong> in SCCM 2012/R2 and that value is not parsed by the <strong>smspxe.dll</strong>. <strong><em>(This method is not supported or recommended by Microsoft)</em></strong><br />
+<br /></li>
+</ul>
+
+<h3 id="implementing-the-fix"><strong>Implementing the fix</strong></h3>
+
+<p>In order to fix this we need to patch the <strong>smspxe.dll</strong> so it uses the <strong>RamDiskTFTPBlockSize</strong> value as the <strong>RamDiskTFTPWindowSize</strong> value.</p>
+
+<ul>
+<li>Back-up your <strong>smspxe.dll</strong>, it should be in the <strong>\BIN\I386\smspxe.dll</strong>, <strong>\BIN\X64\smspxe.dll</strong> or <strong>\BIN\smspxe.dll</strong> folder of your currently PXE enabled DP.<br /></li>
+<li>Stop the <strong>Windows Deployment Services</strong> service to remove the lock from the file.<br /></li>
+<li>Open it with a hex editor like <a href="http://www.hexworkshop.com"><em>Hex Workshop</em></a> select <strong>Type</strong> as <strong>Hex Values</strong> check in <strong>Options</strong> **<em>Find All Instances</em> **and search for <strong>07000035</strong> as value. You should find just one instance. If you find more than one search for <strong>BA07000035</strong>.<br /></li>
+<li>Change the <strong>07000035</strong> value to <strong>08000035</strong> or the <strong>BA07000035</strong> value to <strong>BA08000035</strong> and save the <strong>smspxe.dll</strong>.<br />
+<br />
+<br />
+<br /></li>
+</ul>
+
+<p><img src="/posts/2016-02-08_sccm-ramdisktftpwindowsize-bug-fix/images/2.png" alt="image" /></p>
+
+<ul>
+<li>Create the following <strong>DWORD</strong> registry key: <strong>_HKEY_LOCAL<em>MACHINE\SOFTWARE\Microsoft\SMS\DP\RamdiskTFTPBlockSize</em></strong> and set the value to <strong>4</strong> or <strong>8</strong> (<strong>8</strong> is faster).<br /></li>
+<li>Start the <strong>Windows Deployment Services</strong> service.&gt; <strong>_Notes<br />
+&gt; _</strong><em>Setting the labeled</em> <strong><em>RamdiskTFTPBlockSize</em></strong> <em>key in registry is intentional, as this is key the</em> <strong><em>smspxe.dll</em></strong> <em>is looking for, the DLL hack changes how that key is interpreted.</em><br />
+<br /></li>
+</ul>
+
+<p><strong><em>Keep in mind that this method is not supported or recommended by Microsoft.</em></strong></p>
+
+<p><img src="/posts/2016-02-08_sccm-ramdisktftpwindowsize-bug-fix/images/3.jpeg" alt="image" /></p>
+
+<blockquote>
+<p>Use <a href="https://SCCM.Zone/Issues">Github</a> for 🐛 reporting, or 🌈 and🦄 requests</p>
+</blockquote>
+
+<h4 id="please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</h4>
+
+<p><img src="/posts/2016-02-08_sccm-ramdisktftpwindowsize-bug-fix/images/4.gif" alt="image" /></p>
+
+    </article>
+  </div>
+  <div class="col-lg-3">
+    <div class="sidebar">
+  
+  <hr />
+  <h4>TableOfContents</h4>
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#update-finally-fixed-in-sccm-1603-update"><strong>!!! UPDATE !!! — Finally fixed in SCCM 1603—!!! UPDATE !!!</strong></a></li>
+</ul></li>
+<li><a href="#in-order-to-speed-up-pxe-booting-in-sccm-you-have-two-options"><strong>In order to speed up PXE booting in SCCM you have two options</strong></a></li>
+<li><a href="#implementing-the-fix"><strong>Implementing the fix</strong></a>
+<ul>
+<li><a href="#please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  <hr />
+  <h4><a href="/categories/">Categories</a></h4>
+  
+  <hr />
+  <h4><a href="/tags/">Tags</a></h4>
+  
+</div>
+
+  </div>
+</div>
+      <div class="row">
+        <footer class="col-lg-12">
+          <hr/>
+          <span>&copy; SCCM Zone</span>
+          <span>&nbsp;&middot;&nbsp;</span>
+          <i class="fas fa-bolt"></i>
+          <span>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a></span>
+        </footer>
+      </div>
+    </div>
+    </main>
+    
+      
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+  </body>
+</html>
+

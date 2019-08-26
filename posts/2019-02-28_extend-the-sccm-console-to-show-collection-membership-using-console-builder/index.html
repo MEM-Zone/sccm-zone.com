@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/common/favicon.ico">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/common/site.css">
+    
+    
+    <title>SCCM Zone :: Extend the SCCM Console to show Collection Membership using Console Builder</title>
+    <meta property="og:title"       content="SCCM Zone :: Extend the SCCM Console to show Collection Membership using Console Builder" />
+    <meta property="og:type"        content="article" />
+    
+    <meta property="og:url"         content="https://sccm-zone.com/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/" />
+    <meta property="og:description" content="" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <meta name="twitter:card"       content="summary" />
+    
+    
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      
+      <ul class="navbar-nav">
+        
+        
+        
+        
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="https://sccm-zone.com">SCCM Zone</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        
+        <ul class="navbar-nav mr-auto">
+          
+          
+          
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: 2019.02.28</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: 2019.08.23</span>
+          </li>
+          
+        </ul>
+        
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder%2f&text=Extend%20the%20SCCM%20Console%20to%20show%20Collection%20Membership%20using%20Console%20Builder" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.com%2fposts%2f2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder%2f&title=Extend%20the%20SCCM%20Console%20to%20show%20Collection%20Membership%20using%20Console%20Builder" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.com/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
+
+<div class="row">
+  <div class="col-lg-9">
+    <article>
+      <div class="row">
+        <h1>Extend the SCCM Console to show Collection Membership using Console Builder</h1>
+      </div>
+      
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/1.png" alt="image" /></p>
+
+<p>Let’s be frank the collection membership should be visible in the console by default. Here’s how to do it…</p>
+
+<p>U<br />
+sing RCT to show the collection membership is slow and awkward. In my search to find a better option I stumbled onto the SCCM Console Builder. This is an amazing tool that is already built-in and allows a wide range of customization. I used Zeng Yinghua’s <a href="https://www.scconfigmgr.com/2017/11/09/customizing-configmgr-admin-console-add-details-tab-to-content-status/"><strong><em>blog post</em></strong></a> as a guide when creating this extension.</p>
+
+<p>Without further ado let’s get to it!</p>
+
+<h3 id="start-the-console-builder">Start the Console Builder</h3>
+
+<p>Start PowerShell on any machine that has the SCCM console installed and run the following command:<br />
+<code>**## Start SCCM Console Builder**  
+&amp;amp;$env:SMS_ADMIN_UI_PATH.Replace(&amp;#39;i386&amp;#39;,&amp;#39;AdminUI.ConsoleBuilder.exe&amp;#39;)</code>&gt; <strong>Notes</strong> Console builder path %ConfigMgrInstallPath%\AdminConsole\Bin\AdminUI.ConsoleBuilder.exe<br />
+&gt; THE CONSOLE BUILDER HAS NO SAVE FUNCTION! ANY CHANGES WILL BE COMMITTED WHEN THE CONSOLE BUILDER IS CLOSED.<br />
+&gt; Remember to backup your <strong>XmlStorage</strong> folder in the <strong>.\AdminConsole</strong> root.<br />
+&gt; You can overwrite this folder on any system that needs the extension.<br />
+&gt; <em>In this particular case you only need to back-up the</em> <strong>AssetManagementNode.xml</strong> and <strong>ConnectedConsole.xml</strong> files.</p>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/2.png" alt="image" /></p>
+
+<p>XmlStorage folder</p>
+
+<h3 id="open-the-connected-console">Open the Connected Console</h3>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/3.png" alt="image" /></p>
+
+<p>Open the connected console</p>
+
+<h3 id="add-a-new-tab-to-the-devices-detail-panel">Add a New Tab to the Devices Detail Panel</h3>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/4.png" alt="image" /></p>
+
+<p>Add a new tab page in the Devices Detail Panel</p>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/5.png" alt="image" /></p>
+
+<p>Configure tab to run a query</p>
+
+<h3 id="configure-the-tab-query-settings">Configure the Tab Query Settings</h3>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/6.png" alt="image" /></p>
+
+<p>Configure query settings</p>
+
+<h3 id="add-the-tab-query">Add the Tab Query</h3>
+
+<p>Tab query</p>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/7.png" alt="image" /></p>
+
+<p>Add the tab query and press OK</p>
+
+<h3 id="open-the-navigation-alias-table">Open the Navigation Alias Table</h3>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/8.png" alt="image" /></p>
+
+<p>Open the Navigation Alias Table and edit the MemberOfCollection Alias</p>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/9.png" alt="image" /></p>
+
+<p>Edit the Devices View</p>
+
+<h3 id="add-a-new-tab-to-the-devices-view-detail-panel">Add a New Tab to the Devices View Detail Panel</h3>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/10.png" alt="image" /></p>
+
+<p>Add a new tab to the devices view detail panel</p>
+
+<h3 id="configure-the-tab-query-settings-1">Configure the Tab Query Settings</h3>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/11.png" alt="image" /></p>
+
+<p>Configure query settings</p>
+
+<h3 id="add-the-tab-query-1">Add the Tab Query</h3>
+
+<p>Tab query</p>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/12.png" alt="image" /></p>
+
+<p>Add the tab query and press OK</p>
+
+<h3 id="apply-modifications">Apply Modifications</h3>
+
+<p>Click Ok on all open settings, close the Console Builder and start/restart the SCCM Console.<br />
+&gt; <strong>Notes</strong> <em>THE CONSOLE BUILDER HAS NO SAVE FUNCTION! ANY CHANGES WILL BE COMMITTED WHEN THE CONSOLE BUILDER IS CLOSED.<br />
+&gt; Remember to backup your</em> <strong><em>XmlStorage</em></strong> <em>folder in the</em><strong><em>.\AdminConsole</em></strong> <em>root.<br />
+&gt; You can overwrite this folder on any system that needs the extension.<br />
+&gt; In this particular case you only need to back-up the</em> <strong>AssetManagementNode.xml</strong> and <strong>ConnectedConsole.xml</strong> files.</p>
+
+<h3 id="extension-preview">Extension Preview</h3>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/13.png" alt="image" /></p>
+
+<p>Device View extension preview</p>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/14.png" alt="image" /></p>
+
+<p>Collection Device View extension preview</p>
+
+<h3 id="links"><strong>Links</strong></h3>
+
+<h4 id="official-documentation"><strong>Official Documentation</strong></h4>
+
+<p><a href="https://msdn.microsoft.com/en-us/library/hh948631.aspx"><em>https://msdn.microsoft.com/en-us/library/hh948631.aspx</em></a></p>
+
+<h4 id="blogs">Blogs</h4>
+
+<ul>
+<li><p>Covers the subject in-depth and is really everything you need<br />
+<a href="https://blog.itsdelivers.com/productive-it-insights/extending-the-configuration-manager-current-branch-console-part-1">Extending the Configuration Manager (Current Branch) Console - Part 1</a></p></li>
+
+<li><p>A very good example by Zeng Yinghua<br />
+<a href="https://www.scconfigmgr.com/2017/11/09/customizing-configmgr-admin-console-add-details-tab-to-content-status/">Customizing ConfigMgr Admin Console - Add Details tab to Content Status</a></p></li>
+</ul>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/15.gif" alt="image" /></p>
+
+<blockquote>
+<p>Use <a href="https://SCCM.Zone/Issues">Github</a> for 🐛 reporting, or 🌈 and🦄 requests</p>
+</blockquote>
+
+<h4 id="please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</h4>
+
+<p><img src="/posts/2019-02-28_extend-the-sccm-console-to-show-collection-membership-using-console-builder/images/16.gif" alt="image" /></p>
+
+    </article>
+  </div>
+  <div class="col-lg-3">
+    <div class="sidebar">
+  
+  <hr />
+  <h4>TableOfContents</h4>
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#start-the-console-builder">Start the Console Builder</a></li>
+<li><a href="#open-the-connected-console">Open the Connected Console</a></li>
+<li><a href="#add-a-new-tab-to-the-devices-detail-panel">Add a New Tab to the Devices Detail Panel</a></li>
+<li><a href="#configure-the-tab-query-settings">Configure the Tab Query Settings</a></li>
+<li><a href="#add-the-tab-query">Add the Tab Query</a></li>
+<li><a href="#open-the-navigation-alias-table">Open the Navigation Alias Table</a></li>
+<li><a href="#add-a-new-tab-to-the-devices-view-detail-panel">Add a New Tab to the Devices View Detail Panel</a></li>
+<li><a href="#configure-the-tab-query-settings-1">Configure the Tab Query Settings</a></li>
+<li><a href="#add-the-tab-query-1">Add the Tab Query</a></li>
+<li><a href="#apply-modifications">Apply Modifications</a></li>
+<li><a href="#extension-preview">Extension Preview</a></li>
+<li><a href="#links"><strong>Links</strong></a>
+<ul>
+<li><a href="#official-documentation"><strong>Official Documentation</strong></a></li>
+<li><a href="#blogs">Blogs</a></li>
+<li><a href="#please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  <hr />
+  <h4><a href="/categories/">Categories</a></h4>
+  
+  <hr />
+  <h4><a href="/tags/">Tags</a></h4>
+  
+</div>
+
+  </div>
+</div>
+      <div class="row">
+        <footer class="col-lg-12">
+          <hr/>
+          <span>&copy; SCCM Zone</span>
+          <span>&nbsp;&middot;&nbsp;</span>
+          <i class="fas fa-bolt"></i>
+          <span>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a></span>
+        </footer>
+      </div>
+    </div>
+    </main>
+    
+      
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+  </body>
+</html>
+

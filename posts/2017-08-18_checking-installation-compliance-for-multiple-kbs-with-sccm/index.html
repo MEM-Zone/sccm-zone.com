@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/common/favicon.ico">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/common/site.css">
+    
+    
+    <title>SCCM Zone :: Checking Installation Compliance for multiple KBs with SCCM</title>
+    <meta property="og:title"       content="SCCM Zone :: Checking Installation Compliance for multiple KBs with SCCM" />
+    <meta property="og:type"        content="article" />
+    
+    <meta property="og:url"         content="https://sccm-zone.com/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/" />
+    <meta property="og:description" content="" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <meta name="twitter:card"       content="summary" />
+    
+    
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      
+      <ul class="navbar-nav">
+        
+        
+        
+        
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="https://sccm-zone.com">SCCM Zone</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        
+        <ul class="navbar-nav mr-auto">
+          
+          
+          
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: 2017.08.18</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: 2019.08.23</span>
+          </li>
+          
+        </ul>
+        
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm%2f&text=Checking%20Installation%20Compliance%20for%20multiple%20KBs%20with%20SCCM" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.com%2fposts%2f2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm%2f&title=Checking%20Installation%20Compliance%20for%20multiple%20KBs%20with%20SCCM" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.com/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
+
+<div class="row">
+  <div class="col-lg-9">
+    <article>
+      <div class="row">
+        <h1>Checking Installation Compliance for multiple KBs with SCCM</h1>
+      </div>
+      
+
+<p><img src="/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/images/1.jpeg" alt="image" /></p>
+
+<p>Compliance report and expired updates make you WannaCry? Captain SCCM to the rescue!</p>
+
+<p><a href="https://SCCM.Zone/SU-KB-Compliance-by-ArticleID-CHANGELOG"><strong><em>Report release history</em></strong></a></p>
+
+<p>T<br />
+he WannaCry outbreak continues to be a pain, because some clients are still unpatched. Since most of us expire the updates after a while, reporting can become a challenge.<br />
+&gt; <strong>Notes</strong><br />
+&gt; The sql user defined function is needed as a pre-requisite.### Import the SSRS Report</p>
+
+<ul>
+<li><p>Download the report file<code>**## KB Compliance by ArticleID and Client State** [_SU KB Compliance by ArticleID.rdl_](https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Updates/SU%20KB%20Compliance%20by%20ArticleID/SU%20KB%20Compliance%20by%20ArticleID.rdl)</code></p></li>
+
+<li><p>Internet Explorer on and navigate to <a href="http://en.wikipedia.org/wiki/Fully_qualified_domain_name"><strong>_http://YOUR_REPORT_SERVER<em>FQDN/Reports</em></strong></a></p></li>
+
+<li><p>Choose a path and upload the previously downloaded report files.</p></li>
+
+<li><p><a href="https://joshheffner.com/how-to-import-additional-software-update-reports-in-sccm/"><strong><em>Replace the DataSource</em></strong></a> in the reports. You can use just one datasource if your CM and Reporting DBs are on the same server.</p></li>
+</ul>
+
+<h3 id="install-support-function">Install Support Function</h3>
+
+<p>You can create a new database to host the support function or just add it to the CM database. Fair <strong>warning</strong>, this counts as <strong>‘modifying the CM database’</strong>to Microsoft and they might <strong>deny support</strong> because of it. The right way to do this is to create a separate database for this purpose.</p>
+
+<h4 id="create-the-cm-tools-database">Create the ‘CM_Tools’ database</h4>
+
+<ul>
+<li><p>Create the <strong>_‘CM<em>Tools’</em></strong> database by executing the following code in your SQL Management Studio:<code>**/* Create support function database */**  
+CREATE DATABASE CM_TOOLS</code></p></li>
+
+<li><p>If you change the <strong>_‘CM<em>Tools’</em></strong> __ name to something else you will need to modify the hardcoded function calls in report <strong><em>‘DeviceAndBoundaryData’</em></strong>dataset and <strong>‘_ufn<em>IsIPInSubnet’</em></strong> support function.<code>**## Modify hardcoded function calls**  
+...  
+**/* Support function */**  
+...**CM_TOOLS**.dbo.ufn...  
+...</code></p></li>
+</ul>
+
+<h4 id="create-the-ufn-csv-string-parser-function"><strong>_Create the ufn_csv_String<em>Parser function</em></strong></h4>
+
+<p>Parses a CSV string and returns individual substrings.</p>
+
+<p>String Parser support function</p>
+
+<p><img src="/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/images/2.png" alt="image" /></p>
+
+<p>You should end up with something like this</p>
+
+<blockquote>
+<p><strong>Notes</strong> Please <strong>read</strong> the instructions <strong>carefully</strong> before asking for help!</p>
+</blockquote>
+
+<h3 id="report-query">Report Query</h3>
+
+<p>For reference only, since the report includes this query.</p>
+
+<p>Compliance by ArticleID.</p>
+
+<h3 id="report-preview">Report Preview</h3>
+
+<p><img src="/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/images/3.png" alt="image" /></p>
+
+<p>The collection selection is not shown here. It’s also kind of scrubbed…</p>
+
+<p><img src="/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/images/4.jpeg" alt="image" /></p>
+
+<p>Captain SCCM to the rescue!</p>
+
+<blockquote>
+<p>Use <a href="https://SCCM.Zone/Issues">Github</a> for 🐛 reporting, or 🌈 and🦄 requests</p>
+</blockquote>
+
+<h4 id="please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</h4>
+
+<p><img src="/posts/2017-08-18_checking-installation-compliance-for-multiple-kbs-with-sccm/images/5.gif" alt="image" /></p>
+
+    </article>
+  </div>
+  <div class="col-lg-3">
+    <div class="sidebar">
+  
+  <hr />
+  <h4>TableOfContents</h4>
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#install-support-function">Install Support Function</a>
+<ul>
+<li><a href="#create-the-cm-tools-database">Create the ‘CM_Tools’ database</a></li>
+<li><a href="#create-the-ufn-csv-string-parser-function"><strong>_Create the ufn_csv_String<em>Parser function</em></strong></a></li>
+</ul></li>
+<li><a href="#report-query">Report Query</a></li>
+<li><a href="#report-preview">Report Preview</a>
+<ul>
+<li><a href="#please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  <hr />
+  <h4><a href="/categories/">Categories</a></h4>
+  
+  <hr />
+  <h4><a href="/tags/">Tags</a></h4>
+  
+</div>
+
+  </div>
+</div>
+      <div class="row">
+        <footer class="col-lg-12">
+          <hr/>
+          <span>&copy; SCCM Zone</span>
+          <span>&nbsp;&middot;&nbsp;</span>
+          <i class="fas fa-bolt"></i>
+          <span>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a></span>
+        </footer>
+      </div>
+    </div>
+    </main>
+    
+      
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+  </body>
+</html>
+

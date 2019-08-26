@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/common/favicon.ico">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/common/site.css">
+    
+    
+    <title>SCCM Zone :: Application and Package Deployments Reporting by Collection with SCCM</title>
+    <meta property="og:title"       content="SCCM Zone :: Application and Package Deployments Reporting by Collection with SCCM" />
+    <meta property="og:type"        content="article" />
+    
+    <meta property="og:url"         content="https://sccm-zone.com/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/" />
+    <meta property="og:description" content="" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <meta name="twitter:card"       content="summary" />
+    
+    
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      
+      <ul class="navbar-nav">
+        
+        
+        
+        
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="https://sccm-zone.com">SCCM Zone</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        
+        <ul class="navbar-nav mr-auto">
+          
+          
+          
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: 2018.05.23</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: 2019.08.23</span>
+          </li>
+          
+        </ul>
+        
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm%2f&text=Application%20and%20Package%20Deployments%20Reporting%20by%20Collection%20with%20SCCM" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm%2f&title=Application%20and%20Package%20Deployments%20Reporting%20by%20Collection%20with%20SCCM" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.com/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
+
+<div class="row">
+  <div class="col-lg-9">
+    <article>
+      <div class="row">
+        <h1>Application and Package Deployments Reporting by Collection with SCCM</h1>
+      </div>
+      
+
+<p><img src="/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/images/1.png" alt="image" /></p>
+
+<p>Deployments reports for all collection members available get it while it’s hot…</p>
+
+<p><a href="https://SCCM.Zone/de-deployments-by-device-or-user-changelog"><strong><em>Report release history</em></strong></a></p>
+
+<p>T<br />
+here are no default reports that can display results for each collection member. There is a report that lists deployments for a specific collection but that’s it. If a collection member has a deployment on a different collection you are out of luck. Well not anymore…</p>
+
+<p>I used the ‘<em>All package and program deployments to a specified user/device’</em> as reference. One of the problem was that the <em>‘User’</em> report has a bug and returns <em>‘NULL’</em> for most packages. Since the views are <strong><em>so well documented</em></strong>, it took a while to get it right.</p>
+
+<h3 id="import-the-ssrs-report">Import the SSRS Report</h3>
+
+<ul>
+<li><p>Download the report file<code>**## Software deployments by Device or User**  
+[**_DE Software Deployments by Device or User.rdl_**](https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Deployments/DE%20Software%20Deployments%20by%20Device%20or%20User/DE%20Software%20Deployments%20by%20Device%20or%20User.rdl)</code></p></li>
+
+<li><p>Start Internet Explorer on and navigate to <a href="http://en.wikipedia.org/wiki/Fully_qualified_domain_name"><strong>_http://YOUR_REPORT_SERVER<em>FQDN/Reports</em></strong></a></p></li>
+
+<li><p>Choose a path and upload the previously downloaded report files</p></li>
+
+<li><p><a href="https://joshheffner.com/how-to-import-additional-software-update-reports-in-sccm/"><strong><em>Replace the DataSource</em></strong></a> in the reports&gt; <strong>Notes</strong><br />
+&gt; I’ve merged the original two reports in one unified report.</p></li>
+</ul>
+
+<h4 id="report-queries">Report Queries</h4>
+
+<p>For reference only, reports already include these queries.</p>
+
+<p>Application deployments query</p>
+
+<p>Package deployments query</p>
+
+<h3 id="report-preview">Report Preview</h3>
+
+<p><img src="/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/images/2.png" alt="image" /></p>
+
+<p>User application deployments</p>
+
+<p><img src="/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/images/3.png" alt="image" /></p>
+
+<p>Device application deployments</p>
+
+<blockquote>
+<p><strong>Notes</strong><br />
+I did not post screenshots with package deployments because of severe laziness but you get the picture.</p>
+</blockquote>
+
+<p><img src="/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/images/4.jpeg" alt="image" /></p>
+
+<blockquote>
+<p>Use <a href="https://SCCM.Zone/Issues">Github</a> for 🐛 reporting, or 🌈 and🦄 requests</p>
+</blockquote>
+
+<h4 id="please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</h4>
+
+<p><img src="/posts/2018-05-23_application-and-package-deployments-reporting-by-collection-with-sccm/images/5.gif" alt="image" /></p>
+
+    </article>
+  </div>
+  <div class="col-lg-3">
+    <div class="sidebar">
+  
+  <hr />
+  <h4>TableOfContents</h4>
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#import-the-ssrs-report">Import the SSRS Report</a>
+<ul>
+<li><a href="#report-queries">Report Queries</a></li>
+</ul></li>
+<li><a href="#report-preview">Report Preview</a>
+<ul>
+<li><a href="#please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  <hr />
+  <h4><a href="/categories/">Categories</a></h4>
+  
+  <hr />
+  <h4><a href="/tags/">Tags</a></h4>
+  
+</div>
+
+  </div>
+</div>
+      <div class="row">
+        <footer class="col-lg-12">
+          <hr/>
+          <span>&copy; SCCM Zone</span>
+          <span>&nbsp;&middot;&nbsp;</span>
+          <i class="fas fa-bolt"></i>
+          <span>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a></span>
+        </footer>
+      </div>
+    </div>
+    </main>
+    
+      
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+  </body>
+</html>
+

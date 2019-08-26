@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/common/favicon.ico">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/common/site.css">
+    
+    
+    <title>SCCM Zone :: Installed Software Reporting with SCCM</title>
+    <meta property="og:title"       content="SCCM Zone :: Installed Software Reporting with SCCM" />
+    <meta property="og:type"        content="article" />
+    
+    <meta property="og:url"         content="https://sccm-zone.com/posts/2018-12-06_installed-software-reporting-with-sccm/" />
+    <meta property="og:description" content="Lists installed software by computer or publisher. Supports filtering and exclusions by multiple software names using comma separated values and wildcards." />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <meta name="twitter:card"       content="summary" />
+    
+    
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      
+      <ul class="navbar-nav">
+        
+        
+        
+        
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="https://sccm-zone.com">SCCM Zone</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        
+        <ul class="navbar-nav mr-auto">
+          
+          
+          
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: 2018.12.06</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: 2019.08.23</span>
+          </li>
+          
+        </ul>
+        
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-12-06_installed-software-reporting-with-sccm%2f&text=Installed%20Software%20Reporting%20with%20SCCM" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-12-06_installed-software-reporting-with-sccm%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-12-06_installed-software-reporting-with-sccm%2f&title=Installed%20Software%20Reporting%20with%20SCCM" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-12-06_installed-software-reporting-with-sccm%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.com/posts/2018-12-06_installed-software-reporting-with-sccm/" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
+
+<div class="row">
+  <div class="col-lg-9">
+    <article>
+      <div class="row">
+        <h1>Installed Software Reporting with SCCM</h1>
+      </div>
+      
+
+<p><img src="/posts/2018-12-06_installed-software-reporting-with-sccm/images/1.jpeg" alt="image" /></p>
+
+<p>Installed software reporting made easy…</p>
+
+<p><a href="http://SCCM.Zone/sw-installed-software-by-user-selection-changelog"><strong><em>Report release history</em></strong></a></p>
+
+<p>I<br />
+ was sitting on this one for a while for no good reason. I built it and then completely forgot about it. A few days ago I was trying to find a part of the query, used in this report realized that I forgot to publish it.</p>
+
+<p>Most software reports out there are pretty basic so I decided to buid something new. The idea was to allow filtering by multiple software names and SQL wildcards. This principle applies to both inclusions and exclusions. The only drawback is that you have to use a SQL string parser for splitting the CSV strings. There is no need to re-invent the wheel, you can use the one created by <a href="http://hadoopsie.com"><strong><em>Michelle Ufford</em></strong></a><strong>.</strong></p>
+
+<p>At first, I built two reports, one displaying the data by device name and the other by publisher. In the end I ended up by merging them since it does not make sense to have to maintain two reports using the same query.</p>
+
+<p>Also I’ve updated my report template since the old one was an over-designed pile of c**p, too hard to maintain and to reuse. My other reports will also get the upgrade in time.<br />
+&gt; <strong>Notes</strong><br />
+&gt; The reports have two data sources since my CM DB in on a HA cluster. I need access to the ReportServer DB to get the report description in the ReportDescription dataset. Feel free to switch to one dataset.</p>
+
+<h3 id="import-the-ssrs-report">Import the SSRS Report</h3>
+
+<ul>
+<li><p>Download the report file<code>**## Installed Software Report**  
+[_SW Installed Software by User Selection.rdl_](https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Software/SW%20Installed%20Software%20by%20User%20Selection/SW%20Installed%20Software%20by%20User%20Selection.rdl)</code></p></li>
+
+<li><p>Internet Explorer on and navigate to <a href="http://en.wikipedia.org/wiki/Fully_qualified_domain_name"><strong>_http://YOUR_REPORT_SERVER<em>FQDN/Reports</em></strong></a></p></li>
+
+<li><p>Choose a path and upload the previously downloaded report files.</p></li>
+
+<li><p><a href="https://joshheffner.com/how-to-import-additional-software-update-reports-in-sccm/"><strong><em>Replace the DataSource</em></strong></a> in the reports. You can use just one datasource if your CM and Reporting DBs are on the same server.</p></li>
+</ul>
+
+<h3 id="install-string-parser">Install String Parser</h3>
+
+<p>You can create a new database to host the support function or just add it to the CM database. Fair <strong>warning</strong>, this counts as <strong>‘modifying the CM database’</strong> to Microsoft and they might <strong>deny support</strong> because of it. The right way to do this is to create a separate database for this purpose.</p>
+
+<h4 id="create-the-cm-tools-database">Create the _‘CM<em>Tools’</em> database</h4>
+
+<ul>
+<li><p>Create the <strong>_‘CM<em>Tools’</em></strong> database by executing the following code in your SQL Management Studio:<code>**/* Create support function database */  
+**CREATE DATABASE CM_TOOLS</code></p></li>
+
+<li><p>If you change the <strong>_‘CM<em>Tools’</em></strong> __ name to something else you will need to modify the hardcoded function calls in the SoftwareData dataset report query:<code>/* Populate SoftwareLike table */  
+...  
+FROM **CM_Tools**.dbo.ufn_csv_String_Parser(@SoftwareNameLike, &amp;#39;,&amp;#39;);  
+...</code><code>/* Populate SoftwareNotLike table */  
+...  
+FROM **CM_Tools**.dbo.ufn_csv_String_Parser(@SoftwareNameNotLike, &amp;#39;,&amp;#39;);  
+...</code></p></li>
+</ul>
+
+<h4 id="create-the-string-parser-function">Create the string parser function</h4>
+
+<ul>
+<li>Create the <strong>_‘ufn_csv_String<em>Parser’</em></strong> __ function by executing the following code in your SQL Management Studio:<br />
+<br /></li>
+</ul>
+
+<p>Custom string parser</p>
+
+<p><img src="/posts/2018-12-06_installed-software-reporting-with-sccm/images/2.png" alt="image" /></p>
+
+<p>You should end up with something like this</p>
+
+<blockquote>
+<p><strong>Notes</strong><br />
+Please <strong>read</strong> the instructions <strong>carefully</strong> before asking for help!</p>
+</blockquote>
+
+<h3 id="report-query">Report Query</h3>
+
+<p>For reference only, since the report includes this query.</p>
+
+<p>Installed software reprort query</p>
+
+<h3 id="report-preview">Report Preview</h3>
+
+<p><img src="/posts/2018-12-06_installed-software-reporting-with-sccm/images/3.png" alt="image" /></p>
+
+<p>Installed software by device</p>
+
+<p><img src="/posts/2018-12-06_installed-software-reporting-with-sccm/images/4.png" alt="image" /></p>
+
+<p>Installed software by publisher (1)</p>
+
+<p><img src="/posts/2018-12-06_installed-software-reporting-with-sccm/images/5.png" alt="image" /></p>
+
+<p>Installed software by publisher (2)</p>
+
+<p><img src="/posts/2018-12-06_installed-software-reporting-with-sccm/images/6.png" alt="image" /></p>
+
+<p>Installed software by name</p>
+
+<p><img src="/posts/2018-12-06_installed-software-reporting-with-sccm/images/7.jpeg" alt="image" /></p>
+
+<blockquote>
+<p>Use <a href="https://SCCM.Zone/Issues">Github</a> for 🐛 reporting, or 🌈 and🦄 requests</p>
+</blockquote>
+
+<h4 id="please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</h4>
+
+<p><img src="/posts/2018-12-06_installed-software-reporting-with-sccm/images/8.gif" alt="image" /></p>
+
+    </article>
+  </div>
+  <div class="col-lg-3">
+    <div class="sidebar">
+  
+  <hr />
+  <h4>TableOfContents</h4>
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#import-the-ssrs-report">Import the SSRS Report</a></li>
+<li><a href="#install-string-parser">Install String Parser</a>
+<ul>
+<li><a href="#create-the-cm-tools-database">Create the _‘CM<em>Tools’</em> database</a></li>
+<li><a href="#create-the-string-parser-function">Create the string parser function</a></li>
+</ul></li>
+<li><a href="#report-query">Report Query</a></li>
+<li><a href="#report-preview">Report Preview</a>
+<ul>
+<li><a href="#please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  <hr />
+  <h4><a href="/categories/">Categories</a></h4>
+  
+  <hr />
+  <h4><a href="/tags/">Tags</a></h4>
+  
+</div>
+
+  </div>
+</div>
+      <div class="row">
+        <footer class="col-lg-12">
+          <hr/>
+          <span>&copy; SCCM Zone</span>
+          <span>&nbsp;&middot;&nbsp;</span>
+          <i class="fas fa-bolt"></i>
+          <span>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a></span>
+        </footer>
+      </div>
+    </div>
+    </main>
+    
+      
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+  </body>
+</html>
+

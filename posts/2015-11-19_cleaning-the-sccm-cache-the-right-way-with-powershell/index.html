@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/common/favicon.ico">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/common/site.css">
+    
+    
+    <title>SCCM Zone :: Cleaning the SCCM Cache the right way with PowerShell</title>
+    <meta property="og:title"       content="SCCM Zone :: Cleaning the SCCM Cache the right way with PowerShell" />
+    <meta property="og:type"        content="article" />
+    
+    <meta property="og:url"         content="https://sccm-zone.com/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/" />
+    <meta property="og:description" content="" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <meta name="twitter:card"       content="summary" />
+    
+    
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      
+      <ul class="navbar-nav">
+        
+        
+        
+        
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="https://sccm-zone.com">SCCM Zone</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        
+        <ul class="navbar-nav mr-auto">
+          
+          
+          
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: 2015.11.19</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: 2019.08.23</span>
+          </li>
+          
+        </ul>
+        
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell%2f&text=Cleaning%20the%20SCCM%20Cache%20the%20right%20way%20with%20PowerShell" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.com%2fposts%2f2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell%2f&title=Cleaning%20the%20SCCM%20Cache%20the%20right%20way%20with%20PowerShell" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.com/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
+
+<div class="row">
+  <div class="col-lg-9">
+    <article>
+      <div class="row">
+        <h1>Cleaning the SCCM Cache the right way with PowerShell</h1>
+      </div>
+      
+
+<p><img src="/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/images/1.png" alt="image" /></p>
+
+<p>Hundreds of low disk space alerts in SCOM after Patch Tuesday? I know the feeling…</p>
+
+<p><a href="https://SCCM.Zone/Clean-CMClientCache-CHANGELOG"><strong><em>Script release history</em></strong></a></p>
+
+<p>I’<br />
+ve been struggling a bit to find a good solution for the cache cleanup problem. The cache is supposed to clean itself but that’s not always the case. I have three year old cache items that te not deleted when needed. Deleting the files directly is not supported because the Client is not notified, and the SCCM SDK is quite limited. There are some scripts out there but none of them check if the cache item is actually needed before deleting it. This approach generates a lot of <strong>unnecessary</strong> network traffic.</p>
+
+<p>We can do better with a PowerShell script that deletes <strong>only unused cache items.</strong> Also, it can be added to a <strong>CI</strong> and scheduled to run after Patch Tuesday. I’ve added some nifty parameters and switches that could come in handy!</p>
+
+<h3 id="important"><strong><em>Important</em></strong></h3>
+
+<p>If you just need to clean all the cache indiscriminately this script is overkill.<br />
+You can do it with the 5 lines of code below.<br />
+<code>## Initialize the CCM resource manager com object  
+[__comobject]$CCMComObject = New-Object -ComObject &amp;#39;UIResource.UIResourceMgr&amp;#39;</code><code>## Get the CacheElementIDs to delete  
+$CacheInfo = $CCMComObject.GetCacheInfo().GetCacheElements()</code><code>## Remove cache items  
+ForEach ($CacheItem in $CacheInfo) {  
+    $null = $CCMComObject.GetCacheInfo().DeleteCacheElement([string]$($CacheItem.CacheElementID))  
+}</code></p>
+
+<h3 id="script">Script</h3>
+
+<h4 id="script-parameters">Script parameters</h4>
+
+<ul>
+<li><strong>CleanupActions</strong><br />
+<em>Specifies cleanup action to perform. (‘All’, ‘Applications’, ‘Packages’, ‘Updates’, ‘Orphaned’). Default is: ‘All’.<br />
+If it’s set to ‘All’ all cleaning actions will be performed.</em><br /></li>
+<li>**LowDiskSpaceThreshold<br />
+**<em>Specifies the low disk space threshold percentage after which the cache is cleaned. Default is: ‘100’.<br />
+If it’s set to ‘100’ Free Space Threshold Percentage is ignored.</em><br /></li>
+<li><strong>ReferencedThreshold</strong><br />
+<em>Specifies to remove cache element only if it has not been referenced in specified number of days. Default is: 0.<br />
+If it’s set to ‘0’ Last Referenced Time is ignored.</em><br /></li>
+<li>**SkipSuperPeer<br />
+**<em>This switch specifies to skip cleaning if the client is a super peer (Peer Cache). Default is: $false.</em><br /></li>
+<li>**RemovePersisted<br />
+**<em>This switch specifies to remove content even if it’s persisted. Default is: $false.</em><br /></li>
+<li>**LoggingOptions<br />
+**<em>Specifies logging options: (‘Host’, ‘File’, ‘EventLog’, ‘None’). Default is: (‘Host’, ‘File’, ‘EventLog’).</em><br /></li>
+<li>**LogName<br />
+**<em>Specifies log folder name and event log name. Default is: ‘Configuration Manager’.</em><br /></li>
+<li>**LogSource<br />
+**<em>Specifies log file name and event source name. Default is: ‘Clean-CMClientCache’.</em><br /></li>
+<li>**LogDebugMessages<br />
+**<em>This switch specifies to log debug messages. Default is: $false.</em>&gt; <strong>Notes</strong><br />
+&gt; You need to suppress the output when using it in a CI (You have to omit ‘Host’ in the -LoggingOptions parameter value).<br />
+&gt; Pro tip: Use it as a ‘Discovery’ script, it will save some time and there are not advantages to use remediation in this case.<br />
+<br /></li>
+</ul>
+
+<p>Clean configuration manager client cache</p>
+
+<h3 id="screenshots">Screenshots</h3>
+
+<p><img src="/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/images/2.png" alt="image" /></p>
+
+<p>Progress indicator</p>
+
+<p><img src="/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/images/3.png" alt="image" /></p>
+
+<p>Result</p>
+
+<p><img src="/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/images/4.png" alt="image" /></p>
+
+<p>Verbose</p>
+
+<p><img src="/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/images/5.png" alt="image" /></p>
+
+<p>File log</p>
+
+<p><img src="/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/images/6.png" alt="image" /></p>
+
+<p>Event log</p>
+
+<p><img src="/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/images/7.gif" alt="image" /></p>
+
+<p>Users seen by Sysadmins…</p>
+
+<blockquote>
+<p>Use <a href="https://SCCM.Zone/Issues">Github</a> for 🐛 reporting, or 🌈 and🦄 requests</p>
+</blockquote>
+
+<h4 id="please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</h4>
+
+<p><img src="/posts/2015-11-19_cleaning-the-sccm-cache-the-right-way-with-powershell/images/8.gif" alt="image" /></p>
+
+    </article>
+  </div>
+  <div class="col-lg-3">
+    <div class="sidebar">
+  
+  <hr />
+  <h4>TableOfContents</h4>
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#important"><strong><em>Important</em></strong></a></li>
+<li><a href="#script">Script</a>
+<ul>
+<li><a href="#script-parameters">Script parameters</a></li>
+</ul></li>
+<li><a href="#screenshots">Screenshots</a>
+<ul>
+<li><a href="#please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  <hr />
+  <h4><a href="/categories/">Categories</a></h4>
+  
+  <hr />
+  <h4><a href="/tags/">Tags</a></h4>
+  
+</div>
+
+  </div>
+</div>
+      <div class="row">
+        <footer class="col-lg-12">
+          <hr/>
+          <span>&copy; SCCM Zone</span>
+          <span>&nbsp;&middot;&nbsp;</span>
+          <i class="fas fa-bolt"></i>
+          <span>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a></span>
+        </footer>
+      </div>
+    </div>
+    </main>
+    
+      
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+  </body>
+</html>
+

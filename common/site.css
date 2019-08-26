@@ -1,0 +1,34 @@
+#TableOfContents ul {
+  list-style-type: none
+}
+
+table {
+  box-shadow: 0 1px 2px gray;
+}
+
+table thead th:first-child {
+  border-left: 0;
+}
+
+table thead th {
+  padding: 0 0.4em;
+  text-align: center;
+  background-color: lightgray;
+  border-bottom: 1px solid gray;
+  border-left: 1px dotted gray;
+}
+
+table tbody td:first-child {
+	border-left: 0;
+}
+
+table tbody td {
+  padding: 0.2em 0.4em;
+	border-top: 1px solid white;
+	border-bottom:1px solid lightgray;
+	border-left: 1px dotted lightgray;
+}
+
+table tbody tr:nth-child(even) td {
+  background-color: #f0f0f0;
+}

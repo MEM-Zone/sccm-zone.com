@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/common/favicon.ico">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/common/site.css">
+    
+    
+    <title>SCCM Zone :: BIOS version Reporting by Manufacturer and Model with SCCM</title>
+    <meta property="og:title"       content="SCCM Zone :: BIOS version Reporting by Manufacturer and Model with SCCM" />
+    <meta property="og:type"        content="article" />
+    
+    <meta property="og:url"         content="https://sccm-zone.com/posts/2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm/" />
+    <meta property="og:description" content="" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <meta name="twitter:card"       content="summary" />
+    
+    
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      
+      <ul class="navbar-nav">
+        
+        
+        
+        
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="https://sccm-zone.com">SCCM Zone</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        
+        <ul class="navbar-nav mr-auto">
+          
+          
+          
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: 2018.01.25</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: 2019.08.23</span>
+          </li>
+          
+        </ul>
+        
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm%2f&text=BIOS%20version%20Reporting%20by%20Manufacturer%20and%20Model%20with%20SCCM" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm%2f&title=BIOS%20version%20Reporting%20by%20Manufacturer%20and%20Model%20with%20SCCM" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.com%2fposts%2f2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.com/posts/2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm/" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
+
+<div class="row">
+  <div class="col-lg-9">
+    <article>
+      <div class="row">
+        <h1>BIOS version Reporting by Manufacturer and Model with SCCM</h1>
+      </div>
+      
+
+<p><img src="/posts/2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm/images/1.jpeg" alt="image" /></p>
+
+<p>With the Meltdown and Spectre looming on the horizon you might need to have a BIOS version report ready…</p>
+
+<p><a href="https://github.com/JhonnyTerminus/SCCMZone/blob/master/Reporting/Hardware/HW%20BIOS%20by%20Company%20or%20Manufacturer/CHANGELOG.md"><strong><em>Report release history</em></strong></a></p>
+
+<p>A<br />
+ few days ago I was asked to provide a BIOS version report for our Lenovo and Dell machines. Since you guys might find it useful I decided to publish it.</p>
+
+<h4 id="import-the-ssrs-report">Import the SSRS Report</h4>
+
+<ul>
+<li><p>Download the report files<code>**## Without Company information**  
+[**_HW BIOS by Manufacturer and Model for Collection.rdl_**](https://github.com/JhonnyTerminus/SCCMZone/blob/master/Reporting/Hardware/HW%20BIOS%20by%20Company%20or%20Manufacturer/HW%20BIOS%20by%20Manufacturer%20and%20Model%20for%20Collection.rdl)</code><code>**## With Company information _!! DEPRECATED No longer supported !!_**  
+[**_HW BIOS by Company and Manufacturer for Collection.rdl_**](https://raw.githubusercontent.com/JhonnyTerminus/SCCMZone/master/Reporting/Hardware/HW%20BIOS%20by%20Company%20or%20Manufacturer/HW%20BIOS%20by%20Company%20and%20Manufacturer%20for%20Collection.rdl)</code></p></li>
+
+<li><p>Start Internet Explorer on and navigate to <a href="http://en.wikipedia.org/wiki/Fully_qualified_domain_name"><strong>_http://YOUR_REPORT_SERVER<em>FQDN/Reports</em></strong></a></p></li>
+
+<li><p>Choose a path and upload the previously downloaded report files</p></li>
+
+<li><p><a href="https://joshheffner.com/how-to-import-additional-software-update-reports-in-sccm/"><strong><em>Replace the DataSource</em></strong></a> in the report</p></li>
+
+<li><p>Enable <strong>_Win32_Computer_System<em>Product</em></strong> class gathering in HWI</p></li>
+
+<li><p>If you don’t add a logo, delete the placeholder on the top left&gt; <strong>Notes</strong><br />
+&gt; This report was created with <strong>SQL 2014 Reporting Services</strong>, you might need to remove some report elements if you use an older version.<br />
+&gt; You need to enable the <strong>Company</strong> attribute gathering in <strong>System Discovery</strong> if you choose the report with company information.</p></li>
+</ul>
+
+<h4 id="report-query">Report Query</h4>
+
+<p>For reference only, since the report includes this query.</p>
+
+<p>For reference only, you can download the report above</p>
+
+<h4 id="report-preview">Report Preview</h4>
+
+<p><img src="/posts/2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm/images/2.png" alt="image" /></p>
+
+<p>Report screenshoot</p>
+
+<p><img src="/posts/2018-01-25_bios-version-reporting-by-manufacturer-and-model-with-sccm/images/3.gif" alt="image" /></p>
+
+<h4 id="please-use-github-https-github-com-jhonnyterminus-sccmzone-for-reporting-and-feature-requests">Please use <a href="https://github.com/JhonnyTerminus/SCCMZone">Github</a> for 🐛 reporting and feature requests 🌈</h4>
+
+    </article>
+  </div>
+  <div class="col-lg-3">
+    <div class="sidebar">
+  
+  <hr />
+  <h4>TableOfContents</h4>
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#import-the-ssrs-report">Import the SSRS Report</a></li>
+<li><a href="#report-query">Report Query</a></li>
+<li><a href="#report-preview">Report Preview</a></li>
+<li><a href="#please-use-github-https-github-com-jhonnyterminus-sccmzone-for-reporting-and-feature-requests">Please use <a href="https://github.com/JhonnyTerminus/SCCMZone">Github</a> for 🐛 reporting and feature requests 🌈</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  <hr />
+  <h4><a href="/categories/">Categories</a></h4>
+  
+  <hr />
+  <h4><a href="/tags/">Tags</a></h4>
+  
+</div>
+
+  </div>
+</div>
+      <div class="row">
+        <footer class="col-lg-12">
+          <hr/>
+          <span>&copy; SCCM Zone</span>
+          <span>&nbsp;&middot;&nbsp;</span>
+          <i class="fas fa-bolt"></i>
+          <span>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a></span>
+        </footer>
+      </div>
+    </div>
+    </main>
+    
+      
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+  </body>
+</html>
+
