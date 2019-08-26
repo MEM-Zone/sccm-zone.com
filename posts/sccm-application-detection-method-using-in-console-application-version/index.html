@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/sccm-zone.com/common/favicon.ico">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/sccm-zone.com/common/site.css">
+    
+    
+    <title>SCCM Zone :: SCCM Application Detection Method using in Console Application Version</title>
+    <meta property="og:title"       content="SCCM Zone :: SCCM Application Detection Method using in Console Application Version" />
+    <meta property="og:type"        content="article" />
+    
+    <meta property="og:url"         content="https://sccm-zone.github.io/sccm-zone.com/posts/sccm-application-detection-method-using-in-console-application-version/" />
+    <meta property="og:description" content="" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <meta name="twitter:card"       content="summary" />
+    
+    
+  </head>
+  <body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+      
+      <ul class="navbar-nav">
+        
+        
+        
+        
+      </ul>
+    </header>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="https://sccm-zone.github.io/sccm-zone.com/">SCCM Zone</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar_nav">
+        
+        <ul class="navbar-nav mr-auto">
+          
+          
+          
+          <li class="nav-item">
+            <span class="nav-link disabled">Created At: 2019.04.01</span>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link disabled">Updated At: 2019.08.23</span>
+          </li>
+          
+        </ul>
+        
+        <div class="navbar-nav ml-auto">
+          <span class="navbar-text mr-1">share this page via</span>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.github.io%2fsccm-zone.com%2fposts%2fsccm-application-detection-method-using-in-console-application-version%2f&text=SCCM%20Application%20Detection%20Method%20using%20in%20Console%20Application%20Version" target="_blank"><i class="fab fa-twitter"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.github.io%2fsccm-zone.com%2fposts%2fsccm-application-detection-method-using-in-console-application-version%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.github.io%2fsccm-zone.com%2fposts%2fsccm-application-detection-method-using-in-console-application-version%2f&title=SCCM%20Application%20Detection%20Method%20using%20in%20Console%20Application%20Version" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.github.io%2fsccm-zone.com%2fposts%2fsccm-application-detection-method-using-in-console-application-version%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.github.io/sccm-zone.com/posts/sccm-application-detection-method-using-in-console-application-version/" target="_blank">b!</a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </nav>
+    <main role="main" class="container-fluid col-lg-10 offset-lg-1">
+
+<div class="row">
+  <div class="col-lg-9">
+    <article>
+      <div class="row">
+        <h1>SCCM Application Detection Method using in Console Application Version</h1>
+      </div>
+      
+
+<p><img src="/posts/2019-04-01_sccm-application-detection-method-using-in-console-application-version/images/1.jpeg" alt="image" /></p>
+
+<p>Say no to application version hardcoded in the detection script.</p>
+
+<p>T<br />
+This method is valid for any application. In this case I will use the configuration manager client upgrade application. You might ask yourself, why not use the automatic client upgrade? Well, because the client upgrade can only run during a maintenance window. I won’t go into details, but unless this behavior changes, I cannot use this feature with my current configuration.</p>
+
+<p>Without further ado, here is how to do it…</p>
+
+<h3 id="create-the-application">Create the Application</h3>
+
+<p>I wanted to make this as simple as possible so I don’t have to tinker with it every time there’s a new update.</p>
+
+<h4 id="set-the-configuration-manager-application-version">Set the configuration manager application version</h4>
+
+<p>The version will be used by the discovery method, make sure you use the correct one.</p>
+
+<h4 id="set-the-application-source">Set the application source</h4>
+
+<p>This path will remain the same, so there is no need to touch this ever again.<br />
+<code>_%ConfigMgrServer%\%ConfigMgrPath%\Client_</code></p>
+
+<h4 id="create-the-installation-script">Create the installation script</h4>
+
+<p>In order to be able to specify the local installation source we need to use a script. Useful in low bandwidth environments.</p>
+
+<p>Configuration manager client installation script.</p>
+
+<h4 id="set-the-discovery-method">Set the discovery method</h4>
+
+<p>Remember to change the application name accordingly.</p>
+
+<p>Configuration manager discovery method</p>
+
+<h4 id="set-the-install-string">Set the Install String</h4>
+
+<p><code>_Powershell.exe -File Install-CMClient.ps1 -ExecutionPolicy ‘Bypass’ -WindowStyle ‘Hidden’_</code></p>
+
+<h4 id="set-the-uninstall-string"><strong>Set the uninstall string</strong></h4>
+
+<p><code>CCMSETUP.EXE /Uninstall</code></p>
+
+<h3 id="deploy-the-application">Deploy the application</h3>
+
+<p>The only thing to do now is to deploy the newly created application. If a new version of the client becomes available you just need to change the application version and update the content.<br />
+&gt; <strong>Notes</strong> The production version of the configuration manager client is always used, so make sure you promote the pilot to production if you want to use the latest version.</p>
+
+<p><img src="/posts/2019-04-01_sccm-application-detection-method-using-in-console-application-version/images/2.jpeg" alt="image" /></p>
+
+<blockquote>
+<p>Use <a href="https://SCCM.Zone/Issues">Github</a> for 🐛 reporting, or 🌈 and🦄 requests</p>
+</blockquote>
+
+<h4 id="please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</h4>
+
+<p><img src="/posts/2019-04-01_sccm-application-detection-method-using-in-console-application-version/images/3.gif" alt="image" /></p>
+
+    </article>
+  </div>
+  <div class="col-lg-3">
+    <div class="sidebar">
+  
+  <hr />
+  <h4>TableOfContents</h4>
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#create-the-application">Create the Application</a>
+<ul>
+<li><a href="#set-the-configuration-manager-application-version">Set the configuration manager application version</a></li>
+<li><a href="#set-the-application-source">Set the application source</a></li>
+<li><a href="#create-the-installation-script">Create the installation script</a></li>
+<li><a href="#set-the-discovery-method">Set the discovery method</a></li>
+<li><a href="#set-the-install-string">Set the Install String</a></li>
+<li><a href="#set-the-uninstall-string"><strong>Set the uninstall string</strong></a></li>
+</ul></li>
+<li><a href="#deploy-the-application">Deploy the application</a>
+<ul>
+<li><a href="#please-subscribe-or-clap-for-this-article-it-makes-a-difference">🙏 Please subscribe or clap for this article, it makes a difference! 🙏</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  <hr />
+  <h4><a href="/sccm-zone.com/categories/">Categories</a></h4>
+  
+  <hr />
+  <h4><a href="/sccm-zone.com/tags/">Tags</a></h4>
+  
+</div>
+
+  </div>
+</div>
+      <div class="row">
+        <footer class="col-lg-12">
+          <hr/>
+          <span>&copy; SCCM Zone</span>
+          <span>&nbsp;&middot;&nbsp;</span>
+          <i class="fas fa-bolt"></i>
+          <span>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a></span>
+        </footer>
+      </div>
+    </div>
+    </main>
+    
+      
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+  </body>
+</html>
+

@@ -13,8 +13,13 @@
   </url>
   
   <url>
-    <loc>https://sccm-zone.github.io/sccm-zone.com/posts/2019-07-18-sql-server-product-and-version-reporting-with-sccm/</loc>
+    <loc>https://sccm-zone.github.io/sccm-zone.com/posts/sql-server-product-and-version-reporting-with-sccm/</loc>
     <lastmod>2019-08-23T09:39:26+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sccm-zone.github.io/sccm-zone.com/posts/sccm-application-detection-method-using-in-console-application-version/</loc>
+    <lastmod>2019-08-23T12:39:20+03:00</lastmod>
   </url>
   
   <url>
