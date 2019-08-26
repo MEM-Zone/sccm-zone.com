@@ -3,19 +3,19 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="shortcut icon" href="/SCCM-Zone.com/common/favicon.ico">
+    <link rel="shortcut icon" href="/sccm-zone.com/common/favicon.ico">
     
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <link rel="stylesheet" href="/SCCM-Zone.com/common/site.css">
+    <link rel="stylesheet" href="/sccm-zone.com/common/site.css">
     
     
     <title>SCCM Zone :: SQL Server Product and Version Reporting with SCCM</title>
     <meta property="og:title"       content="SCCM Zone :: SQL Server Product and Version Reporting with SCCM" />
     <meta property="og:type"        content="article" />
     
-    <meta property="og:url"         content="https://sccm-zone.io/SCCM-Zone.com/posts/2019-07-18-sql-server-product-and-version-reporting-with-sccm/" />
+    <meta property="og:url"         content="https://sccm-zone.github.io/sccm-zone.com/posts/2019-07-18-sql-server-product-and-version-reporting-with-sccm/" />
     <meta property="og:description" content="" />
     
     
@@ -42,7 +42,7 @@
       </ul>
     </header>
     <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="https://sccm-zone.io/SCCM-Zone.com">SCCM Zone</a>
+      <a class="navbar-brand" href="https://sccm-zone.github.io/sccm-zone.com/">SCCM Zone</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_nav" aria-controls="navbar_nav" aria-expand="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -65,19 +65,19 @@
           <span class="navbar-text mr-1">share this page via</span>
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.io%2fSCCM-Zone.com%2fposts%2f2019-07-18-sql-server-product-and-version-reporting-with-sccm%2f&text=SQL%20Server%20Product%20and%20Version%20Reporting%20with%20SCCM" target="_blank"><i class="fab fa-twitter"></i></a>
+              <a class="nav-link" href="https://twitter.com/share?url=https%3a%2f%2fsccm-zone.github.io%2fsccm-zone.com%2fposts%2f2019-07-18-sql-server-product-and-version-reporting-with-sccm%2f&text=SQL%20Server%20Product%20and%20Version%20Reporting%20with%20SCCM" target="_blank"><i class="fab fa-twitter"></i></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.io%2fSCCM-Zone.com%2fposts%2f2019-07-18-sql-server-product-and-version-reporting-with-sccm%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
+              <a class="nav-link" href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fsccm-zone.github.io%2fsccm-zone.com%2fposts%2f2019-07-18-sql-server-product-and-version-reporting-with-sccm%2f" target="_blank"><i class="fab fa-facebook"></i></a></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.io%2fSCCM-Zone.com%2fposts%2f2019-07-18-sql-server-product-and-version-reporting-with-sccm%2f&title=SQL%20Server%20Product%20and%20Version%20Reporting%20with%20SCCM" target="_blank"><i class="fab fa-linkedin"></i></a></a>
+              <a class="nav-link" href="https://www.linkedin.com/shareArticle?url=https%3a%2f%2fsccm-zone.github.io%2fsccm-zone.com%2fposts%2f2019-07-18-sql-server-product-and-version-reporting-with-sccm%2f&title=SQL%20Server%20Product%20and%20Version%20Reporting%20with%20SCCM" target="_blank"><i class="fab fa-linkedin"></i></a></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.io%2fSCCM-Zone.com%2fposts%2f2019-07-18-sql-server-product-and-version-reporting-with-sccm%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
+              <a class="nav-link" href="https://plusone.google.com/_/+1/confirm?url=https%3a%2f%2fsccm-zone.github.io%2fsccm-zone.com%2fposts%2f2019-07-18-sql-server-product-and-version-reporting-with-sccm%2f" target="_blank"><i class="fab fa-google-plus"></i></a></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.io/SCCM-Zone.com/posts/2019-07-18-sql-server-product-and-version-reporting-with-sccm/" target="_blank">b!</a>
+              <a class="nav-link" href="https://b.hatena.ne.jp/entry/https://sccm-zone.github.io/sccm-zone.com/posts/2019-07-18-sql-server-product-and-version-reporting-with-sccm/" target="_blank">b!</a>
             </li>
           </ul>
         </div>
@@ -373,10 +373,10 @@ Credit to Jakob Bindslet and Chrissy LeMaire.</p>
 </ul>
 </nav>
   <hr />
-  <h4><a href="/SCCM-Zone.com/categories/">Categories</a></h4>
+  <h4><a href="/sccm-zone.com/categories/">Categories</a></h4>
   
   <hr />
-  <h4><a href="/SCCM-Zone.com/tags/">Tags</a></h4>
+  <h4><a href="/sccm-zone.com/tags/">Tags</a></h4>
   
 </div>
 
