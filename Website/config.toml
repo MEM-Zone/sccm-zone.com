@@ -1,6 +1,5 @@
-baseURL = "https://example.org/"
+baseURL = "https://sccm-zone.com"
 languageCode = "en-us"
-theme = "coder"
-title = "SCCM Zones"
+title = "SCCM Zone"
 [blackfriday]
 extensions = ["hardLineBreak"]
