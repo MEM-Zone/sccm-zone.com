@@ -1,37 +1,24 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
-  <url>
-    <loc>https://sccm-zone.github.io/sccm-zone.com/posts/</loc>
-    <lastmod>2019-08-23T09:39:26+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://sccm-zone.github.io/sccm-zone.com/</loc>
-    <lastmod>2019-08-23T09:39:26+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://sccm-zone.github.io/sccm-zone.com/posts/sql-server-product-and-version-reporting-with-sccm/</loc>
-    <lastmod>2019-08-23T09:39:26+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://sccm-zone.github.io/sccm-zone.com/posts/sccm-application-detection-method-using-in-console-application-version/</loc>
-    <lastmod>2019-08-23T12:39:20+03:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://sccm-zone.github.io/sccm-zone.com/authors/</loc>
-  </url>
-  
-  <url>
-    <loc>https://sccm-zone.github.io/sccm-zone.com/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>https://sccm-zone.github.io/sccm-zone.com/tags/</loc>
-  </url>
-  
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>/2015-02-28-test-markdown/</loc>
+<lastmod>2015-02-28T00:00:00+02:00</lastmod>
+</url>
+<url>
+<loc>/2019-04-01-sccm-application-detection-method-using-in-console-application-version/</loc>
+<lastmod>2019-04-01T19:19:15+03:00</lastmod>
+</url>
+<url>
+<loc>/2019-07-18-sql-server-product-and-version-reporting-with-sccm/</loc>
+<lastmod>2019-07-18T00:00:00+03:00</lastmod>
+</url>
+<url>
+<loc>/aboutus/</loc>
+</url>
+<url>
+<loc>/</loc>
+</url>
+<url>
+<loc>/tags/</loc>
+</url>
 </urlset>

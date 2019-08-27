@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Beautiful Jekyll | MIT license | Copyright Dean Attali 2016 -->
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+
+  <title>SQL Server Product and Version Reporting with SCCM</title>
+
+  <meta name="author" content="Ⓒ All Rights Reserved Ioan Popovici" />
+
+  
+  <meta name="description" content="SQL licensing is always a pain but this report should make it a little easier…">
+  
+
+  <link rel="alternate" type="application/rss+xml" title="SCCM Zone - We publish awsome SCCM, SSRS and Powershell related content." href="/feed.xml" />
+
+  
+
+  
+
+  
+
+
+  
+    
+      
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css" />
+
+
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    
+      <link rel="stylesheet" href="/css/bootstrap-social.css" />
+    
+      <link rel="stylesheet" href="/css/main.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+    
+  
+
+  
+
+  
+
+  
+
+    <!-- Facebook OpenGraph tags -->
+  
+
+  
+  <meta property="og:title" content="SQL Server Product and Version Reporting with SCCM" />
+  
+
+   
+  <meta property="og:description" content="SQL licensing is always a pain but this report should make it a little easier…">
+  
+
+
+  <meta property="og:type" content="website" />
+
+  
+  <meta property="og:url" content="/2019-07-18-sql-server-product-and-version-reporting-with-sccm/" />
+  <link rel="canonical" href="/2019-07-18-sql-server-product-and-version-reporting-with-sccm/" />
+  
+
+  
+  <meta property="og:image" content="/img/avatar-icon.png" />
+  
+
+
+  <!-- Twitter summary cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@" />
+  <meta name="twitter:creator" content="@" />
+
+  
+  <meta name="twitter:title" content="SQL Server Product and Version Reporting with SCCM" />
+  
+
+  
+  <meta name="twitter:description" content="SQL licensing is always a pain but this report should make it a little easier…">
+  
+
+  
+  <meta name="twitter:image" content="/img/avatar-icon.png" />
+  
+
+  
+
+  
+
+</head>
+
+
+  <body>
+
+    
+
+  
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button><a class="navbar-brand" href="">SCCM Zone</a></div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+          <li><a href="/aboutus">About Us</a></li>
+          <li class="navlinks-container">
+            <a class="navlinks-parent" href="javascript:void(0)">Blog</a>
+            <div class="navlinks-children">
+              <a href="/#search">Search</a>
+              <a href="/#posts">Posts</a>
+              <a href="/#tags">Tags</a>
+            </div>
+          </li>
+        
+          <li><a href="/#sitemap">Sitemap</a></li></ul>
+    </div>
+
+	
+	<div class="avatar-container">
+	  <div class="avatar-img-border">
+	    <a href="">
+	      <img class="avatar-img" src="/img/authors/Ioan-Popovici.jpg" />
+		</a>
+	  </div>
+	</div>
+	
+
+  </div>
+</nav>
+
+
+    <!-- TODO this file has become a mess, refactor it -->
+
+
+
+
+
+<header class="header-section ">
+
+<div class="intro-header no-img">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>SQL Server Product and Version Reporting with SCCM</h1>
+		  
+		    
+			<h2 class="post-subheading">SQL licensing is always a pain but this report should make it a little easier…</h2>
+			
+		  
+		  
+		  
+		  <span class="post-meta">Posted on July 18, 2019</span>
+		  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+      
+
+      <article role="main" class="blog-post">
+        <p>This is the second iteration of my SQL version report. When I look back on my previous work I always cringe and this was no exception. A while back, I received a request to add the SQL key to the report, so I began examining the old code. Horrified by the things that I found laying dormant there, I scrapped everything and started anew. The result is a brand new report with a lot more info, smaller database footprint and much better coding.</p>
+
+<hr />
+
+<h2 id="index">Index</h2>
+
+<ul id="markdown-toc">
+  <li><a href="#index" id="markdown-toc-index">Index</a></li>
+  <li><a href="#links" id="markdown-toc-links">Links</a></li>
+  <li><a href="#recommendations" id="markdown-toc-recommendations">Recommendations</a></li>
+  <li><a href="#installation" id="markdown-toc-installation">Installation</a>    <ul>
+      <li><a href="#prerequisites" id="markdown-toc-prerequisites">Prerequisites</a></li>
+      <li><a href="#hwi-extension" id="markdown-toc-hwi-extension">HWI Extension</a></li>
+      <li><a href="#apply-changes" id="markdown-toc-apply-changes">Apply changes</a></li>
+      <li><a href="#hwi-definitions" id="markdown-toc-hwi-definitions">HWI Definitions</a></li>
+    </ul>
+  </li>
+  <li><a href="#test-and-validation" id="markdown-toc-test-and-validation">Test and Validation</a>    <ul>
+      <li><a href="#configurationmof" id="markdown-toc-configurationmof">Configuration.mof</a></li>
+      <li><a href="#wmi" id="markdown-toc-wmi">WMI</a></li>
+      <li><a href="#database" id="markdown-toc-database">Database</a></li>
+    </ul>
+  </li>
+  <li><a href="#import-the-ssrs-report" id="markdown-toc-import-the-ssrs-report">Import the SSRS Report</a>    <ul>
+      <li><a href="#upload-report-to-ssrs" id="markdown-toc-upload-report-to-ssrs">Upload Report to SSRS</a></li>
+      <li><a href="#configure-imported-report" id="markdown-toc-configure-imported-report">Configure Imported Report</a></li>
+    </ul>
+  </li>
+  <li><a href="#create-the-sql-stored-procedure" id="markdown-toc-create-the-sql-stored-procedure">Create the SQL Stored Procedure</a></li>
+  <li><a href="#preview" id="markdown-toc-preview">Preview</a></li>
+  <li><a href="#code" id="markdown-toc-code">Code</a>    <ul>
+      <li><a href="#extension" id="markdown-toc-extension">Extension</a></li>
+      <li><a href="#definitions" id="markdown-toc-definitions">Definitions</a></li>
+      <li><a href="#sql-query" id="markdown-toc-sql-query">SQL Query</a></li>
+      <li><a href="#vb-support-function" id="markdown-toc-vb-support-function">VB Support Function</a></li>
+    </ul>
+  </li>
+  <li><a href="#final-notes" id="markdown-toc-final-notes">Final Notes</a></li>
+</ul>
+
+<h2 id="links">Links</h2>
+
+<ul>
+  <li><a href="https://SCCM.Zone/SW-SQL-Server-Products-CHANGELOG">Report release history</a></li>
+  <li><a href="https://sccm-zone.com/sql-version-detection-and-report-sccm-2012-r2-12f299b5e63b">Previous extension version</a></li>
+  <li><a href="https://SCCM.Zone/SW-SQL-Server-Products-EXT">Originaly published on sccmf12twice.com</a></li>
+</ul>
+
+<h2 id="recommendations">Recommendations</h2>
+
+<ul>
+  <li>Do not modify or remove the previous extension version until you thoroughly test the new version.</li>
+  <li>Use a test environment for validation!</li>
+  <li>Back-up your <a href="https://technet.microsoft.com/en-us/library/bb680858.aspx">configuration.mof</a> file before any changes!</li>
+  <li>Use <a href="https://docs.microsoft.com/en-us/windows/win32/wmisdk/mofcomp">mofcomp.exe</a> to validate the <a href="https://technet.microsoft.com/en-us/library/bb680858.aspx">configuration.mof</a> on a test machine first!</li>
+</ul>
+
+<blockquote>
+  <p><strong>Notes</strong><br />
+This version is compatible with the previous version, they can live side by side.<br />
+Hardware inventory extension needs to be done on the top of your hierarchy.</p>
+</blockquote>
+
+<h2 id="installation">Installation</h2>
+
+<h3 id="prerequisites">Prerequisites</h3>
+
+<ul>
+  <li>Test environment</li>
+  <li>Downloads (Right click → Download linked file)
+    <ul>
+      <li><a href="https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Software/SW%20SQL%20Server%20Products/HWI%20EXT%20SQL%20Server%20Products.mof">HWI EXT SQL Server Products.mof</a> (HWI Extension)</li>
+      <li><a href="https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Software/SW%20SQL%20Server%20Products/HWI%20DEF%20SQL%20Server%20Products.mof">HWI DEF SQL Server Products.mof</a> (HWI Definitions)</li>
+      <li><a href="https://raw.githubusercontent.com/SCCM-Zone/sccm-zone.github.io/master/Reporting/Software/SW%20SQL%20Server%20Products/SW%20SQL%20Server%20Products.rdl">SW SQL Server Products.rdl</a> (SSRS Report)</li>
+    </ul>
+  </li>
+  <li>SQL Stored Procedure → <a href="#create-the-sql-stored-procedure"><strong>Create the SQL Stored Procedure</strong></a></li>
+</ul>
+
+<h3 id="hwi-extension">HWI Extension</h3>
+
+<p>The extension needs to be added to the <strong>&lt;CMInstallLocation&gt;\Inboxes\clifiles.src\hinv\configuration.mof</strong> file</p>
+
+<ul>
+  <li>Insert the extension at the end of the <strong>configuration.mof</strong> file and between the following headers:</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//<span class="o">========================</span>
+// Added extensions start
+//<span class="o">========================</span>
+
+//<span class="o">========================</span>
+// Added extensions end
+//<span class="o">========================</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Uncomment the ‘<strong>Old SQL extension cleanup’</strong> section to remove the old extension classes from the clients repositories if needed.</li>
+  <li>Use a test environment for validation as described in the <a href="#test-and-validation"><strong>Test and Validation</strong></a> section.</li>
+</ul>
+
+<blockquote>
+  <p><strong>Notes</strong><br />
+Always use a test environment before any changes in production!<br />
+Never create any extensions outside of the “Added extensions start/end” headers.<br />
+Try to have consistent formatting inside these headers.<br />
+Never modify anything outside these headers.<br />
+Watch for other previous extensions and use clear delimitation between them.</p>
+</blockquote>
+
+<h3 id="apply-changes">Apply changes</h3>
+
+<p>Compiling the configuration.mof file in the hinv folder on the CAS/PSS, will trigger the distribution and compilation on all machines in your environment on the next machine policy evaluation.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mofcomp.exe &lt;CMInstallLocation&gt;<span class="se">\I</span>nboxes<span class="se">\c</span>lifiles.src<span class="se">\h</span>inv<span class="se">\C</span>onfiguration.mof
+</code></pre></div></div>
+
+<p><img src="/img/2.png" alt="image" class="center-block" /></p>
+
+<p>Implement HWI extension in production</p>
+
+<h3 id="hwi-definitions">HWI Definitions</h3>
+
+<p>You need to add the new class definitions to the Default Client Settings</p>
+
+<ul>
+  <li>Import definitions.</li>
+</ul>
+
+<p><img src="/img/3.png" alt="image" class="center-block" /></p>
+
+<p>Click on Import and select the <strong>HWI DEF SQL Server Products.mof</strong> file</p>
+
+<p><img src="/img/4.png" alt="image" class="center-block" /></p>
+
+<p>Review the classes and click on Import.</p>
+
+<p><img src="/img/5.png" alt="image" class="center-block" /></p>
+
+<p>Make sure the new extension classes are enabled and click OK</p>
+
+<blockquote>
+  <p><strong>Notes</strong><br />
+DO NOT DELETE the old extension definitions if you still want to use the old report!</p>
+</blockquote>
+
+<h2 id="test-and-validation">Test and Validation</h2>
+
+<h3 id="configurationmof">Configuration.mof</h3>
+
+<p>Use <a href="https://docs.microsoft.com/en-us/windows/win32/wmisdk/mofcomp"><strong><em>mofcomp.exe</em></strong></a> to check if <a href="https://technet.microsoft.com/en-us/library/bb680858.aspx"><strong><em>configuration.mof</em></strong></a> was correctly modified and implement the changes.</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">## Check syntax</span>
+mofcomp.exe -check &lt;Configuration.mof_Directory&gt;\Configuration.mof
+
+<span class="c1">## Compile file</span>
+/<span class="k">*</span>
+Compiling the configuration.mof file <span class="k">in </span>the hinv folder on the CAS/PSS,
+will trigger the distribution and compilation on all machines <span class="k">in </span>your
+environment on the next machine policy evaluation.
+<span class="k">*</span>/
+
+mofcomp.exe &lt;Configuration.mof_Directory&gt;\Configuration.mof
+</code></pre></div></div>
+
+<p><img src="/img/6.png" alt="image" class="center-block" /></p>
+
+<p>Compling the configuration.mof is done on a test environment here!</p>
+
+<blockquote>
+  <p><strong>Notes</strong><br />
+Saving and compiling the configuration.mof file in the hinv folder on the CAS/PSS, will trigger the distribution and compilation on all machines in your environment on the next machine policy evaluation.</p>
+</blockquote>
+
+<h3 id="wmi">WMI</h3>
+
+<p>Use PowerShell to check if the new classes have been created in WMI</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">## Check if the new classes are present in WMI</span>
+/<span class="k">*</span> The machine must have at least one version of SQL installed <span class="k">in
+</span>order <span class="k">for </span>these classes to be created <span class="k">*</span>/
+
+<span class="c1">#  Get SQL 2017 class</span>
+<span class="nb">Get-CimClass</span> -ClassName SQL_2017_Property
+
+<span class="c1">#  Get SQL 2014 class</span>
+<span class="nb">Get-CimClass</span> -ClassName SQL_2014_Property
+
+<span class="c1">#  Get SQL 2012 class</span>
+<span class="nb">Get-CimClass</span> -ClassName SQL_2012_Property
+
+<span class="c1">#  Get SQL 2008 class</span>
+<span class="nb">Get-CimClass</span> -ClassName SQL_2008_Property
+
+<span class="c1">#  Get SQL Legacy class</span>
+<span class="nb">Get-CimClass</span> -ClassName SQL_Legacy_Property
+
+<span class="c1">#  Get SQL ProductID class</span>
+<span class="nb">Get-CimClass</span> -ClassName SQL_ProductID
+</code></pre></div></div>
+
+<h3 id="database">Database</h3>
+
+<p>Use SSMS (SQL Server Management Studio) to check if the views are created in the CM database</p>
+
+<p><img src="/img/7.png" alt="image" class="center-block" /></p>
+
+<h2 id="import-the-ssrs-report">Import the SSRS Report</h2>
+
+<h3 id="upload-report-to-ssrs">Upload Report to SSRS</h3>
+
+<ul>
+  <li>Start Internet Explorer and navigate to <a href="http://en.wikipedia.org/wiki/Fully_qualified_domain_name"><strong>http://&lt;YOUR_REPORT_SERVER_FQDN&gt;Reports</strong></a></li>
+  <li>Choose a path and upload the previously downloaded report file.</li>
+</ul>
+
+<h3 id="configure-imported-report">Configure Imported Report</h3>
+
+<ul>
+  <li><a href="https://joshheffner.com/how-to-import-additional-software-update-reports-in-sccm/"><strong><em>Replace the DataSource</em></strong></a> in the report.</li>
+</ul>
+
+<h2 id="create-the-sql-stored-procedure">Create the SQL Stored Procedure</h2>
+
+<p>The usp_PivotWithDynamicColumns is needed in order to maximize code reuse and have a more sane and sanitized data source.</p>
+
+<ul>
+  <li>Copy paste the code below in SSMS</li>
+  <li>Change the <strong>&lt;SITE_CODE&gt;</strong> in the <strong>USE</strong> statement to match your Site Code.</li>
+  <li>Click <strong>Execute</strong> to add the <a href="#vb-support-function"><strong><em>usp_PivotWithDynamicColumns</em></strong></a> stored procedure to your database.</li>
+</ul>
+
+<blockquote>
+  <p><strong>Notes</strong><br />
+<strong>You might need additional DB access to install the support function!</strong><br />
+<strong>Allow</strong> some time for the policy to be downloaded or force a policy refresh.<br />
+<strong>Allow</strong> some time for the data to be gathered or force a HWI collection.<br />
+This report was created with SQL 2017 Reporting Services, you might need to remove some report elements if you use an older version.</p>
+</blockquote>
+
+<h2 id="preview">Preview</h2>
+
+<p><img src="/img/8.png" alt="image" title="Report preview" class="center-block" /></p>
+
+<h2 id="code">Code</h2>
+
+<h3 id="extension">Extension</h3>
+
+<p>For reference only, you can download the file in the <a href="#prerequisites"><strong>Prerequisites</strong></a> section.</p>
+
+<h3 id="definitions">Definitions</h3>
+
+<p>For reference only, you can download the file in the <a href="#prerequisites"><strong>Prerequisites</strong></a> section.</p>
+
+<h3 id="sql-query">SQL Query</h3>
+
+<p>For reference only, the report includes this query.</p>
+
+<h3 id="vb-support-function">VB Support Function</h3>
+
+<p>For reference only, the report includes this function.</p>
+
+<script src="https://embed.cacher.io/83576ed10a66f816abf812925f284fa17d58fc14.js?a=dac2e390b609c7b9b8c4f97ff5b0a4cc&amp;t=github_gist&amp;r=0"></script>
+
+<script src="https://gist.github.com/Ioan-Popovici/db8228de1d96def7a455fdbf1b59f165.js"></script>
+
+<blockquote>
+  <p><strong>Notes</strong><br />
+Credit to Jakob Bindslet and Chrissy LeMaire.</p>
+</blockquote>
+
+<h2 id="final-notes">Final Notes</h2>
+
+<p>Please use <a href="http://SCCM.Zone/Issues">Github</a> for 🐛 reporting, or 🌈 and 🦄 requests.</p>
+
+<hr />
+
+<p><img src="/img/9.gif" alt="image" title="Random gif" class="center-block" /></p>
+
+<hr />
+
+
+      </article>
+
+      
+        <div class="blog-tags">
+          Tags:
+          
+          
+            <a href="/tags#SQL">SQL</a>
+          
+            <a href="/tags#Reports">Reports</a>
+          
+          
+        </div>
+      
+
+      
+        <!-- Check if any share-links are active -->
+
+
+
+
+<section id = "social-share-section">
+  <span class="sr-only">Share: </span>
+
+  
+  <!--- Share on Twitter -->
+    <a href="https://twitter.com/intent/tweet?text=SQL+Server+Product+and+Version+Reporting+with+SCCM&url=%2F2019-07-18-sql-server-product-and-version-reporting-with-sccm%2F"
+      class="btn btn-social-icon btn-twitter" title="Share on Twitter">
+      <span class="fa fa-fw fa-twitter" aria-hidden="true"></span>
+      <span class="sr-only">Twitter</span>
+    </a>
+  
+
+  
+
+  
+  <!--- Share on LinkedIn -->
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2F2019-07-18-sql-server-product-and-version-reporting-with-sccm%2F"
+      class="btn btn-social-icon btn-linkedin" title="Share on LinkedIn">
+      <span class="fa fa-fw fa-linkedin" aria-hidden="true"></span>
+      <span class="sr-only">LinkedIn</span>
+    </a>
+  
+
+</section>
+
+
+
+      
+
+      <ul class="pager blog-pager">
+        
+        <li class="previous">
+          <a href="/2019-04-01-sccm-application-detection-method-using-in-console-application-version/" data-toggle="tooltip" data-placement="top" title="SCCM Application Detection Method using in Console Application Version">&larr; Previous Post</a>
+        </li>
+        
+        
+      </ul>
+
+      
+        <div class="disqus-comments">
+          
+        </div>
+          
+        <div class="staticman-comments">
+          
+
+        </div>
+        <div class="justcomments-comments">
+          
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+    <footer>
+  <div class="container beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links"><li><a href="/feed.xml" title="RSS"><span class="fa-stack fa-lg" aria-hidden="true">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+                <span class="sr-only">RSS</span>
+              </a>
+            </li><li><a href="mailto:hello@sccm-zone.com" title="Email me"><span class="fa-stack fa-lg" aria-hidden="true">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                </span>
+                <span class="sr-only">Email me</span>
+              </a>
+            </li><li><a href="https://github.com/SCCM-Zone" title="GitHub"><span class="fa-stack fa-lg" aria-hidden="true">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+                <span class="sr-only">GitHub</span>
+              </a>
+            </li><li><a href="https://twitter.com/ioanpopovici" title="Twitter"><span class="fa-stack fa-lg" aria-hidden="true">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                </span>
+                <span class="sr-only">Twitter</span>
+              </a>
+            </li><li><a href="https://reddit.com/u/ioan_popovici" title="Reddit"><span class="fa-stack fa-lg" aria-hidden="true">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-reddit fa-stack-1x fa-inverse"></i>
+                </span>
+                <span class="sr-only">Reddit</span>
+              </a>
+            </li><li><a href="https://linkedin.com/in/ioanpopovici" title="LinkedIn"><span class="fa-stack fa-lg" aria-hidden="true">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                </span>
+                <span class="sr-only">LinkedIn</span>
+              </a>
+            </li></ul>
+      <p class="copyright text-muted">
+      Ⓒ All Rights Reserved Ioan Popovici
+      &nbsp;&bull;&nbsp;
+      2019
+
+      
+      &nbsp;&bull;&nbsp;
+      <a href="">SCCM-Zone.com</a>
+      
+
+      
+      </p>
+          <!-- Please don't remove this, keep my open source work credited :) -->
+    <p class="theme-by text-muted">
+      Theme by
+      <a href="https://deanattali.com/beautiful-jekyll/">beautiful-jekyll</a>
+    </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  
+    
+
+
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script>
+      	if (typeof jQuery == 'undefined') {
+          document.write('<script src="/js/jquery-1.11.2.min.js"></scr' + 'ipt>');
+      	}
+      </script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script src="/js/bootstrap.min.js"></script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script src="/js/main.js"></script>
+    
+  
+
+
+
+
+
+
+  
+  </body>
+</html>

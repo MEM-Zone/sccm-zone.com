@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SCCM Zone</title>
+    <description>We publish awsome SCCM, SSRS and Powershell related content.</description>
+    <link></link>
+    <atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>SQL Server Product and Version Reporting with SCCM</title>
+        <description>
+          SQL licensing is always a pain but this report should make it a little easier… - 
+          This is the second iteration of my SQL version report. When I look back on my previous work I always cringe and this was no exception. A while back, I received a request to add the SQL key to the report, so I began examining the old code. Horrified by...
+        </description>
+        <pubDate>Thu, 18 Jul 2019 00:00:00 +0300</pubDate>
+        <link>/2019-07-18-sql-server-product-and-version-reporting-with-sccm/</link>
+        <guid isPermaLink="true">/2019-07-18-sql-server-product-and-version-reporting-with-sccm/</guid>
+      </item>
+    
+      <item>
+        <title>SCCM Application Detection Method using in Console Application Version</title>
+        <description>
+          Say no to application version hardcoded in the detection script. - 
+          Say no to application version hardcoded in the detection script. T This method is valid for any application. In this case I will use the configuration manager client upgrade application. You might ask yourself, why not use the automatic client upgrade? Well, because the client upgrade can only run during...
+        </description>
+        <pubDate>Mon, 01 Apr 2019 19:19:15 +0300</pubDate>
+        <link>/2019-04-01-sccm-application-detection-method-using-in-console-application-version/</link>
+        <guid isPermaLink="true">/2019-04-01-sccm-application-detection-method-using-in-console-application-version/</guid>
+      </item>
+    
+      <item>
+        <title>Test markdown</title>
+        <description>
+          Each post also has a subtitle - 
+          You can write regular markdown here and Jekyll will automatically convert it to a nice webpage. I strongly encourage you to take 5 minutes to learn how to write in markdown - it’ll teach you how to transform regular text into bold/italics/headings/tables/etc. Here is some bold text Here is a...
+        </description>
+        <pubDate>Sat, 28 Feb 2015 00:00:00 +0200</pubDate>
+        <link>/2015-02-28-test-markdown/</link>
+        <guid isPermaLink="true">/2015-02-28-test-markdown/</guid>
+      </item>
+    
+  </channel>
+</rss>
