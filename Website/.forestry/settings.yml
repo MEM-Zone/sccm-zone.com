@@ -10,7 +10,7 @@ sections:
   create: all
   match: "*"
 - type: directory
-  path: Website/content/posts
+  path: Website/_posts
   label: Posts
   create: all
   match: "**/*"
