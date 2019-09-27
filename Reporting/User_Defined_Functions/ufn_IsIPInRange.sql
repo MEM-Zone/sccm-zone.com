@@ -96,6 +96,11 @@ AS
         /* Return result */
         RETURN  @Result;
     END;
+GO
+
+/* Grants execute rights for this function to SCCM reporting users */
+GRANT EXECUTE ON OBJECT::ufn_IsIPInRange
+    TO smsschm_users;
 
 /* #endregion */
 /*##=============================================*/

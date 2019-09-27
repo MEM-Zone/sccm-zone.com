@@ -4,15 +4,17 @@
 .DESCRIPTION
     Gets the software update compliance in SCCM by computer, classification and severity.
 .NOTES
-    Created by
-        Ioan Popovici   2018-10-11
-    Release notes
-        https://github.com/Ioan-Popovici/SCCMZone/blob/master/Reporting/Updates/SU%20Compliance%20by%20Computer%20Classification%20and%20Severity/CHANGELOG.md
-    This query is part of a report should not be run separately.
+    Created by Ioan Popovici
+    Requires ufn_csv_String_Parser custom function.
+    Part of a report should not be run separately.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone/SU-Compliance-Classification-Severity
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/SU-Compliance-Classification-CHANGELOG
+.LINK
+    https://SCCM.Zone/SU-Compliance-Classification-GIT
+.LINK
+    https://SCCM.Zone/Issues
 */
 
 /*##=============================================*/

@@ -81,6 +81,11 @@ AS
 
         RETURN;
     END;
+GO
+
+/* Grants execute rights for this function to SCCM reporting users */
+GRANT EXECUTE ON OBJECT::dbo.ufn_csv_String_Parser
+    TO smsschm_users;
 
 /* #endregion */
 /*##=============================================*/
