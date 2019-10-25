@@ -6,7 +6,7 @@
 
     * Code cleanup
     * Moved changelog to markdown file
-    * ChaUpdated descriptions
+    * Updated descriptions
 
 ## 2.0 - 2017-09-11
 
