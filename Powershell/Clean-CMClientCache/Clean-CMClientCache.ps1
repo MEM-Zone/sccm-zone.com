@@ -63,11 +63,11 @@ Param (
     [Parameter(Mandatory = $false, Position = 1)]
     [ValidateNotNullorEmpty()]
     [Alias('FreeSpace')]
-    [int16]$LowDiskSpaceThreshold = '100',
+    [int16]$LowDiskSpaceThreshold = 100,
     [Parameter(Mandatory = $false, Position = 2)]
     [ValidateNotNullorEmpty()]
     [Alias('OlderThan')]
-    [int16]$ReferencedThreshold = '0',
+    [int16]$ReferencedThreshold = 0,
     [Parameter(Mandatory = $false, Position = 3)]
     [switch]$SkipSuperPeer = $false,
     [Parameter(Mandatory = $false, Position = 4)]
