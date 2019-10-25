@@ -98,8 +98,8 @@ AS
     END;
 GO
 
-/* Grants execute rights for this function to SCCM reporting users */
-GRANT EXECUTE ON OBJECT::ufn_IsIPInRange
+/* Grants select rights for this function to SCCM reporting users */
+GRANT SELECT ON OBJECT::ufn_IsIPInRange
     TO smsschm_users;
 
 /* #endregion */

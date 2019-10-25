@@ -83,8 +83,8 @@ AS
     END;
 GO
 
-/* Grants execute rights for this function to SCCM reporting users */
-GRANT EXECUTE ON OBJECT::dbo.ufn_CIDRFromIPMask
+/* Grants select rights for this function to SCCM reporting users */
+GRANT SELECT ON OBJECT::dbo.ufn_CIDRFromIPMask
     TO smsschm_users;
 
 /* #endregion */

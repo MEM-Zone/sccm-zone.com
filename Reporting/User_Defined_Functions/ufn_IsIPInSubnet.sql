@@ -107,8 +107,8 @@ BEGIN
 END;
 GO
 
-/* Grants execute rights for this function to SCCM reporting users */
-GRANT EXECUTE ON OBJECT::dbo.ufn_IsIPInSubnet
+/* Grants select rights for this function to SCCM reporting users */
+GRANT SELECT ON OBJECT::dbo.ufn_IsIPInSubnet
     TO smsschm_users;
 
 /* #endregion */
