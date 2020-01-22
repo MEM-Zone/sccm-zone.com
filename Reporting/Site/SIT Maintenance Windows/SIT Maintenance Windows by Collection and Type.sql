@@ -20,9 +20,12 @@
 /*## QUERY BODY                                  */
 /*##=============================================*/
 
+/* Testing variables !! Need to be commented for Production !! */
+DECLARE @UserSIDs       AS NVARCHAR(10) = 'Disabled';
+
 SELECT
     Collection.Name AS Collection
-    , ServiceWindow.Name,
+    , ServiceWindow.Name
     , ServiceWindow.Description
     , Type = (
         CASE ServiceWindow.ServiceWindowType
