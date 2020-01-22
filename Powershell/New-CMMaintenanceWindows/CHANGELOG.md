@@ -1,5 +1,10 @@
 # New-CMMaintenanceWindows release history
 
+## 2.1.1 - 2020-01-22
+
+    * Spaces are back in the MW name
+    * Modified example file accordingly
+
 ## 2.1 - 2018-12-19
 
 ### Changes

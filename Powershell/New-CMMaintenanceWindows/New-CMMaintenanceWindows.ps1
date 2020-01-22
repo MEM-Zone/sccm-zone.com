@@ -437,7 +437,7 @@ Function New-MaintenanceWindows {
     ElseIf ($ApplyTo -match 'Task') { $MWType = 'MWT' }
 
     # Set maintenance window name
-    $MWName =  $MWType+'.NR.'+(Get-Date -Uformat %Y-%B-%d $MWStartTime)+'_'+$StartTime+'-'+$StopTime
+    $MWName =  $MWType+' - NR - '+(Get-Date -Uformat %Y-%m-%d $MWStartTime)+' '+$StartTime+'-'+$StopTime
 
     ## Set maintenance window on collection
     Try {
