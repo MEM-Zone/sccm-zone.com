@@ -4,15 +4,16 @@
 .DESCRIPTION
     Gets the Hardware info of a Computer Collection including BIOS version and Computer model.
 .NOTES
-    Created by
-        Ioan Popovici   2018-01-18
-    Release notes
-        https://github.com/Ioan-Popovici/SCCMZone/blob/master/Reporting/Hardware/HW%20BIOS%20by%20Company%20or%20Manufacturer/CHANGELOG.md
+    Created by Ioan Popovici
     This query is part of a report should not be run separately.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone/HW-BIOS-Manufacturer
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/HW-BIOS-Manufacturer-CHANGELOG
+.LINK
+    https://SCCM.Zone/HW-BIOS-Manufacturer-GIT
+.LINK
+    https://SCCM.Zone/Issues
 */
 
 /*##=============================================*/
@@ -20,9 +21,9 @@
 /*##=============================================*/
 
 /* Testing variables !! Need to be commented for Production !! */
---DECLARE @UserSIDs               AS VARCHAR(16) = 'Disabled';
---DECLARE @CollectionID           AS VARCHAR(16) = 'A01000B3';
---DECLARE @ExcludeVirtualMachines AS VARCHAR(3)  = 'YES';
+-- DECLARE @UserSIDs               AS VARCHAR(16) = 'Disabled';
+-- DECLARE @CollectionID           AS VARCHAR(16) = 'SMS00001';
+-- DECLARE @ExcludeVirtualMachines AS VARCHAR(3)  = 'NO';
 
 SELECT DISTINCT
     Manufacturer = System.Manufacturer0

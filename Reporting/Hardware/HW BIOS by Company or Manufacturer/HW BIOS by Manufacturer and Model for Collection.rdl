@@ -31,15 +31,16 @@
 .DESCRIPTION
     Gets the Hardware info of a Computer Collection including BIOS version and Computer model.
 .NOTES
-    Created by
-        Ioan Popovici   2018-01-18
-    Release notes
-        https://github.com/Ioan-Popovici/SCCMZone/blob/master/Reporting/Hardware/HW%20BIOS%20by%20Company%20or%20Manufacturer/CHANGELOG.md
+    Created by Ioan Popovici
     This query is part of a report should not be run separately.
 .LINK
-    https://SCCM-Zone.com
+    https://SCCM.Zone/HW-BIOS-Manufacturer
 .LINK
-    https://github.com/Ioan-Popovici/SCCMZone
+    https://SCCM.Zone/HW-BIOS-Manufacturer-CHANGELOG
+.LINK
+    https://SCCM.Zone/HW-BIOS-Manufacturer-GIT
+.LINK
+    https://SCCM.Zone/Issues
 */
 
 /*##=============================================*/
@@ -211,7 +212,7 @@ ORDER BY
           </QueryParameter>
         </QueryParameters>
         <CommandText>/* ReportDescription Dataset */
-SELECT DISTINCT Description 
+SELECT DISTINCT Description
 FROM ReportServer.dbo.Catalog
 WHERE Name = @ReportName</CommandText>
       </Query>
