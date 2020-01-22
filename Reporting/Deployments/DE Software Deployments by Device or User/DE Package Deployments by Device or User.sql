@@ -92,7 +92,7 @@ IF @CollectionType = 2
     BEGIN
         SELECT DISTINCT
             Device           = Devices.Name
-			, PrimaryUser    = Devices.PrimaryUser
+            , PrimaryUser    = Devices.PrimaryUser
             , TopConsoleUser = Console.TopConsoleUser0
             , Manufacturer   = Enclosure.Manufacturer0
             , DeviceType     = (
@@ -157,8 +157,8 @@ IF @CollectionType = 2
             JOIN v_Package AS Package ON Package.PackageID = Advertisment.PackageID
             JOIN v_ClientAdvertisementStatus AS AdvertismentStatus ON AdvertismentStatus.AdvertisementID = Advertisment.AdvertisementID
             JOIN v_CombinedDeviceResources AS Devices ON Devices.MachineID = AdvertismentStatus.ResourceID
-			LEFT JOIN v_GS_SYSTEM_ENCLOSURE AS Enclosure ON Enclosure.ResourceID = Devices.MachineID
-			LEFT JOIN v_GS_SYSTEM_CONSOLE_USAGE AS Console ON Console.ResourceID = Devices.MachineID
+            LEFT JOIN v_GS_SYSTEM_ENCLOSURE AS Enclosure ON Enclosure.ResourceID = Devices.MachineID
+            LEFT JOIN v_GS_SYSTEM_CONSOLE_USAGE AS Console ON Console.ResourceID = Devices.MachineID
             JOIN vClassicDeployments AS Deployment ON Deployment.CollectionID = Advertisment.CollectionID
                 AND Advertisment.ProgramName != '*' -- Only Programs
         WHERE Devices.isClient = 1
