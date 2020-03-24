@@ -1,5 +1,9 @@
 # SW SQL Server Products release history
 
+## 2.6.4 - 2020-03-24
+
+    * Updated to support SQL 2019
+
 ## 2.6.3 - 2019-07-17
 
 ### Changes

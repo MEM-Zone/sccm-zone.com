@@ -9,12 +9,40 @@
 
 //-- !! UNCOMMENT TO ACTIVATE !! (Remove '//' from '//#Pragma')
 
+//#Pragma DeleteClass("SQL_2019", NOFAIL)
 //#Pragma DeleteClass("SQL_2017", NOFAIL)
 //#Pragma DeleteClass("SQL_2016", NOFAIL)
 //#Pragma DeleteClass("SQL_2014", NOFAIL)
 //#Pragma DeleteClass("SQL_2012", NOFAIL)
 //#Pragma DeleteClass("SQL_2008", NOFAIL)
 //#Pragma DeleteClass("SQL_2000_And_2005", NOFAIL)
+
+//---------------| SQL 2019 class |---------------
+
+//-- Create custom WMI class
+//-  Class qualifiers
+[
+    Description("The SQL_2019_Property class contains information about the SQL 2019 service. You can use this information for SQL version reporting."): ToInstance,
+    UNION,
+    ViewSources {
+        "SELECT PropertyIndex, PropertyName, PropertyNumValue, PropertyStrValue, ServiceName, SqlServiceType FROM SqlServiceAdvancedProperty WHERE SQLServiceType=1"
+    },
+    ViewSpaces {
+        "\\\\.\\ROOT\\Microsoft\\SqlServer\\ComputerManagement15"
+    },
+    Dynamic,
+    Provider("MS_VIEW_INSTANCE_PROVIDER")
+]
+//-  Class properties
+Class SQL_2017_Property
+{
+    [PropertySources{"PropertyIndex"},  key]    uint32 PropertyIndex;
+    [PropertySources{"PropertyName"},   key]    string PropertyName;
+    [PropertySources{"PropertyNumValue"}   ]    uint32 PropertyNumValue;
+    [PropertySources{"PropertyStrValue"}   ]    string PropertyStrValue;
+    [PropertySources{"ServiceName"},    key]    string ServiceName;
+    [PropertySources{"SqlServiceType"}, key]    uint32 SqlServiceType;
+};
 
 //---------------| SQL 2017 class |---------------
 

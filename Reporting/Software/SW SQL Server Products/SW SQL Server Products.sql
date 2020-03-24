@@ -26,9 +26,9 @@
 /* #region QueryBody */
 
 /* Test variable declaration !! Need to be commented for Production !! */
---DECLARE @UserSIDs          AS NVARCHAR(10) = 'Disabled';
---DECLARE @CollectionID      AS NVARCHAR(10) = 'SMS00001';
---DECLARE @Filter            AS NVARCHAR(20) = 'WID';
+-- DECLARE @UserSIDs          AS NVARCHAR(10) = 'Disabled';
+-- DECLARE @CollectionID      AS NVARCHAR(10) = 'SMS00001';
+-- DECLARE @Filter            AS NVARCHAR(20) = 'WID';
 
 /* Variable declaration */
 DECLARE @TableName         AS NVARCHAR(MAX);
@@ -61,7 +61,8 @@ SET @StaticColumnList = N'[SKUNAME],[VERSION],[FILEVERSION],[SPLEVEL],[CLUSTERED
 /* Populate SQLRelease table */
 INSERT INTO @SQLRelease (FileVersion, Release)
 VALUES
-    ('2017', '2017')
+    ('2019', '2019')
+    , ('2017', '2017')
     , ('2016', '2017')
     , ('2015', '2016')
     , ('2014', '2014')
@@ -74,6 +75,15 @@ VALUES
     , ('2005', '2005')
     , ('2000', '2000')
     , ('',     'Unknown')
+
+/* Get SQL 2019 data */
+INSERT INTO #SQLProducts
+EXECUTE dbo.usp_PivotWithDynamicColumns
+    @TableName           = N'dbo.v_GS_EXT_SQL_2019_Property0'
+    , @NonPivotedColumn  = N'ResourceID'
+    , @DynamicColumn     = N'PropertyName0'
+    , @AggregationColumn = N'ISNULL(PropertyStrValue0, PropertyNumValue0)'
+	, @StaticColumnList  = @StaticColumnList;
 
 /* Get SQL 2017 data */
 INSERT INTO #SQLProducts
