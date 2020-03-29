@@ -9,7 +9,7 @@ SMS_Report(true),
 SMS_Group_Name("SQL 2019 Property"),
 SMS_Class_ID("EXT|SQL_2019_PROPERTY|1.0")]
 
-Class SQL_2017_Property: SMS_Class_Template
+Class SQL_2019_Property: SMS_Class_Template
 {
     [SMS_Report(true), key]    uint32 PropertyIndex;
     [SMS_Report(true), key]    string PropertyName;

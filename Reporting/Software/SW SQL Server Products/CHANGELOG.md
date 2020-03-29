@@ -1,5 +1,10 @@
 # SW SQL Server Products release history
 
+## 2.6.4 - 2020-03-29
+
+* Removed `Cannot decode key` for SQL Express
+* Fixed definitions and extensions for `SQL 2019`
+
 ## 2.6.4 - 2020-03-24
 
 * Updated to support `SQL 2019`

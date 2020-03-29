@@ -224,6 +224,25 @@ Class SQL_ProductID
     boolean DigitalProductID[];
 };
 
+//- SQL 2019 class instance
+[DYNPROPS]
+Instance of SQL_ProductID
+{
+    Release = "2017";
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\150\\Tools\\ClientSetup|ProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    ProductID;
+    [
+        PropertyContext("Local|HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\150\\Tools\\ClientSetup|DigitalProductID"),
+        Dynamic,
+        Provider("RegPropProv")
+    ]
+    DigitalProductID;
+};
+
 //- SQL 2017 class instance
 [DYNPROPS]
 Instance of SQL_ProductID
