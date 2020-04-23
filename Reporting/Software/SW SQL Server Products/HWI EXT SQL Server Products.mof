@@ -34,7 +34,7 @@
     Provider("MS_VIEW_INSTANCE_PROVIDER")
 ]
 //-  Class properties
-Class SQL_2017_Property
+Class SQL_2019_Property
 {
     [PropertySources{"PropertyIndex"},  key]    uint32 PropertyIndex;
     [PropertySources{"PropertyName"},   key]    string PropertyName;
