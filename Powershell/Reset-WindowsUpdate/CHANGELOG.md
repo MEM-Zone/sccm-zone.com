@@ -1,6 +1,11 @@
-# Repair-WUDataStore release history
+# Reset-WindowsUpdate release history
 
-## 2.0 - 2018-05-24
+## 3.0.0 - 2020-12-04
+
+    * Renamed script and function to `Reset-WindowsUpdate`
+    * Added full reset functionality (will work only if component files are not corrupted)
+
+## 2.0.0 - 2018-05-24
 
 ### Changes
 
@@ -9,7 +14,7 @@
     * Added standalone repair option to use without detection
     * Added kill windows update service by PID
 
-## 1.0 - 2018-03-28
+## 1.0.0 - 2018-03-28
 
 ### First version
 

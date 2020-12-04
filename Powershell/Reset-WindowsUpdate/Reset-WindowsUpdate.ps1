@@ -1,19 +1,19 @@
 <#
 .SYNOPSIS
-    Repairs a corrupted WU DataStore.
+    Resets the windows update component.
 .DESCRIPTION
-    Detects and repairs a corrupted WU DataStore.
+    Detects and resets a corrupted windows update component.
     Detection is done by testing the eventlog with the specified parameters.
-    Repairs are performed by removing and reinitializing the corrupted DataStore.
+    Reset is performed by reseting the windows update component to its initial state.
     The specified eventlog is backed up and cleared in order not to triger the detection again before the repair step.
     The backup of the specified eventlog is stored in 'SystemRoot\Temp' folder.
     Defaults are configured for the ESENT '623' error.
 .PARAMETER Action
-    Specifies the action to be performed. Available actions are: ('DetectAndRepair', 'Detect', 'Repair','RepairStandalone').
-    'DetectAndRepair'  - Performs detection and then performs repairs if necessary.
-    'Detect'           - Performs detection and returns the result.
-    'Repair'           - Performs repairs and flushes the specified EventLog.
-    'RepairStandalone' - Performs repairs only.
+    Specifies the action to be performed. Available actions are: ('DetectAndReset', 'Detect', 'Reset','ResetStandalone').
+    'DetectAndReset'  - Performs detection and then performs a reset if necessary.
+    'Detect'          - Performs detection and returns the result.
+    'Reset'           - Performs a reset and flushes the specified EventLog.
+    'ResetStandalone' - Performs a reset only.
 .PARAMETER LogName
     Specifies the LogName to search. Default is: 'Application'
 .PARAMETER Source
@@ -27,30 +27,30 @@
 .PARAMETER Threshold
     Specifed the numbers of events after which this functions returns $true. Default is: 3.
 .EXAMPLE
-    Repair-WUDataStore.ps1 -Action 'Detect' -LogName 'Application' -Source 'ESENT' -EventID '623' -EntryType 'Error' -LimitDays 3 -Threshold 3
+    Reset-WindowsUpdate.ps1 -Action 'Detect' -LogName 'Application' -Source 'ESENT' -EventID '623' -EntryType 'Error' -LimitDays 3 -Threshold 3
 .INPUTS
-    System.String.
+    None.
 .OUTPUTS
-    System.String. This script returns Compliant, Non-Compliant, Remediated or Error Message
+    System.String. This script returns Compliant, Non-Compliant, Reset or Error Message
 .NOTES
     Created by Ioan Popovici
     This script can be called directly.
 .LINK
-    https://SCCM.Zone/Repair-WUDataStore
+    https://MEM.Zone
 .LINK
-    https://SCCM.Zone/Repair-WUDataStore-CHANGELOG
+    https://MEM.Zone/Reset-WindowsUpdate-CHANGELOG
 .LINK
-    https://SCCM.Zone/Repair-WUDataStore-GIT
+    https://MEM.Zone/Reset-WindowsUpdate-GIT
 .LINK
-    https://SCCM.Zone/Issues
+    https://MEM.Zone/Issues
 .COMPONENT
-    WindowsUpdate
+    Windows Update
 .FUNCTIONALITY
-    Repair
+    Reset Windows Update component
 #>
 
 ## Set script requirements
-#Requires -Version 3.0
+#Requires -Version 2.0
 
 ##*=============================================
 ##* VARIABLE DECLARATION
@@ -61,7 +61,7 @@
 Param (
     [Parameter(Mandatory=$true,Position=0)]
     [ValidateNotNullorEmpty()]
-    [ValidateSet('DetectAndRepair','Detect','Repair','RepairStandalone')]
+    [ValidateSet('DetectAndReset','Detect','Reset','ResetStandalone')]
     [string]$Action,
     [Parameter(Mandatory=$false,Position=1)]
     [ValidateNotNullorEmpty()]
@@ -122,9 +122,9 @@ Function Test-EventLogCompliance {
 .NOTES
     This function can typically be called directly.
 .LINK
-    https://SCCM.Zone
+    https://MEM.Zone
 .LINK
-    https://SCCM.Zone/Git
+    https://MEM.Zone/GIT
 .COMPONENT
     WindowsUpdate
 .FUNCTIONALITY
@@ -195,9 +195,9 @@ Function Backup-EventLog {
 .PARAMETER LogName
     Specifies the event log to backup.
 .PARAMETER BackupPath
-    Specifies the Backup Path. Default is: '$Env:SystemRoot\Temp'.
+    Specifies the Backup Path. Default is: '$env:SystemRoot\Temp'.
 .PARAMETER BackupName
-    Specifies the Backup name. Default is: 'yyyy-MM-dd_HH-mm-ss_$Env:ComputerName_$LogName'.
+    Specifies the Backup name. Default is: 'yyyy-MM-dd_HH-mm-ss_$env:ComputerName_$LogName'.
 .EXAMPLE
     Backup-EventLog -LogName 'Application' -BackupPath 'C:\SCCMZone' -BackupName '1980-09-09_10-10-00_SCCMZoneBlog_Application'
 .INPUTS
@@ -207,9 +207,9 @@ Function Backup-EventLog {
 .NOTES
     This function can typically be called directly.
 .LINK
-    https://SCCM.Zone
+    https://MEM.Zone
 .LINK
-    https://SCCM.Zone/Git
+    https://MEM.Zone/GIT
 .COMPONENT
     EventLog
 .FUNCTIONALITY
@@ -235,10 +235,10 @@ Function Backup-EventLog {
         [datetime]$Date = $(Get-Date -f 'yyyy-MM-dd_HH-mm-ss')
         #  Setting optional parameters
         If (-not $BackupPath) {
-            $BackupPath = $(Join-Path -Path $Env:SystemRoot -ChildPath '\Temp')
+            $BackupPath = $(Join-Path -Path $env:SystemRoot -ChildPath '\Temp')
         }
         If (-not $BackupFileName) {
-            [string]$BackUpFileName = "{0}_{1}_{2}.evtx" -f $Date, $Env:COMPUTERNAME, $LogName
+            [string]$BackUpFileName = "{0}_{1}_{2}.evtx" -f $Date, $env:COMPUTERNAME, $LogName
         }
         #  Setting backup arguments
         [hashtable]$BackupArguments = @{ ArchiveFileName = (Join-Path -Path $BackupPath -ChildPath $BackUpFileName) }
@@ -247,34 +247,28 @@ Function Backup-EventLog {
         Try {
 
             If ($PowerShellVersion -eq 2) {
+
                 ## Get event log
                 $EventLog = Get-WmiObject -Class 'Win32_NtEventLogFile' -Filter "LogFileName = '$LogName'" -ErrorAction 'SilentlyContinue'
 
-                If (-not $EventLog) {
-                    Throw 'EventLog not found.'
-                }
+                If (-not $EventLog) { Throw "EventLog [$LogName] not found." }
 
                 ## Backup event log
                 $BackUp = $EventLog | Invoke-WmiMethod -Name 'BackupEventLog' -ArgumentList $BackupArguments -ErrorAction 'SilentlyContinue'
 
-                If ($BackUp.ReturnValue -ne 0) {
-                    Throw "Backup retuned $($BackUp.ReturnValue)."
-                }
+                If ($BackUp.ReturnValue -ne 0) { Throw "Backup retuned error [$($BackUp.ReturnValue)]." }
             }
             ElseIf ($PowerShellVersion -ge 3) {
+
                 ## Get event log
                 $EventLog = Get-CimInstance -ClassName 'Win32_NtEventLogFile' -Filter "LogFileName = '$LogName'" -ErrorAction 'SilentlyContinue'
 
-                If (-not $EventLog) {
-                    Throw 'EventLog not found.'
-                }
+                If (-not $EventLog) { Throw 'EventLog not found.' }
 
                 ## Backup event log
                 $BackUp = $EventLog | Invoke-CimMethod -Name 'BackupEventLog' -Arguments $BackupArguments -ErrorAction 'SilentlyContinue'
 
-                If ($BackUp.ReturnValue -ne 0) {
-                    Throw "Backup retuned $($BackUp.ReturnValue)."
-                }
+                If ($BackUp.ReturnValue -ne 0) { Throw "Backup retuned error [$($BackUp.ReturnValue)]." }
             }
             Else {
                 Throw "PowerShell version [$PowerShellVersion] not supported."
@@ -289,19 +283,19 @@ Function Backup-EventLog {
 }
 #endregion
 
-#region Function Repair-WUDataStore
-Function Repair-WUDataStore {
+#region Function Reset-WindowsUpdate
+Function Reset-WindowsUpdate {
 <#
 .SYNOPSIS
-    Repairs a corrupted WU DataStore.
+    Resets the windows update component.
 .DESCRIPTION
-    Repairs a corrupted WU DataStore by removing and reinitializing the corrupted DataStore.
+    Resets the windows update component to its initial state.
 .EXAMPLE
-    Repair-WUDataStore
+    Reset-WindowsUpdate
 .INPUTS
-    None. This function has no inputs.
+    None.
 .OUTPUTS
-    None. This function has no outputs.
+    System.String. This script returns Compliant, Non-Compliant, Reset or Error Message
 .NOTES
     This function can typically be called directly.
 .LINK
@@ -316,15 +310,25 @@ Function Repair-WUDataStore {
 
     Try {
 
+        ## Variable declaration
         #  Setting Paths
-        [string]$PathRegsvr = (Join-Path -Path $Env:SystemRoot -ChildPath '\System32\Regsvr32.exe')
-        [string]$PathDataStore = (Join-Path -Path $Env:SystemRoot -ChildPath '\SoftwareDistribution\DataStore')
-
-        ## Re-register wuauend.dll
-        $null = Start-Process -FilePath $PathRegsvr -ArgumentList '/s Wuaueng.dll' -Wait -ErrorAction 'SilentlyContinue'
+        [string]$PathRegsvr    = (Join-Path -Path $env:SystemRoot -ChildPath '\System32\Regsvr32.exe')
+        [string]$PathDataStore = (Join-Path -Path $env:SystemRoot -ChildPath '\SoftwareDistribution\DataStore')
+        [string]$PathCatroot2  = (Join-Path -Path $env:SystemRoot -ChildPath '\System32\Catroot2')
+        [string]$PathQMGRFiles = (Join-Path -Path $env:AllUsersProfile -ChildPath '\Application Data\Microsoft\Network\Downloader\qmgr*.dat')
+        #  Setting dll names
+        [string[]]$Dlls = @(
+            'atl', 'urlmon', 'mshtml', 'shdocvw', 'browseui', 'jscript', 'vbscript','scrrun', 'msxml3', 'msxml6', 'actxprxy', 'softpub'
+            , 'wintrust', 'dssenh', 'rsaenh', 'cryptdlg', 'oleaut32', 'ole32', 'shell32', 'wuapi', 'wuaueng', 'wups', 'wups2', 'qmgr'
+        )
+        #  Setting security descriptors
+        [string]$SecurityDescriptors = 'D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWLOCRRC;;;AU)(A;;CCLCSWRPWPDTLOCRRC;;;PU)'
+        #  Setting registry keys
+        [string]$UpdateRegistryKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate'
+        [string[]]$UpdateRegistryProperties = @('AccountDomainSid', 'PingID', 'SusClientId')
 
         ## Stop the windows update service
-        $null = Stop-Service -Name 'wuauserv' -Force -ErrorAction 'SilentlyContinue'
+        Stop-Service -Name 'wuauserv', 'BITS', 'cryptsvc' -ErrorAction 'SilentlyContinue'
 
         ## Wait for the windows update service to stop
         #  Setting Loop index to 12 (one minute)
@@ -332,7 +336,7 @@ Function Repair-WUDataStore {
         While ($StatusWuaService -ne 'Stopped') {
 
             #  Waiting 10 seconds
-            $null = Start-Sleep -Seconds 10
+            Start-Sleep -Seconds 10
 
             #  Get windows update service status
             [string]$StatusWuaService =  (Get-Service -Name 'wuauserv').Status
@@ -370,17 +374,45 @@ Function Repair-WUDataStore {
             $Loop++
         }
 
+        ## Remove QMGR Data file
+        Remove-Item -Path $PathQMGRFiles -Force -ErrorAction 'Stop' | Out-Null
+
+        ## Remove catalog root folder
+        Remove-Item -Path $PathCatroot2 -Recurse -Force -ErrorAction 'Stop' | Out-Null
+
         ## Remove the Windows update DataStore
         Remove-Item -Path $PathDataStore -Recurse -Force -ErrorAction 'Stop' | Out-Null
 
-        ## Start the windows update service
-        Start-Service -Name 'wuauserv' -ErrorAction 'SilentlyContinue'
+        ## Remove WSUS client registry entries
+        ForEach ($PropertyName in $UpdateRegistryProperties) {
+            Remove-ItemProperty -Path $UpdateRegistryKey -Name $PropertyName -ErrorAction 'SilentlyContinue'
+        }
 
-        ## Set result to 'Remediated'
-        [string]$RepairWuDatastore = 'Remediated'
+        ## Reset BITS and wuaserv services security descriptors to default
+        Start-Process -FilePath 'sc.exe' -ArgumentList "sdset BITS $SecurityDescriptors"
+        Start-Process -FilePath 'sc.exe' -ArgumentList "sdset wuauserv $SecurityDescriptors"
+
+        ## Re-registr dlls
+        Set-Location -Path $(Join-Path -Path $env:systemroot -ChildPath 'System32')
+        ForEach ($Dll in $Dlls) {
+            $DllName = $Dll + '.dll'
+            Start-Process -FilePath $PathRegsvr -ArgumentList "/s $DllName" -Wait -ErrorAction 'SilentlyContinue'
+        }
+
+        ## Clear the BITS queue
+        Get-BitsTransfer -AllUsers | Remove-BitsTransfer
+
+        ## Start services
+        Start-Service -Name 'wuauserv', 'BITS', 'cryptsvc' -ErrorAction 'SilentlyContinue'
+
+        ## Start MEMCM Client software update scan
+        $null = Invoke-CimMethod -Namespace 'Root\ccm' -ClassName 'SMS_CLIENT' -MethodName 'TriggerSchedule' -Arguments @{SScheduleID = '{00000000-0000-0000-0000-000000000108}'} -ErrorAction 'SilentlyContinue'
+
+        ## Set result to 'Reset'
+        [string]$RepairWuDatastore = 'Reset'
     }
     Catch {
-        [string]$RepairWuDatastore = "WUDataStore repair error. $($_.Exception.Message)"
+        [string]$RepairWuDatastore = "Windows Update reset failed [$($_.Exception.Message)]."
     }
     Finally {
 
@@ -401,7 +433,7 @@ Function Repair-WUDataStore {
 #region ScriptBody
 
 Switch ($Action) {
-    'DetectAndRepair' {
+    'DetectAndReset' {
 
         ## Get machine compliance
         [string]$ESENTError623 = Test-EventLogCompliance -LogName $LogName -Source $Source -EventID $EventID -EntryType $EntryType -LimitDays $LimitDays -Threshold $Threshold
@@ -417,11 +449,11 @@ Switch ($Action) {
                 #  Clear EventLog
                 $null = Clear-EventLog -LogName $LogName -ErrorAction 'Stop'
 
-                #  Repair DataStore if clear eventlog is succesful
-                Repair-WUDataStore
+                #  Reset Windows update component if clear eventlog is succesful
+                Reset-WindowsUpdate
             }
             Catch {
-                Write-Output -InputObject "No repair possible. Clear EventLog [$LogName] error. $($_.Exception.Message)"
+                Write-Output -InputObject "No reset possible. Clear EventLog [$LogName] error. $($_.Exception.Message)"
             }
         }
         Else {
@@ -434,7 +466,7 @@ Switch ($Action) {
         [string]$ESENTError623 = Test-EventLogCompliance -LogName $LogName -Source $Source -EventID $EventID -EntryType $EntryType -LimitDays $LimitDays -Threshold $Threshold
         Write-Output -InputObject $ESENTError623
     }
-    'Repair' {
+    'Reset' {
 
         ## Backup EventLog
         $null = Backup-EventLog -LogName $LogName -ErrorAction 'SilentlyContinue'
@@ -444,17 +476,17 @@ Switch ($Action) {
             ## Clear EventLog
             $null = Clear-EventLog -LogName $LogName -ErrorAction 'Stop'
 
-            ##  Repair DataStore if clear eventlog is succesful
-            Repair-WUDataStore
+            ##  Reset windows update component if clear eventlog is succesful
+            Reset-WindowsUpdate
         }
         Catch {
-            Write-Output -InputObject "No repair possible. Clear EventLog [$LogName] error. $($_.Exception.Message)"
+            Write-Output -InputObject "No reset possible. Clear EventLog [$LogName] error. $($_.Exception.Message)"
         }
     }
     'RepairStandalone' {
 
-        ##  Repair DataStore
-        Repair-WUDataStore -ErrorAction 'SilentlyContinue'
+        ##  Reset windows update component
+        Reset-WindowsUpdate -ErrorAction 'SilentlyContinue'
     }
 }
 
