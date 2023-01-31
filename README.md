@@ -1,1 +1,1 @@
-## Merged with [MEM.Zone]I(https://github.com/MEM-Zone/MEM.Zone) Repo
+## Merged with [MEM.Zone](https://github.com/MEM-Zone/MEM.Zone) Repo
